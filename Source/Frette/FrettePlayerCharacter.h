@@ -23,9 +23,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
 	
-	UPROPERTY(BlueprintReadWrite)
-	float Speed = 5.0f;
-	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;

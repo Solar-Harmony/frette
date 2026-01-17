@@ -34,6 +34,6 @@ void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 
 void AFrettePlayerCharacter::DoPlayerJump()
 {
-	AddMovementInput(FVector::UpVector, Speed);
+	Jump();
 }
 
