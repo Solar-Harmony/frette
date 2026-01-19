@@ -128,6 +128,10 @@ void AFrettePlayerCharacter::HandleStaminaDrain(float DeltaTime)
 	float CurrentStamina = AttributeSet->GetStamina();
 	float MaxStamina = AttributeSet->GetMaxStamina();
 	
+	// NOTE: For production, use Gameplay Effects instead of direct attribute manipulation
+	// This basic implementation directly modifies attributes for simplicity
+	// Future: Create instant gameplay effects for stamina drain/regen
+	
 	// Drain stamina while sprinting and moving
 	if (bIsSprinting && GetVelocity().Size() > 0.f)
 	{
@@ -156,12 +160,13 @@ void AFrettePlayerCharacter::Landed(const FHitResult& Hit)
 	
 	if (FallSpeed > FallDamageThreshold)
 	{
+		// NOTE: For production, use a Gameplay Effect to apply damage
+		// This basic implementation directly modifies health for simplicity
+		// Future: Create a damage gameplay effect with proper tags and events
 		float Damage = (FallSpeed - FallDamageThreshold) * FallDamageMultiplier;
 		float CurrentHealth = AttributeSet->GetHealth();
 		float NewHealth = FMath::Max(0.f, CurrentHealth - Damage);
 		AttributeSet->SetHealth(NewHealth);
-		
-		UE_LOG(LogTemp, Warning, TEXT("Fall damage: %f (speed: %f)"), Damage, FallSpeed);
 	}
 }
 
