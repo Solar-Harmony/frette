@@ -1,3 +1,1 @@
 Content/** filter=lfs diff=lfs merge=lfs -text
-Content/**/*.uasset filter=lfs diff=lfs merge=lfs -text lockable
-Content/**/*.umap   filter=lfs diff=lfs merge=lfs -text lockable
