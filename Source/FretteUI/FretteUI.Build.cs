@@ -19,7 +19,8 @@ public class FretteUI : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "Slate",
-                "SlateCore"
+                "SlateCore", 
+                "ModelViewViewModelBlueprint"
             }
         );
     }
