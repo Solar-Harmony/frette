@@ -20,6 +20,8 @@ public class FretteUI : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore", 
+                "UMG",
+                "ModelViewViewModel",
                 "ModelViewViewModelBlueprint"
             }
         );
