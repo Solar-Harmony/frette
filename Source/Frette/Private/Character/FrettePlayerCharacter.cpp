@@ -1,11 +1,28 @@
-#include "FrettePlayerCharacter.h"
+#include "Character/FrettePlayerCharacter.h"
 
+#include "AbilitySystemComponent.h"
+#include "Player/FrettePlayerState.h"
 #include "Components/CapsuleComponent.h"
+#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
+
+class AFrettePlayerState;
 
 AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetCapsuleComponent());
+}
+
+void AFrettePlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	InitAbilityActorInfo();
+}
+
+void AFrettePlayerCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	InitAbilityActorInfo();
 }
 
 void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
@@ -35,5 +52,16 @@ void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 void AFrettePlayerCharacter::DoPlayerJump()
 {
 	Jump();
+}
+
+void AFrettePlayerCharacter::InitAbilityActorInfo()
+{
+	AFrettePlayerState* playerState = GetPlayerState<AFrettePlayerState>();
+	check(playerState);
+	AttributeSet =  playerState->GetAttributeSet();
+	AbilitySystemComponent = playerState->GetAbilitySystemComponent();
+	AbilitySystemComponent->InitAbilityActorInfo(playerState,this);
+	
+	Cast<UFretteAbilitySystemComponent>(playerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
 }
 
