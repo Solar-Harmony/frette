@@ -26,4 +26,5 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
+	
 };
