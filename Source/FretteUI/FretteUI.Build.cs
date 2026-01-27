@@ -9,7 +9,7 @@ public class FretteUI : ModuleRules
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core",
+                "Core"
             }
         );
 
@@ -22,7 +22,8 @@ public class FretteUI : ModuleRules
                 "SlateCore", 
                 "UMG",
                 "ModelViewViewModel",
-                "ModelViewViewModelBlueprint"
+                "ModelViewViewModelBlueprint",
+                "Frette"
             }
         );
     }

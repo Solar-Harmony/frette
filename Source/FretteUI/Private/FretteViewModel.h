@@ -11,9 +11,7 @@ class FRETTEUI_API UFretteViewModel : public UMVVMViewModelBase
 	GENERATED_BODY()
 	
 public:
-	// Subscribes the viewmodel to changes in gameplay state.
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Viewmodel")
-	void Bind(APlayerController* OwningController);
+	virtual void Bind(APlayerController* OwningController) {}
 	
 private:
 	virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override
