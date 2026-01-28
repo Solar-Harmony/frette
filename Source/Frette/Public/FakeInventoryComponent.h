@@ -2,7 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "InventoryComponent.generated.h"
+#include "FakeInventoryComponent.generated.h"
+
+// Used as a stub for UI prototyping while William works on the real thing. Ignore.
 
 class USpecialEffectConfig;
 
@@ -36,8 +38,6 @@ class USpecialEffectConfig : public UDataAsset
 	
 };
 
-
-
 USTRUCT(BlueprintType)
 struct FInventoryItem
 {
@@ -65,7 +65,7 @@ struct FInventoryItem
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryItemAdded, const FInventoryItem&, NewItem);
 
 UCLASS(meta=(BlueprintSpawnableComponent))
-class FRETTE_API UInventoryComponent : public UActorComponent
+class FRETTE_API UFakeInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 	

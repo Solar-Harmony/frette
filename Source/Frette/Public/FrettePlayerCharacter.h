@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
-#include "InventoryComponent.h"
+#include "FakeInventoryComponent.h"
 
 #include "FrettePlayerCharacter.generated.h"
 
@@ -29,5 +29,5 @@ protected:
 	TObjectPtr<UCameraComponent> Camera;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UInventoryComponent> InventoryComponent;
+	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
 };

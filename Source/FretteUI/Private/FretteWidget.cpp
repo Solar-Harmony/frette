@@ -8,12 +8,20 @@ UFretteWidget* UFretteWidget::CreateFretteWidget(
 	TSubclassOf<UFretteWidget> WidgetClass, 
 	TSubclassOf<UFretteViewModel> ViewModelClass
 ) {
-	// TODO: ensure setup to Manual binding mode
 	UFretteWidget* Widget = CreateWidget<UFretteWidget>(OwningPlayer, WidgetClass);
-	Widget->ViewModel = NewObject<UFretteViewModel>(Widget, ViewModelClass);
-	Widget->ViewModel->Bind(OwningPlayer);
-	Widget->GetExtension<UMVVMView>()->SetViewModelByClass(Widget->ViewModel);
-	Widget->AddToViewport();
+	if (!ensureAlways(Widget))
+		return nullptr;
 	
+	Widget->ViewModel = NewObject<UFretteViewModel>(Widget, ViewModelClass);
+	if (!ensureAlways(Widget->ViewModel))
+		return nullptr;
+	
+	Widget->ViewModel->Bind(OwningPlayer);
+	UMVVMView* MVVMExtension = Widget->GetExtension<UMVVMView>();
+	if (!ensureAlways(MVVMExtension))
+		return nullptr;
+	
+	MVVMExtension->SetViewModelByClass(Widget->ViewModel);
+	Widget->AddToViewport();
 	return Widget;
 }

@@ -9,7 +9,7 @@ public class FretteUI : ModuleRules
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core"
+                "Core", "Frette"
             }
         );
 
