@@ -8,14 +8,6 @@
 
 #include "Net/UnrealNetwork.h"
 
-UFretteAttributeSet::UFretteAttributeSet()
-{
-	InitHealth(100.f);
-	InitMaxHealth(100.f);
-	InitStamina(50.f);
-	InitMaxStamina(50.f);
-}
-
 void UFretteAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -25,7 +17,7 @@ void UFretteAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always)
 	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, Stamina, COND_None, REPNOTIFY_Always)
 	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, MaxStamina, COND_None, REPNOTIFY_Always)
-	
+	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, MaxSpeed, COND_None, REPNOTIFY_Always)
 }
 
 
@@ -47,6 +39,10 @@ void UFretteAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attri
 void UFretteAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
+	if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
+	{
+		GEngine->AddOnScreenDebugMessage(-1,5.f,FColor::Green,FString::Printf(TEXT("MaxHealth changed to %f"),GetMaxHealth()));
+	}
 }
 
 //Annonce au gameplaySystem que l'attribut a été mis à jour
@@ -60,12 +56,17 @@ void UFretteAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHe
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UFretteAttributeSet, MaxHealth, OldMaxHealth);
 }
 
-void UFretteAttributeSet::OnRep_Stamina(const FGameplayAttributeData& OldMana) const
+void UFretteAttributeSet::OnRep_Stamina(const FGameplayAttributeData& OldStamina) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFretteAttributeSet, Stamina, OldMana);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UFretteAttributeSet, Stamina, OldStamina);
 }
 
-void UFretteAttributeSet::OnRep_MaxStamina(const FGameplayAttributeData& OldMaxMana) const
+void UFretteAttributeSet::OnRep_MaxStamina(const FGameplayAttributeData& OldMaxStamina) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UFretteAttributeSet, MaxStamina, OldMaxMana);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UFretteAttributeSet, MaxStamina, OldMaxStamina);
+}
+
+void UFretteAttributeSet::OnRep_MaxSpeed(const FGameplayAttributeData& OldMaxSpeed) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UFretteAttributeSet, MaxStamina, OldMaxSpeed);
 }

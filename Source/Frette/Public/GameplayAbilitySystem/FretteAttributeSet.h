@@ -17,14 +17,14 @@
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
 /**
- * 67
+ * 
  */
 UCLASS()
 class FRETTE_API UFretteAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 public:
-	UFretteAttributeSet();
+	//UFretteAttributeSet();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
@@ -49,6 +49,10 @@ public:
 	FGameplayAttributeData MaxStamina;
 	ATTRIBUTE_ACCESSORS(UFretteAttributeSet, MaxStamina)
 	
+	UPROPERTY(ReplicatedUsing = OnRep_MaxSpeed, BlueprintReadOnly,Category = "Vital Attributes")
+	FGameplayAttributeData MaxSpeed;
+	ATTRIBUTE_ACCESSORS(UFretteAttributeSet, MaxSpeed)
+	
 	
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
@@ -57,8 +61,11 @@ public:
 	void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const;
 	
 	UFUNCTION()
-	void OnRep_Stamina(const FGameplayAttributeData& OldMana) const;
+	void OnRep_Stamina(const FGameplayAttributeData& OldStamina) const;
 	
 	UFUNCTION()
-	void OnRep_MaxStamina(const FGameplayAttributeData& OldMaxMana) const;
+	void OnRep_MaxStamina(const FGameplayAttributeData& OldMaxStamina) const;
+	
+	UFUNCTION()
+	void OnRep_MaxSpeed(const FGameplayAttributeData& OldMaxSpeed) const;
 };

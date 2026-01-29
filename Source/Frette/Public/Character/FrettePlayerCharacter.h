@@ -4,6 +4,7 @@
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
+#include "GameplayAbilitySystem/DA_ClassLoadout.h"
 
 #include "FrettePlayerCharacter.generated.h"
 
@@ -30,7 +31,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
 	
+	UPROPERTY(EditDefaultsOnly, Category="Class")
+	TObjectPtr<UDA_ClassLoadout> ClassLoadout;
 		
 private:
 	virtual void InitAbilityActorInfo() override;
+	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
 };

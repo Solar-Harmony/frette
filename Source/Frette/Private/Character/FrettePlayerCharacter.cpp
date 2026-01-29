@@ -3,7 +3,9 @@
 #include "AbilitySystemComponent.h"
 #include "Player/FrettePlayerState.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
+#include "GameplayAbilitySystem/FretteAttributeSet.h"
 
 class AFrettePlayerState;
 
@@ -56,12 +58,29 @@ void AFrettePlayerCharacter::DoPlayerJump()
 
 void AFrettePlayerCharacter::InitAbilityActorInfo()
 {
+	
 	AFrettePlayerState* playerState = GetPlayerState<AFrettePlayerState>();
 	check(playerState);
 	AttributeSet =  playerState->GetAttributeSet();
-	AbilitySystemComponent = playerState->GetAbilitySystemComponent();
+	AbilitySystemComponent = Cast<UFretteAbilitySystemComponent>(playerState->GetAbilitySystemComponent());
 	AbilitySystemComponent->InitAbilityActorInfo(playerState,this);
+	AbilitySystemComponent->GrantAbilitiesFromLoadout(ClassLoadout);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UFretteAttributeSet::GetMaxSpeedAttribute())
+		.AddUObject(this, &AFrettePlayerCharacter::OnMaxSpeedChanged);
 	
 	Cast<UFretteAbilitySystemComponent>(playerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
+	
+	Super::InitAbilityActorInfo();
+}
+
+void AFrettePlayerCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const
+{
+	GEngine->AddOnScreenDebugMessage(-1,5.f,FColor::Green,FString::Printf(TEXT("Max Speed changed to %f"),Data.NewValue));
+	const float NewMaxSpeed = Data.NewValue;
+    
+	if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
+	{
+		MovementComp->MaxWalkSpeed = NewMaxSpeed;
+	}
 }
 
