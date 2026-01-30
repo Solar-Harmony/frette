@@ -15,7 +15,7 @@ UCLASS()
 class FRETTE_API UFretteInputComponent : public UEnhancedInputComponent
 {
 	GENERATED_BODY()
-	public:
+	
 public:
 	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
 	void BindAbilityActions(const UFretteInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc);

@@ -15,6 +15,7 @@ class FRETTE_API UFretteGameplayAbility : public UGameplayAbility
 	
 public:
 	UFretteGameplayAbility();
+	
 	//Les GameplayAbilities on un InputPressed et InputRelease mais ça fonctionne seulement pour l'ancien input system
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Ability|Input")
 	void OnInputReleased();

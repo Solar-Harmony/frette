@@ -7,9 +7,6 @@
 #include "DA_ClassLoadout.h"
 #include "FretteAbilitySystemComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /*AssetTags*/);
-
-
 /**
  * 
  */
@@ -18,16 +15,13 @@ class FRETTE_API UFretteAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 public:
-	//Event pour annoncer que le ActorInfo a été setté
-	void AbilityActorInfoSet();
-	FEffectAssetTags EffectAssetTags;
 	void AbilityInputPressed(const FGameplayTag& InputTag);
 	void AbilityInputReleased(const FGameplayTag& InputTag);
 	void GrantAbilitiesFromLoadout(UDA_ClassLoadout* Loadout);
 	
 protected:
-	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle) const;
-	
+	//Pourrais peut-être avoir le input action directement plutot que le gameplayTag 
+	//Mais le system de tag permet aussi de l'utiliser pour les IA facilement si jamais on veux
 	UPROPERTY()
 	TMap<FGameplayTag, FGameplayAbilitySpecHandle> InputAbilityMap;
 };

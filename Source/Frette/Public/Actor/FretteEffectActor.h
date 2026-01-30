@@ -40,6 +40,7 @@ struct FEffectPolicyPair
 	EEffectRemovalPolicy RemovalPolicy = EEffectRemovalPolicy::DefaultRemove;
 };
 
+//Pour faire des acteurs qui on un OnOverlap et qui applique des gameplay effects aux acteur qui entre en collision avec eux
 UCLASS()
 class FRETTE_API AFretteEffectActor : public AActor
 {

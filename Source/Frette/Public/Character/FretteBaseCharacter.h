@@ -22,6 +22,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	void ApplyStartupEffects() const;
 	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
 	void ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const;
 	UAttributeSet* GetAttributeSet() const {return AttributeSet;}
@@ -33,14 +34,20 @@ protected:
 	TObjectPtr<UAttributeSet> AttributeSet;
 	
 	UPROPERTY(EditAnywhere, Category = "AbilitySystem")
-	TSubclassOf<class UGameplayEffect> DefaultAttributes;
+	TSubclassOf<UGameplayEffect> DefaultAttributes;
 	
 	UPROPERTY(EditAnywhere, Category = "AbilitySystem")
-	TArray<TSubclassOf<class UGameplayEffect>> StartupEffects;
+	TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Class")
+	TObjectPtr<UDA_ClassLoadout> ClassLoadout;
 	
 	UPROPERTY(EditAnywhere)
 	int CharacterLevel = 1;
 	
 	virtual void InitAbilityActorInfo();
-
+	
+	void SubToAttributeChanges();
+	
+	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
 };

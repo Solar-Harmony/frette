@@ -5,6 +5,8 @@
 
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameplayAbilitySystem/FretteAttributeSet.h"
 
 AFretteBaseCharacter::AFretteBaseCharacter()
 {
@@ -19,6 +21,23 @@ void AFretteBaseCharacter::BeginPlay()
 UAbilitySystemComponent* AFretteBaseCharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+void AFretteBaseCharacter::ApplyStartupEffects() const
+{
+	check(AbilitySystemComponent)
+
+	if (!DefaultAttributes)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s() Missing DefaultAttributes for %s. Please fill in the character's Blueprint."), *FString(__FUNCTION__), *GetName());
+		return;
+	}
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
+
+	ApplyDefaultAttributeEffect(EffectContext);
+	ApplyDefaultStartupEffect(EffectContext);
+	AbilitySystemComponent->GrantAbilitiesFromLoadout(ClassLoadout);
 }
 
 void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const
@@ -45,17 +64,20 @@ void AFretteBaseCharacter::ApplyDefaultStartupEffect(const FGameplayEffectContex
 
 void AFretteBaseCharacter::InitAbilityActorInfo()
 {
-	check(AbilitySystemComponent)
+	
+}
 
-	if (!DefaultAttributes)
+void AFretteBaseCharacter::SubToAttributeChanges()
+{
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UFretteAttributeSet::GetMaxSpeedAttribute())
+		.AddUObject(this, &AFretteBaseCharacter::OnMaxSpeedChanged);
+}
+
+void AFretteBaseCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const
+{
+	if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
 	{
-		UE_LOG(LogTemp, Error, TEXT("%s() Missing DefaultAttributes for %s. Please fill in the character's Blueprint."), *FString(__FUNCTION__), *GetName());
-		return;
+		MovementComp->MaxWalkSpeed = Data.NewValue;
 	}
-	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
-	EffectContext.AddSourceObject(this);
-
-	ApplyDefaultAttributeEffect(EffectContext);
-	ApplyDefaultStartupEffect(EffectContext);
 }
 

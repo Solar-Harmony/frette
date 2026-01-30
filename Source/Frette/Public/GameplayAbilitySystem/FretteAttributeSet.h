@@ -24,7 +24,6 @@ class FRETTE_API UFretteAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 public:
-	//UFretteAttributeSet();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;

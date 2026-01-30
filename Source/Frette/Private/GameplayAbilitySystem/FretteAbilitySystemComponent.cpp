@@ -5,12 +5,6 @@
 
 #include "GameplayAbilitySystem/FretteGameplayAbility.h"
 
-void UFretteAbilitySystemComponent::AbilityActorInfoSet()
-{
-	//Trigger quand un effet est appliquer sur le owner de ce AbilitySystemComponent
-	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this,&UFretteAbilitySystemComponent::EffectApplied);
-}
-
 void UFretteAbilitySystemComponent::AbilityInputPressed(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
@@ -70,12 +64,4 @@ void UFretteAbilitySystemComponent::GrantAbilitiesFromLoadout(UDA_ClassLoadout* 
         
 		InputAbilityMap.Add(Mapping.InputTag, Handle);
 	}
-}
-
-void UFretteAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
-                                                  const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle) const
-{
-	FGameplayTagContainer TagContainer;
-	EffectSpec.GetAllAssetTags(TagContainer);
-	EffectAssetTags.Broadcast(TagContainer);
 }

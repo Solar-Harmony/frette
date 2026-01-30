@@ -3,7 +3,6 @@
 #include "AbilitySystemComponent.h"
 #include "Player/FrettePlayerState.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
@@ -15,12 +14,15 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	Camera->SetupAttachment(GetCapsuleComponent());
 }
 
+//Client side
 void AFrettePlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	InitAbilityActorInfo();
+
 }
 
+//Server side
 void AFrettePlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
@@ -56,31 +58,17 @@ void AFrettePlayerCharacter::DoPlayerJump()
 	Jump();
 }
 
+//Je suis pas trop sur de ce qui devrait être appeler juste du coté serveur ou juste du coté client mais pour l'instant
+//Ça semble fonctionner comme ça aumoin localement
+//Les abilité ne sont pas donnés aux simulated proxies donc on peut pas vraiment tester (De ce que)
 void AFrettePlayerCharacter::InitAbilityActorInfo()
 {
-	
 	AFrettePlayerState* playerState = GetPlayerState<AFrettePlayerState>();
 	check(playerState);
 	AttributeSet =  playerState->GetAttributeSet();
 	AbilitySystemComponent = Cast<UFretteAbilitySystemComponent>(playerState->GetAbilitySystemComponent());
 	AbilitySystemComponent->InitAbilityActorInfo(playerState,this);
-	AbilitySystemComponent->GrantAbilitiesFromLoadout(ClassLoadout);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UFretteAttributeSet::GetMaxSpeedAttribute())
-		.AddUObject(this, &AFrettePlayerCharacter::OnMaxSpeedChanged);
-	
-	Cast<UFretteAbilitySystemComponent>(playerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
-	
-	Super::InitAbilityActorInfo();
-}
-
-void AFrettePlayerCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const
-{
-	GEngine->AddOnScreenDebugMessage(-1,5.f,FColor::Green,FString::Printf(TEXT("Max Speed changed to %f"),Data.NewValue));
-	const float NewMaxSpeed = Data.NewValue;
-    
-	if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
-	{
-		MovementComp->MaxWalkSpeed = NewMaxSpeed;
-	}
+	ApplyStartupEffects();
+	SubToAttributeChanges();
 }
 
