@@ -6,6 +6,8 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetCapsuleComponent());
+	
+	InventoryComponent = CreateDefaultSubobject<UFakeInventoryComponent>(TEXT("Inventory"));
 }
 
 void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
