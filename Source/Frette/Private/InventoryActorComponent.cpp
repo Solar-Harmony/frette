@@ -1,18 +1,13 @@
 ﻿// 
 
-
 #include "InventoryActorComponent.h"
 
 #include "IDetailTreeNode.h"
 #include "Algo/Count.h"
 #include "Engine/AssetManager.h"
 
-
-// Sets default values for this component's properties
 UInventoryActorComponent::UInventoryActorComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
 	if (!bUseArea)
@@ -28,7 +23,7 @@ void UInventoryActorComponent::BeginPlay()
 	UAssetManager& Manager = UAssetManager::Get();
     
 	Manager.LoadPrimaryAssetsWithType(
-		ITEM_TYPE, 
+		Item_Type, 
 		TArray<FName>(),
 		FStreamableDelegate::CreateUObject(this, &UInventoryActorComponent::OnItemDataAssetsLoaded)
 	);
@@ -36,10 +31,10 @@ void UInventoryActorComponent::BeginPlay()
 
 void UInventoryActorComponent::OnItemDataAssetsLoaded()
 {
-	UAssetManager& Manager = UAssetManager::Get();
+	const UAssetManager& Manager = UAssetManager::Get();
     
 	TArray<FPrimaryAssetId> ItemIds;
-	Manager.GetPrimaryAssetIdList(ITEM_TYPE, ItemIds);
+	Manager.GetPrimaryAssetIdList(Item_Type, ItemIds);
 
 	for (const FPrimaryAssetId& ItemId : ItemIds)
 	{
@@ -176,4 +171,79 @@ int32 UInventoryActorComponent::RemoveItemsOfId(FName ItemId)
 	{
 		return Item.Data == *MaybeData;
 	});
+}
+
+bool UInventoryActorComponent::WithItem(FGuid ItemGuid, TFunctionRef<void(FInventoryItem&)> Func)
+{
+	FInventoryItem* MaybeItem = Items.FindByPredicate([ItemGuid, Func](const FInventoryItem& Item)
+	{
+		return Item.InstanceId == ItemGuid;
+	});
+	
+	if (MaybeItem)
+	{
+		Func(*MaybeItem);
+		return true;
+	}
+	return false;
+}
+	
+int32 UInventoryActorComponent::WithItems(const TArray<FGuid>& ItemGuids, const TFunctionRef<void(FInventoryItem&)>& Func)
+{
+	int32 ModifiedCount = 0;
+	for (const FGuid ItemGuid : ItemGuids)
+		 ModifiedCount += WithItem(ItemGuid, Func) ? 1 : 0;
+	return ModifiedCount;
+}
+
+FInventoryItem UInventoryActorComponent::GetItemCopy(FGuid ItemGuid) const
+{
+	const FInventoryItem* MaybeItem = Items.FindByPredicate([ItemGuid](const FInventoryItem& Item)
+	{
+		return Item.InstanceId == ItemGuid;
+	});
+	return MaybeItem ? *MaybeItem : FInventoryItem();
+}
+	
+TArray<FInventoryItem> UInventoryActorComponent::GetItemCopies(const TArray<FGuid>& ItemGuids) const 
+{
+	TArray<FInventoryItem> ItemCopies = Items.FilterByPredicate([ItemGuids](const FInventoryItem& Item)
+	{
+		return ItemGuids.Contains(Item.InstanceId);
+	});
+	return ItemCopies;
+}
+
+bool UInventoryActorComponent::SetItem(const FInventoryItem& NewItemData)
+{
+	FGuid ItemGuid = NewItemData.InstanceId;
+	int32 Index = Items.IndexOfByPredicate([ItemGuid](const FInventoryItem& Item)
+	{
+		return Item.InstanceId == ItemGuid;
+	});
+	
+	if (Index == INDEX_NONE && IsFull())
+		return false;
+	if (Index != INDEX_NONE)
+		Items.RemoveAt(Index);
+	
+	Items.Add(NewItemData);
+	return true;
+}
+	
+int UInventoryActorComponent::SetItems(const TArray<FInventoryItem>& NewItemsData)
+{
+	int32 ModifiedCount = 0;
+	for (const FInventoryItem& NewItem : NewItemsData)
+		ModifiedCount += SetItem(NewItem) ? 1 : 0;
+	return ModifiedCount; 
+}
+
+FInventoryItem UInventoryActorComponent::CreateItemCopy(FName ItemId) const
+{
+	UItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
+	if (!MaybeData)
+		return FInventoryItem();
+	
+	return FInventoryItem(*MaybeData);
 }

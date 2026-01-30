@@ -19,11 +19,14 @@ struct FInventoryItem
 		: Data(Data), InstanceId(FGuid::NewGuid())
 	{ }
 	
-	UPROPERTY()
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	UItemDataAsset* Data;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FGuid InstanceId;
+	
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	int32 Calliss = 1;
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Category="Inventory")
@@ -49,12 +52,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<FGuid> AddItems(FName ItemId, int32 Quantity);
 	
+	UFUNCTION(BlueprintCallable)
+	FInventoryItem CreateItemCopy(FName ItemId) const;
+	
 	// Removing stuff
 	UFUNCTION(BlueprintCallable)
-	bool RemoveItem(FGuid Item);
+	bool RemoveItem(FGuid ItemGuid);
 	
 	UFUNCTION(BlueprintCallable)
-	int32 RemoveItems(const TArray<FGuid>& Items);
+	int32 RemoveItems(const TArray<FGuid>& ItemGuids);
 	
 	UFUNCTION(BlueprintCallable)
 	int32 RemoveItemsOfId(FName ItemId);
@@ -71,6 +77,23 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	int32 GetNumItems(FName ItemId) const;
+	
+	UFUNCTION(BlueprintCallable)
+	FInventoryItem GetItemCopy(FGuid ItemGuid) const;
+	
+	UFUNCTION(BlueprintCallable)
+	TArray<FInventoryItem> GetItemCopies(const TArray<FGuid>& ItemGuids) const;
+	
+	// Modifying stuff in C++
+	bool WithItem(FGuid ItemGuid, TFunctionRef<void(FInventoryItem&)> Func);
+	
+	int32 WithItems(const TArray<FGuid>& ItemGuids, const TFunctionRef<void(FInventoryItem&)>& Func);
+	
+	// You damn copy dance, I hate you!!
+	UFUNCTION(BlueprintCallable)
+	bool SetItem(const FInventoryItem& NewItemData);
+	UFUNCTION(BlueprintCallable)
+	int SetItems(const TArray<FInventoryItem>& NewItemsData);
 	
 	// Predicates
 	UFUNCTION(BlueprintCallable)
@@ -104,6 +127,5 @@ public:
 private:
 	void OnItemDataAssetsLoaded();
 	
-	const FPrimaryAssetType ITEM_TYPE = FPrimaryAssetType("Item");
 	FGuid BadGuid = FGuid::NewGuid();
 };

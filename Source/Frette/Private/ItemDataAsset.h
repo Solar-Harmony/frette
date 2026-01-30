@@ -6,6 +6,8 @@
 #include "Engine/DataAsset.h"
 #include "ItemDataAsset.generated.h"
 
+const FPrimaryAssetType Item_Type = FPrimaryAssetType("Item");
+
 UCLASS()
 class UItemDataAsset : public UPrimaryDataAsset
 {
@@ -29,6 +31,6 @@ public:
 	
 	virtual FPrimaryAssetId GetPrimaryAssetId() const
 	{
-		return FPrimaryAssetId("Item", GetFName());
+		return FPrimaryAssetId(Item_Type, GetFName());
 	} 
 };
