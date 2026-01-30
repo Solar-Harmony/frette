@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
+#include "Private/InventoryActorComponent.h"
 
 #include "FrettePlayerCharacter.generated.h"
 
