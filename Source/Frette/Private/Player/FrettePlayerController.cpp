@@ -2,7 +2,22 @@
 #include "Player/FrettePlayerController.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "EnhancedInputSubsystems.h"
 #include "Input/FretteInputComponent.h"
+void AFrettePlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (!IsLocalController())
+		return;
+	
+	check(DefaultInputContext);
+	
+	if (auto* Input = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Input->AddMappingContext(DefaultInputContext, 0);
+	}
+}
 
 void AFrettePlayerController::SetupInputComponent()
 {

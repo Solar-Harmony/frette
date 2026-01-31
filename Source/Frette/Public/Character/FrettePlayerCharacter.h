@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "GameplayAbilitySystem/DA_ArchetypeLoadout.h"
+#include "FakeInventoryComponent.h"
 
 #include "FrettePlayerCharacter.generated.h"
 
@@ -25,11 +25,14 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
-	
+		
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
 		
 private:
 	virtual void InitAbilityActorInfo() override;
+
 };

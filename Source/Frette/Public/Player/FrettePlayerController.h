@@ -24,6 +24,11 @@ protected:
 	virtual void SetupInputComponent() override;
 
 private:
+	virtual void BeginPlay() override;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Frette")
+	TObjectPtr<class UInputMappingContext> DefaultInputContext;
+	
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
 	

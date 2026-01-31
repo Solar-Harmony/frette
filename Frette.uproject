@@ -13,6 +13,11 @@
 				"GameplayAbilities",
 				"EnhancedInput"
 			]
+		},
+		{
+			"Name": "FretteUI",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
@@ -58,6 +63,14 @@
 				"Win64",
 				"Linux"
 			]
+		},
+		{
+			"Name": "ModelViewViewModelPreview",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
 		}
 	]
 }
