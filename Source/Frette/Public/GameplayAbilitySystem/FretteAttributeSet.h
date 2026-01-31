@@ -30,25 +30,25 @@ public:
 	
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 	
-	UPROPERTY(ReplicatedUsing = OnRep_Health, BlueprintReadOnly,Category = "Vital Attributes")
+	UPROPERTY(ReplicatedUsing = OnRep_Health, BlueprintReadOnly,Category = "Frette|Attributes|Vitals")
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS(UFretteAttributeSet, Health)
 	
-	UPROPERTY(ReplicatedUsing = OnRep_MaxHealth, BlueprintReadOnly,Category = "Vital Attributes")
+	UPROPERTY(ReplicatedUsing = OnRep_MaxHealth, BlueprintReadOnly,Category = "Frette|Attributes|Vitals")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(UFretteAttributeSet, MaxHealth)
 
 	
-	UPROPERTY(ReplicatedUsing = OnRep_Stamina, BlueprintReadOnly,Category = "Vital Attributes")
+	UPROPERTY(ReplicatedUsing = OnRep_Stamina, BlueprintReadOnly,Category = "Frette|Attributes|Vitals")
 	FGameplayAttributeData Stamina;
 	ATTRIBUTE_ACCESSORS(UFretteAttributeSet, Stamina)
 
 	
-	UPROPERTY(ReplicatedUsing = OnRep_MaxStamina, BlueprintReadOnly,Category = "Vital Attributes")
+	UPROPERTY(ReplicatedUsing = OnRep_MaxStamina, BlueprintReadOnly,Category = "Frette|Attributes|Vitals")
 	FGameplayAttributeData MaxStamina;
 	ATTRIBUTE_ACCESSORS(UFretteAttributeSet, MaxStamina)
 	
-	UPROPERTY(ReplicatedUsing = OnRep_MaxSpeed, BlueprintReadOnly,Category = "Vital Attributes")
+	UPROPERTY(ReplicatedUsing = OnRep_MaxSpeed, BlueprintReadOnly,Category = "Frette|Attributes")
 	FGameplayAttributeData MaxSpeed;
 	ATTRIBUTE_ACCESSORS(UFretteAttributeSet, MaxSpeed)
 	

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
-#include "DA_ClassLoadout.generated.h"
+#include "DA_ArchetypeLoadout.generated.h"
 
 class UGameplayAbility;
 
@@ -14,7 +14,7 @@ struct FAbilityTagMapping
 {
 	GENERATED_BODY()
     
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(Categories="InputTag"))
 	FGameplayTag InputTag;
     
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -31,7 +31,7 @@ struct FAbilityTagMapping
 //Donc on peut facilement juste changer de loadout d'abileté selon la classe mais les changement at runtime son surement plus chiant
 //Faudra voir ça
 UCLASS()
-class FRETTE_API UDA_ClassLoadout : public UDataAsset
+class FRETTE_API UDA_ArchetypeLoadout : public UDataAsset
 {
 	GENERATED_BODY()
 

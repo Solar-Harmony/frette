@@ -27,7 +27,7 @@ private:
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
 	
-	UPROPERTY(EditDefaultsOnly, Category="Input")
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Input")
 	TObjectPtr<UFretteInputConfig> InputConfig;
 	
 	UPROPERTY()

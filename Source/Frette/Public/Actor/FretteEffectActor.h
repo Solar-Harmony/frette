@@ -60,14 +60,14 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void OnEndOverlap(AActor* TargetActor);
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Applied Effects")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Frette|Applied Effects")
 	bool bDestroyOnApplyEffect = false;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Applied Effects")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Frette|Applied Effects")
 	TMap<TSubclassOf<UGameplayEffect>,FEffectPolicyPair> AppliedEffects;
 	
 	TMap<FActiveGameplayEffectHandle,TObjectPtr<UAbilitySystemComponent>> ActiveEffectHandles;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Applied Effects")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Frette|Applied Effects")
 	float ActorLevel = 1.f;
 };

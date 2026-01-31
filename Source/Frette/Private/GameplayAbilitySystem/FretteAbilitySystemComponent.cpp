@@ -50,7 +50,7 @@ void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& Inp
 	}
 }
 
-void UFretteAbilitySystemComponent::GrantAbilitiesFromLoadout(UDA_ClassLoadout* Loadout)
+void UFretteAbilitySystemComponent::GrantAbilitiesFromLoadout(UDA_ArchetypeLoadout* Loadout)
 {
 	if (!Loadout) return;
     

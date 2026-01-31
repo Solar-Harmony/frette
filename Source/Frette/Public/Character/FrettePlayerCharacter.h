@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "GameplayAbilitySystem/DA_ClassLoadout.h"
+#include "GameplayAbilitySystem/DA_ArchetypeLoadout.h"
 
 #include "FrettePlayerCharacter.generated.h"
 

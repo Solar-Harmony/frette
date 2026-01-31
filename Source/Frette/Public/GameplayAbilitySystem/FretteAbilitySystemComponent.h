@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
-#include "DA_ClassLoadout.h"
+#include "DA_ArchetypeLoadout.h"
 #include "FretteAbilitySystemComponent.generated.h"
 
 /**
@@ -17,7 +17,7 @@ class FRETTE_API UFretteAbilitySystemComponent : public UAbilitySystemComponent
 public:
 	void AbilityInputPressed(const FGameplayTag& InputTag);
 	void AbilityInputReleased(const FGameplayTag& InputTag);
-	void GrantAbilitiesFromLoadout(UDA_ClassLoadout* Loadout);
+	void GrantAbilitiesFromLoadout(UDA_ArchetypeLoadout* Loadout);
 	
 protected:
 	//Pourrais peut-être avoir le input action directement plutot que le gameplayTag 

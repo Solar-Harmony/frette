@@ -33,14 +33,14 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
 	
-	UPROPERTY(EditAnywhere, Category = "AbilitySystem")
+	UPROPERTY(EditAnywhere, Category = "Frette|AbilitySystem")
 	TSubclassOf<UGameplayEffect> DefaultAttributes;
 	
-	UPROPERTY(EditAnywhere, Category = "AbilitySystem")
+	UPROPERTY(EditAnywhere, Category = "Frette|AbilitySystem")
 	TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
 	
-	UPROPERTY(EditDefaultsOnly, Category="Class")
-	TObjectPtr<UDA_ClassLoadout> ClassLoadout;
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Archetype")
+	TObjectPtr<UDA_ArchetypeLoadout> ArchetypeLoadout;
 	
 	UPROPERTY(EditAnywhere)
 	int CharacterLevel = 1;
