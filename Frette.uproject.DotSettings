@@ -1,0 +1,35 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:s="clr-namespace:System;assembly=mscorlib"
+                        xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml"
+                        xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadAngleBracketsSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadBracesSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadColonSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadCommaSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadMemberAccessSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadParensSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadSemicolonSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadSquareBracketsSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadSymbolSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMissingSpace/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantSpace/@EntryIndexedValue">WARNING</s:String>
+    <s:String
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTabsAndSpacesMismatch/@EntryIndexedValue"></s:String>
+    <s:Boolean
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTabsAndSpacesMismatch/@EntryIndexRemoved">True</s:Boolean>
+    <s:String
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTabsAreDisallowed/@EntryIndexedValue"></s:String>
+    <s:Boolean
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTabsAreDisallowed/@EntryIndexRemoved">True</s:Boolean>
+    <s:String
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTabsOutsideIndent/@EntryIndexedValue"></s:String>
+    <s:Boolean
+            x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTabsOutsideIndent/@EntryIndexRemoved">True</s:Boolean>
+    <s:String x:Key="/Default/CodeStyle/CodeFormatting/CppCodeStyle/BracesInForStatement/@EntryValue">RequiredForMultiline</s:String>
+    <s:String
+            x:Key="/Default/CodeStyle/CodeFormatting/CppCodeStyle/BracesInIfStatement/@EntryValue">NotRequiredForBoth</s:String>
+    <s:Boolean x:Key="/Default/CodeStyle/CppIncludeDirective/SortIncludeDirectives/@EntryValue">True</s:Boolean></wpf:ResourceDictionary>
