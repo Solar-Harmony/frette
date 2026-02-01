@@ -1,19 +1,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/Character.h"
 #include "FakeInventoryComponent.h"
 
 #include "FrettePlayerCharacter.generated.h"
 
 UCLASS()
-class AFrettePlayerCharacter : public ACharacter
+class AFrettePlayerCharacter : public AFretteBaseCharacter
 {
 	GENERATED_BODY()
 
 public:
 	AFrettePlayerCharacter();
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 	
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerMove(FVector2D MoveAxis);
@@ -23,11 +25,14 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
-	
+		
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
+		
+private:
+	virtual void InitAbilityActorInfo() override;
+
 };
