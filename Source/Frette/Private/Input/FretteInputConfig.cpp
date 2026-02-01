@@ -1,13 +1,8 @@
-
-
-
 #include "Input/FretteInputConfig.h"
 
-
-const UInputAction* UFretteInputConfig::FindAbilityInputActionForTag(const FGameplayTag& InputTag,
-	bool bLogNotFound) const
+const UInputAction* UFretteInputConfig::FindAbilityInputActionForTag(const FGameplayTag& InputTag, bool bLogNotFound) const
 {
-	for (const FFretteInputAction& Action: AbilityInputActions)
+	for (const FFretteInputAction& Action : AbilityInputActions)
 	{
 		if (Action.InputAction && Action.InputTag == InputTag)
 		{

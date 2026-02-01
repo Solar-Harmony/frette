@@ -1,27 +1,9 @@
-
-
-
 #include "Character/FretteBaseCharacter.h"
 
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
-
-AFretteBaseCharacter::AFretteBaseCharacter()
-{
-	PrimaryActorTick.bCanEverTick = false;
-}
-
-void AFretteBaseCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-UAbilitySystemComponent* AFretteBaseCharacter::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent;
-}
 
 void AFretteBaseCharacter::ApplyStartupEffects() const
 {
@@ -43,7 +25,7 @@ void AFretteBaseCharacter::ApplyStartupEffects() const
 void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const
 {
 	const FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributes, CharacterLevel, EffectContext);
-	
+
 	if (NewHandle.IsValid())
 	{
 		AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent.Get());
@@ -52,7 +34,7 @@ void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectCont
 
 void AFretteBaseCharacter::ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const
 {
-	for (TSubclassOf Effect : StartupEffects)	
+	for (TSubclassOf Effect : StartupEffects)
 	{
 		const FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(Effect, CharacterLevel, EffectContext);
 		if (NewHandle.IsValid())
@@ -62,14 +44,12 @@ void AFretteBaseCharacter::ApplyDefaultStartupEffect(const FGameplayEffectContex
 	}
 }
 
-void AFretteBaseCharacter::InitAbilityActorInfo()
-{
-	
-}
+void AFretteBaseCharacter::InitAbilityActorInfo() {}
 
 void AFretteBaseCharacter::SubToAttributeChanges()
 {
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UFretteAttributeSet::GetMaxSpeedAttribute())
+	AbilitySystemComponent
+		->GetGameplayAttributeValueChangeDelegate(UFretteAttributeSet::GetMaxSpeedAttribute())
 		.AddUObject(this, &AFretteBaseCharacter::OnMaxSpeedChanged);
 }
 
@@ -80,4 +60,3 @@ void AFretteBaseCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data)
 		MovementComp->MaxWalkSpeed = Data.NewValue;
 	}
 }
-

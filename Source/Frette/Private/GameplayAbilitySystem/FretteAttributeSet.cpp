@@ -1,10 +1,7 @@
-
-
-
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "AbilitySystemBlueprintLibrary.h"
-#include "GameFramework/Character.h"
 #include "GameplayEffectExtension.h"
+#include "GameFramework/Character.h"
 
 #include "Net/UnrealNetwork.h"
 
@@ -20,16 +17,15 @@ void UFretteAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, MaxSpeed, COND_None, REPNOTIFY_Always)
 }
 
-
 void UFretteAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const
 {
 	Super::PreAttributeBaseChange(Attribute, NewValue);
-	
+
 	if (Attribute == GetHealthAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
 	}
-	
+
 	if (Attribute == GetStaminaAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxStamina());
@@ -41,7 +37,7 @@ void UFretteAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffect
 	Super::PostGameplayEffectExecute(Data);
 	if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{
-		GEngine->AddOnScreenDebugMessage(-1,5.f,FColor::Green,FString::Printf(TEXT("MaxHealth changed to %f"),GetMaxHealth()));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("MaxHealth changed to %f"), GetMaxHealth()));
 	}
 }
 

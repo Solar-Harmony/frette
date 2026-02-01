@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,23 +6,19 @@
 #include "FretteInputComponent.generated.h"
 
 struct FFretteInputAction;
-/**
- * 
- */
+
 UCLASS()
 class FRETTE_API UFretteInputComponent : public UEnhancedInputComponent
 {
 	GENERATED_BODY()
-	
+
 public:
-	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
+	template <class UserClass, typename PressedFuncType, typename ReleasedFuncType>
 	void BindAbilityActions(const UFretteInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc);
-	
 };
 
 template <class UserClass, typename PressedFuncType, typename ReleasedFuncType>
-void UFretteInputComponent::BindAbilityActions(const UFretteInputConfig* InputConfig, UserClass* Object,
-	PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc)
+void UFretteInputComponent::BindAbilityActions(const UFretteInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc)
 {
 	check(InputConfig);
 

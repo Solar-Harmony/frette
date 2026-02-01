@@ -16,16 +16,16 @@ class UInventoryItemTemplate : public UPrimaryDataAsset
 public:
 	UPROPERTY(EditDefaultsOnly)
 	FName ItemName;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	FColor Color;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	int MaxDurability = 50;
-	
+
 	UPROPERTY()
 	bool bHasSpecialEffect = false;
-	
+
 	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = "bHasSpecialEffect"))
 	TSoftObjectPtr<USpecialEffectConfig> SpecialEffectConfig;
 };
@@ -35,29 +35,26 @@ class USpecialEffectConfig : public UDataAsset
 {
 	GENERATED_BODY()
 
-	
 };
 
 USTRUCT(BlueprintType)
 struct FInventoryItem
 {
 	GENERATED_BODY()
-	
+
 	FInventoryItem() = default;
 
 	explicit FInventoryItem(const UInventoryItemTemplate* ItemTemplate)
 		: ItemName(ItemTemplate->ItemName)
 		, Color(ItemTemplate->Color)
-		, Durability(ItemTemplate->MaxDurability)
-	{
-	}
-	
+		, Durability(ItemTemplate->MaxDurability) {}
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FName ItemName;
-	
+
 	UPROPERTY()
 	FColor Color;
-	
+
 	UPROPERTY()
 	int Durability;
 };
@@ -68,24 +65,24 @@ UCLASS(meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFakeInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryItemAdded OnItemAdded;
-	
+
 	UFUNCTION(BlueprintCallable)
 	void AddItem(UInventoryItemTemplate* Item)
 	{
 		Items.Add(FInventoryItem(Item));
 		OnItemAdded.Broadcast(Items.Last());
 	}
-	
+
 	UFUNCTION(BlueprintCallable)
 	const TArray<FInventoryItem>& GetItems() const
 	{
 		return Items;
 	}
-	
+
 private:
 	UPROPERTY(Transient)
 	TArray<FInventoryItem> Items;

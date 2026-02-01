@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -45,29 +43,28 @@ UCLASS()
 class FRETTE_API AFretteEffectActor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	AFretteEffectActor();
 
 protected:
-	virtual void BeginPlay() override;
-	void ApplyEffectToTarget(AActor* TargetActor,TTuple<TSubclassOf<UGameplayEffect>, FEffectPolicyPair> GameplayEffectClass);
-	
+	void ApplyEffectToTarget(AActor* TargetActor, const TTuple<TSubclassOf<UGameplayEffect>, FEffectPolicyPair>& EffectType);
+
 	UFUNCTION(BlueprintCallable)
 	void OnOverlap(AActor* TargetActor);
 	void RemoveGameplayEffectsFromTarget(AActor* TargetActor);
 
 	UFUNCTION(BlueprintCallable)
 	void OnEndOverlap(AActor* TargetActor);
-	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Frette|Applied Effects")
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Frette|Applied Effects")
 	bool bDestroyOnApplyEffect = false;
-	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Frette|Applied Effects")
-	TMap<TSubclassOf<UGameplayEffect>,FEffectPolicyPair> AppliedEffects;
-	
-	TMap<FActiveGameplayEffectHandle,TObjectPtr<UAbilitySystemComponent>> ActiveEffectHandles;
-	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Frette|Applied Effects")
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Frette|Applied Effects")
+	TMap<TSubclassOf<UGameplayEffect>, FEffectPolicyPair> AppliedEffects;
+
+	TMap<FActiveGameplayEffectHandle, TObjectPtr<UAbilitySystemComponent>> ActiveEffectHandles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Frette|Applied Effects")
 	float ActorLevel = 1.f;
 };

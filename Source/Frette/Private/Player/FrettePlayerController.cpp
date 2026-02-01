@@ -1,18 +1,17 @@
-
 #include "Player/FrettePlayerController.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
 #include "Input/FretteInputComponent.h"
+
 void AFrettePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (!IsLocalController())
 		return;
-	
+
 	check(DefaultInputContext);
-	
+
 	if (auto* Input = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Input->AddMappingContext(DefaultInputContext, 0);
@@ -29,19 +28,22 @@ void AFrettePlayerController::SetupInputComponent()
 
 void AFrettePlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	if (GetASC()) GetASC()->AbilityInputPressed(InputTag);
+	if (GetASC())
+		GetASC()->AbilityInputPressed(InputTag);
 }
 
 void AFrettePlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (GetASC()) GetASC()->AbilityInputReleased(InputTag);
+	if (GetASC())
+		GetASC()->AbilityInputReleased(InputTag);
 }
 
 UFretteAbilitySystemComponent* AFrettePlayerController::GetASC()
 {
-	if (AuraAbilitySystemComponent == nullptr)
+	if (FretteAbilitySystemComponent == nullptr)
 	{
-		AuraAbilitySystemComponent = Cast<UFretteAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+		FretteAbilitySystemComponent = Cast<UFretteAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
 	}
-	return AuraAbilitySystemComponent;
+
+	return FretteAbilitySystemComponent;
 }
