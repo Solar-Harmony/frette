@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "FrettePlayerCharacter.h"
+#include "Character/FrettePlayerCharacter.h"
 #include "FretteViewModel.h"
 #include "FakeInventoryComponent.h"
 #include "InventoryItemVM.h"
