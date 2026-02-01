@@ -64,11 +64,11 @@ void AFrettePlayerCharacter::DoPlayerJump()
 //Les abilité ne sont pas donnés aux simulated proxies donc on peut pas vraiment tester (De ce que)
 void AFrettePlayerCharacter::InitAbilityActorInfo()
 {
-	AFrettePlayerState* PlayerState = GetPlayerState<AFrettePlayerState>();
-	check(PlayerState);
-	AttributeSet = PlayerState->GetAttributeSet();
-	AbilitySystemComponent = Cast<UFretteAbilitySystemComponent>(PlayerState->GetAbilitySystemComponent());
-	AbilitySystemComponent->InitAbilityActorInfo(PlayerState, this);
+	AFrettePlayerState* State = GetPlayerState<AFrettePlayerState>();
+	check(State);
+	AttributeSet = State->GetAttributeSet();
+	AbilitySystemComponent = Cast<UFretteAbilitySystemComponent>(State->GetAbilitySystemComponent());
+	AbilitySystemComponent->InitAbilityActorInfo(State, this);
 	ApplyStartupEffects();
 	SubToAttributeChanges();
 }
