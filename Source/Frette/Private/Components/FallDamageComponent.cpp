@@ -60,7 +60,7 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFell) const
 {
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
-	if (DistanceFell <= -600.f)
+	if (DistanceFell <= Config->MinFallHeight)
 	{
 		if (Config == nullptr)
 		{

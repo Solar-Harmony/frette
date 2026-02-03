@@ -12,8 +12,8 @@ class UFallDamageDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
-	float MinFallHeight = 600.f;
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMax = "0.0"))
+	float MinFallHeight = -600.f;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UGameplayEffect> FallDamageEffect;
