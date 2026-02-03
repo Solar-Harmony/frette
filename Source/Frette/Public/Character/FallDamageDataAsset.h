@@ -18,6 +18,6 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UGameplayEffect> FallDamageEffect;
 
-	UPROPERTY(EditAnywhere, AdvancedDisplay)
+	UPROPERTY(EditAnywhere)
 	FRuntimeFloatCurve DamageCurve;
 };

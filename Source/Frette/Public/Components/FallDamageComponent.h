@@ -19,10 +19,13 @@ protected:
 	virtual void BeginPlay() override;
 	void BindMovementEvents();
 	void ApplyFallDamage(float DistanceFell) const;
+
 	UFUNCTION()
 	void MovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
+
 	UFUNCTION()
 	void Landed(const FHitResult& Hit);
+
 	UFUNCTION()
 	void OnJumpApexReached();
 

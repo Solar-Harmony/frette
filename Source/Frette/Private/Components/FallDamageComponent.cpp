@@ -3,26 +3,17 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Character/FretteBaseCharacter.h"
 
-//Permet de créer un tag dans la liste des tags de l'éditeur et de le référencer par TAG_Effect_Movement_FallDamage
 UE_DEFINE_GAMEPLAY_TAG(TAG_Effect_Movement_FallDamage, "Effect.Movement.FallDamage");
 
 void UFallDamageComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OwnerCharacter = Cast<AFretteBaseCharacter>(GetOwner());
-	if (!OwnerCharacter)
-	{
-		UE_LOG(LogTemp, Error, TEXT("FallDamageComponent requires an ACharacter owner."));
-		return;
-	}
+	OwnerCharacter = Cast<ACharacter>(GetOwner());
+	check(OwnerCharacter);
 
 	MovementComponent = OwnerCharacter->GetCharacterMovement();
-	if (!MovementComponent)
-	{
-		UE_LOG(LogTemp, Error, TEXT("FallDamageComponent requires CharacterMovementComponent."));
-		return;
-	}
+	check(MovementComponent);
 
 	BindMovementEvents();
 }
@@ -60,28 +51,22 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFell) const
 {
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
-	if (DistanceFell <= Config->MinFallHeight)
-	{
-		if (Config == nullptr)
-		{
-			UE_LOG(LogTemp, Error, TEXT("FallDamageComponent missing Config Data Asset"));
-			return;
-		}
+	if (DistanceFell > Config->MinFallHeight)
+		return;
 
-		FGameplayEffectContextHandle EffectContext = ASC->MakeEffectContext();
-		EffectContext.AddSourceObject(this);
+	ensureMsgf(Config, TEXT("FallDamageComponent missing Config Data Asset"));
 
-		const FGameplayEffectSpecHandle NewHandle = ASC->MakeOutgoingSpec(Config->FallDamageEffect, 1, EffectContext);
+	FGameplayEffectContextHandle EffectContext = ASC->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
 
-		const float DamageAmount = Config->DamageCurve.GetRichCurveConst()->Eval(FMath::Abs(DistanceFell));
-		NewHandle.Data->SetSetByCallerMagnitude(TAG_Effect_Movement_FallDamage, -DamageAmount);
+	const FGameplayEffectSpecHandle NewHandle = ASC->MakeOutgoingSpec(Config->FallDamageEffect, 1, EffectContext);
 
-		if (NewHandle.IsValid())
-		{
-			//TODO: Les dégats vont devoir être appliqué aux jambes plutot qu'au character en général
-			ASC->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), ASC);
-		}
+	const float DamageAmount = Config->DamageCurve.GetRichCurveConst()->Eval(FMath::Abs(DistanceFell));
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Took Fall Damage: ") + FString::SanitizeFloat(DamageAmount));
-	}
+	NewHandle.Data->SetSetByCallerMagnitude(TAG_Effect_Movement_FallDamage, -DamageAmount);
+
+	ensureMsgf(NewHandle.IsValid(), TEXT("Probably need to set the DamageEffect in the Config"));
+
+	//TODO: Les dégats vont devoir être appliqué aux jambes plutot qu'au character en général
+	ASC->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), ASC);
 }
