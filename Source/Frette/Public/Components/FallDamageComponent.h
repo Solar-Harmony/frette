@@ -10,7 +10,7 @@
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Effect_Movement_FallDamage);
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), meta=(RequiresComponent="Character"))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFallDamageComponent : public UActorComponent
 {
 	GENERATED_BODY()
