@@ -1,5 +1,4 @@
 #include "Character/FrettePlayerCharacter.h"
-
 #include "AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"

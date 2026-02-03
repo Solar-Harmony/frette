@@ -16,6 +16,7 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 
 protected:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
+
 	void ApplyStartupEffects() const;
 	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
 	void ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const;
@@ -44,4 +45,5 @@ protected:
 	void SubToAttributeChanges();
 
 	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
+
 };
