@@ -10,6 +10,12 @@ public class FretteTarget : TargetRules
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V6;
 
-		ExtraModuleNames.AddRange( new string[] { "Frette" } );
+		ExtraModuleNames.AddRange(new string[] { "Frette" });
+		RegisterModulesCreatedByRider();
+	}
+
+	private void RegisterModulesCreatedByRider()
+	{
+		ExtraModuleNames.AddRange(new string[] { "FretteUI", "FretteEditor" });
 	}
 }
