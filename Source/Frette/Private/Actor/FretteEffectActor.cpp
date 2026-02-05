@@ -36,7 +36,7 @@ void AFretteEffectActor::ApplyEffectToTarget(AActor* TargetActor, const TTuple<T
 
 void AFretteEffectActor::OnOverlap(AActor* TargetActor)
 {
-	for (const TTuple EffectPair : AppliedEffects)
+	for (const auto& EffectPair : AppliedEffects)
 	{
 		if (EffectPair.Value.ApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap)
 		{
@@ -71,7 +71,7 @@ void AFretteEffectActor::RemoveGameplayEffectsFromTarget(AActor* TargetActor)
 
 void AFretteEffectActor::OnEndOverlap(AActor* TargetActor)
 {
-	for (const TTuple EffectPair : AppliedEffects)
+	for (const auto& EffectPair : AppliedEffects)
 	{
 		if (EffectPair.Value.ApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
 		{
