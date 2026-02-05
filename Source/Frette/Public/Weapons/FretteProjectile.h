@@ -20,7 +20,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* CollisionComponent;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Damage")
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
 
 protected:

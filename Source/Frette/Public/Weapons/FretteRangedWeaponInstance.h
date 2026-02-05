@@ -4,6 +4,7 @@
 #include "Weapons/FretteWeaponInstance.h"
 #include "FretteRangedWeaponInstance.generated.h"
 
+class AFretteProjectile;
 /**
  * 
  */
@@ -14,6 +15,9 @@ class UFretteRangedWeaponInstance : public UFretteWeaponInstance
 
 public:
 	UFretteRangedWeaponInstance();
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AFretteProjectile> ProjectileType;
 
 	UPROPERTY(EditAnywhere)
 	int MaxAmmo = 30;

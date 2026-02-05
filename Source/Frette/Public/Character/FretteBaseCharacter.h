@@ -18,8 +18,7 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 
 protected:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
-
-	void ApplyStartupEffects() const;
+	void ApplyStartupEffects();
 	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
 	void ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
@@ -36,7 +35,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Frette|AbilitySystem")
 	TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
 
-	UPROPERTY(EditDefaultsOnly, Category="Frette|Archetype")
+	UPROPERTY(EditDefaultsOnly, Category= "Frette|Archetype")
 	TObjectPtr<UAbilitySetDataAsset> ArchetypeLoadout;
 
 	UPROPERTY(EditAnywhere)

@@ -44,9 +44,17 @@ void AFretteProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
 void AFretteProjectile::ApplyDamage(AActor* Target, const FHitResult& Hit)
 {
+
 	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
+
+	if (!TargetASC)
+	{
+		Destroy();
+		return;
+	}
+
 	UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetInstigator());
-	check(TargetASC && SourceASC && DamageEffectClass);
+	check(SourceASC && DamageEffectClass);
 
 	FGameplayEffectContextHandle EffectContext = SourceASC->MakeEffectContext();
 	EffectContext.AddHitResult(Hit);
@@ -57,5 +65,4 @@ void AFretteProjectile::ApplyDamage(AActor* Target, const FHitResult& Hit)
 	check(SpecHandle.IsValid())
 
 	SourceASC->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), TargetASC);
-
 }

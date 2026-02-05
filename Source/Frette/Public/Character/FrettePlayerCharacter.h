@@ -26,6 +26,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
 
+	virtual void GetAimData(FVector& OutLocation, FRotator& OutRotation) override;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
 

@@ -29,8 +29,12 @@ protected:
 	UFUNCTION()
 	void OnJumpApexReached();
 
+	UPROPERTY()
 	TObjectPtr<ACharacter> OwnerCharacter;
-	UCharacterMovementComponent* MovementComponent;
+
+	UPROPERTY()
+	TObjectPtr<UCharacterMovementComponent> MovementComponent;
+
 	float FallStartHeight = 0.f;
 
 	UPROPERTY(EditDefaultsOnly)

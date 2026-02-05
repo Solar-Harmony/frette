@@ -5,7 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
-void AFretteBaseCharacter::ApplyStartupEffects() const
+void AFretteBaseCharacter::ApplyStartupEffects()
 {
 	check(AbilitySystemComponent)
 
@@ -19,7 +19,7 @@ void AFretteBaseCharacter::ApplyStartupEffects() const
 
 	ApplyDefaultAttributeEffect(EffectContext);
 	ApplyDefaultStartupEffect(EffectContext);
-	AbilitySystemComponent->GrantAbilitiesFromAbilitySet(ArchetypeLoadout);
+	AbilitySystemComponent->GrantAbilitiesFromAbilitySet(ArchetypeLoadout, this);
 }
 
 void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const
@@ -64,6 +64,9 @@ void AFretteBaseCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data)
 void AFretteBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!EquippedItem)
+		return;
 
 	CurrentWeaponInstance = NewObject<UFretteWeaponInstance>(this, EquippedItem->InstanceType);
 	CurrentWeaponInstance->OnEquipped();

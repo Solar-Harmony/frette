@@ -47,7 +47,7 @@ void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& Inp
 	}
 }
 
-void UFretteAbilitySystemComponent::GrantAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout)
+void UFretteAbilitySystemComponent::GrantAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout, UObject* SourceObject)
 {
 	if (Loadout == nullptr)
 		return;
@@ -55,6 +55,7 @@ void UFretteAbilitySystemComponent::GrantAbilitiesFromAbilitySet(UAbilitySetData
 	for (const FAbilityTagMapping& Mapping : Loadout->AbilityMappings)
 	{
 		FGameplayAbilitySpec Spec(Mapping.Ability, Mapping.AbilityLevel);
+		Spec.SourceObject = SourceObject;
 		Spec.GetDynamicSpecSourceTags().AddTag(Mapping.InputTag);
 
 		FGameplayAbilitySpecHandle Handle = GiveAbility(Spec);
