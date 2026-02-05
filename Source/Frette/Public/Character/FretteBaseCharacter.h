@@ -2,8 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "Equipments/FretteEquipmentDataAsset.h"
 #include "GameFramework/Character.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
+#include "Weapons/FretteRangedWeaponInstance.h"
 #include "FretteBaseCharacter.generated.h"
 
 class UAttributeSet;
@@ -45,5 +47,14 @@ protected:
 	void SubToAttributeChanges();
 
 	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
+
+	virtual void BeginPlay() override;
+	//For testing purposes
+	//@TODO:Faudrait le changer pour faire un vrai equiment manager system ou wtv
+	UPROPERTY(EditAnywhere, Category="Frette|Equipment")
+	TObjectPtr<UFretteEquipmentDataAsset> EquippedItem;
+
+	UPROPERTY()
+	TObjectPtr<UFretteWeaponInstance> CurrentWeaponInstance = nullptr;
 
 };

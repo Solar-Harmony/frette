@@ -13,7 +13,8 @@ class FRETTE_API UFretteAbilitySystemComponent : public UAbilitySystemComponent
 public:
 	void AbilityInputPressed(const FGameplayTag& InputTag);
 	void AbilityInputReleased(const FGameplayTag& InputTag);
-	void GrantAbilitiesFromLoadout(UAbilitySetDataAsset* Loadout);
+	void GrantAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout);
+	void RemoveAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout);
 
 protected:
 	//Pourrais peut-être avoir le input action directement plutot que le gameplayTag 

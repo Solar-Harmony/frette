@@ -3,7 +3,7 @@
 
 void UFretteAbilitySystemComponent::AbilityInputPressed(const FGameplayTag& InputTag)
 {
-	if (!InputTag.IsValid())
+	if (!InputTag.IsValid() || !InputAbilityMap.Find(InputTag))
 		return;
 
 	if (const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(InputTag); Handle->IsValid())
@@ -21,7 +21,7 @@ void UFretteAbilitySystemComponent::AbilityInputPressed(const FGameplayTag& Inpu
 
 void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& InputTag)
 {
-	if (!InputTag.IsValid())
+	if (!InputTag.IsValid() || !InputAbilityMap.Find(InputTag))
 		return;
 
 	if (const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(InputTag); Handle->IsValid())
@@ -47,7 +47,7 @@ void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& Inp
 	}
 }
 
-void UFretteAbilitySystemComponent::GrantAbilitiesFromLoadout(UAbilitySetDataAsset* Loadout)
+void UFretteAbilitySystemComponent::GrantAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout)
 {
 	if (Loadout == nullptr)
 		return;
@@ -59,5 +59,16 @@ void UFretteAbilitySystemComponent::GrantAbilitiesFromLoadout(UAbilitySetDataAss
 
 		FGameplayAbilitySpecHandle Handle = GiveAbility(Spec);
 		InputAbilityMap.Add(Mapping.InputTag, Handle);
+	}
+}
+
+void UFretteAbilitySystemComponent::RemoveAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout)
+{
+	if (Loadout == nullptr)
+		return;
+
+	for (const FAbilityTagMapping& Mapping : Loadout->AbilityMappings)
+	{
+		InputAbilityMap.Remove(Mapping.InputTag);
 	}
 }

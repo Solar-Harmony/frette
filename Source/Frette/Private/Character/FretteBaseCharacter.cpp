@@ -19,7 +19,7 @@ void AFretteBaseCharacter::ApplyStartupEffects() const
 
 	ApplyDefaultAttributeEffect(EffectContext);
 	ApplyDefaultStartupEffect(EffectContext);
-	AbilitySystemComponent->GrantAbilitiesFromLoadout(ArchetypeLoadout);
+	AbilitySystemComponent->GrantAbilitiesFromAbilitySet(ArchetypeLoadout);
 }
 
 void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const
@@ -59,4 +59,12 @@ void AFretteBaseCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data)
 	{
 		MovementComp->MaxWalkSpeed = Data.NewValue;
 	}
+}
+
+void AFretteBaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CurrentWeaponInstance = NewObject<UFretteWeaponInstance>(this, EquippedItem->InstanceType);
+	CurrentWeaponInstance->OnEquipped();
 }
