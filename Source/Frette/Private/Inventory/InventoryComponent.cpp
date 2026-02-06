@@ -17,8 +17,11 @@ void UInventoryComponent::BeginPlay()
 
 	UAssetManager& Manager = UAssetManager::Get();
 
+	// FIXME: This will run for each inventory component, but it should only run once. 
+	// An easy fix: make the ItemIdLookup static and only load assets if it's empty.
+	// Will matter if NPCs etc. start having inventories, but for now it's fine since only the player has one.
 	Manager.LoadPrimaryAssetsWithType(
-		Item_Type,
+		GInventoryItemPrimaryAssetType,
 		TArray<FName>(),
 		FStreamableDelegate::CreateUObject(this, &UInventoryComponent::OnItemDataAssetsLoaded)
 		);
@@ -29,12 +32,11 @@ void UInventoryComponent::OnItemDataAssetsLoaded()
 	const UAssetManager& Manager = UAssetManager::Get();
 
 	TArray<FPrimaryAssetId> ItemIds;
-	Manager.GetPrimaryAssetIdList(Item_Type, ItemIds);
+	Manager.GetPrimaryAssetIdList(GInventoryItemPrimaryAssetType, ItemIds);
 
 	for (const FPrimaryAssetId& ItemId : ItemIds)
 	{
-		UItemDataAsset* Data = Cast<UItemDataAsset>(Manager.GetPrimaryAssetObject(ItemId));
-		if (Data)
+		if (UInventoryItemDataAsset* Data = Cast<UInventoryItemDataAsset>(Manager.GetPrimaryAssetObject(ItemId)))
 			ItemIdLookup.FindOrAdd(ItemId.PrimaryAssetName, Data);
 	}
 
@@ -49,7 +51,7 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 FGuid UInventoryComponent::AddItem(FName ItemId)
 {
-	UItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
+	UInventoryItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
 	if (!MaybeData || IsFull())
 		return BadGuid;
 
@@ -73,7 +75,7 @@ int32 UInventoryComponent::GetTotalNumItems() const
 
 int32 UInventoryComponent::GetNumItems(FName ItemId) const
 {
-	UItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
+	UInventoryItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
 	if (!MaybeData)
 		return 0;
 
@@ -96,7 +98,7 @@ bool UInventoryComponent::IsFull() const
 
 bool UInventoryComponent::HasItem(FName ItemId) const
 {
-	UItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
+	UInventoryItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
 	if (!MaybeData)
 		return false;
 
@@ -107,7 +109,7 @@ bool UInventoryComponent::HasItem(FName ItemId) const
 
 FGuid UInventoryComponent::GetFirstItem(FName ItemId) const
 {
-	UItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
+	UInventoryItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
 	if (!MaybeData)
 		return BadGuid;
 
@@ -123,7 +125,7 @@ FGuid UInventoryComponent::GetFirstItem(FName ItemId) const
 
 TArray<FGuid> UInventoryComponent::GetItems(FName ItemId) const
 {
-	UItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
+	UInventoryItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
 	if (!MaybeData)
 		return TArray<FGuid>();
 
@@ -152,7 +154,7 @@ int32 UInventoryComponent::RemoveItems(const TArray<FGuid>& ItemGuids)
 
 int32 UInventoryComponent::RemoveItemsOfId(FName ItemId)
 {
-	UItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
+	UInventoryItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
 	if (!MaybeData)
 		return 0;
 
@@ -225,7 +227,7 @@ int UInventoryComponent::SetItems(const TArray<FInventoryItem>& NewItemsData)
 
 FInventoryItem UInventoryComponent::CreateItemCopy(FName ItemId) const
 {
-	UItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
+	UInventoryItemDataAsset* const* MaybeData = ItemIdLookup.Find(ItemId);
 	if (!MaybeData)
 		return FInventoryItem();
 

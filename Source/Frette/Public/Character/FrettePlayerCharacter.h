@@ -2,9 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
-#include "Camera/CameraComponent.h"
-
 #include "FrettePlayerCharacter.generated.h"
+
+class UCameraComponent;
+class UInventoryComponent;
 
 UCLASS()
 class AFrettePlayerCharacter : public AFretteBaseCharacter
@@ -26,7 +27,10 @@ public:
 	void DoPlayerJump();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UInventoryComponent> InventoryComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
 
 private:

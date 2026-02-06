@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "ItemDataAsset.h"
+#include "InventoryItemDataAsset.h"
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
@@ -14,12 +14,12 @@ struct FInventoryItem
 		: Data(nullptr)
 		, InstanceId(FGuid::NewGuid()) {}
 
-	explicit FInventoryItem(UItemDataAsset* Data)
+	explicit FInventoryItem(UInventoryItemDataAsset* Data)
 		: Data(Data)
 		, InstanceId(FGuid::NewGuid()) {}
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
-	UItemDataAsset* Data;
+	UInventoryItemDataAsset* Data;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FGuid InstanceId;
@@ -35,8 +35,7 @@ public:
 
 	virtual void BeginPlay() override;
 
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-		FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// Adding stuff
 	UFUNCTION(BlueprintCallable)
@@ -106,7 +105,7 @@ public:
 	TArray<FInventoryItem> Items;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	TMap<FName, UItemDataAsset*> ItemIdLookup;
+	TMap<FName, UInventoryItemDataAsset*> ItemIdLookup;
 
 	// Modifiable state in blueprints
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
