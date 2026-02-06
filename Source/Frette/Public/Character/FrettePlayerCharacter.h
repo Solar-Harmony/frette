@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FakeInventoryComponent.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
 
@@ -25,9 +24,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
