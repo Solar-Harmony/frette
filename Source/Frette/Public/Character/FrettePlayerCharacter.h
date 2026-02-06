@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
+#include "Inventory/StackableInventoryComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
 class UCameraComponent;
@@ -28,7 +29,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TObjectPtr<UInventoryComponent> InventoryComponent;
+	TObjectPtr<UStackableInventoryComponent> InventoryComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
