@@ -5,24 +5,72 @@
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
+UENUM()
+enum class EInventoryQueryAttribute : uint8
+{
+	FirstFound,
+	Durability
+};
+
+UENUM(BlueprintType)
+enum class EComparisonPredicate : uint8
+{
+	Less UMETA(DisplayName="Less Than"),
+	LessOrEqual UMETA(DisplayName="Less or Equal"),
+	Equal UMETA(DisplayName="Equal"),
+	GreaterOrEqual UMETA(DisplayName="Greater or Equal"),
+	Greater UMETA(DisplayName="Greater Than"),
+	NotEqual UMETA(DisplayName="Not Equal")
+};
+
 USTRUCT(BlueprintType)
 struct FInventoryItem
 {
 	GENERATED_BODY()
 
-	FInventoryItem()
-		: Data(nullptr)
-		, InstanceId(FGuid::NewGuid()) {}
-
-	explicit FInventoryItem(UInventoryItemDataAsset* Data)
-		: Data(Data)
-		, InstanceId(FGuid::NewGuid()) {}
-
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly)
 	UInventoryItemDataAsset* Data;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
-	FGuid InstanceId;
+	UPROPERTY(BlueprintReadOnly)
+	int Durability = 100;
+
+	float GetAttributeValue(EInventoryQueryAttribute Attribute) const
+	{
+		switch (Attribute)
+		{
+			case EInventoryQueryAttribute::Durability:
+				return static_cast<float>(Durability);
+			default:
+				return 0.0f;
+		}
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FInventoryQuery
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	EInventoryQueryAttribute Attribute;
+
+	UPROPERTY(BlueprintReadOnly, meta = (EditCondition = "Attribute != EInventoryQueryAttribute::FirstFound"))
+	EComparisonPredicate Predicate;
+
+	UPROPERTY(BlueprintReadOnly, meta = (EditCondition = "Attribute != EInventoryQueryAttribute::FirstFound"))
+	float Value;
+};
+
+USTRUCT(BlueprintType)
+struct FInventoryQueryResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bFound;
+
+	UPROPERTY(BlueprintReadOnly)
+	FInventoryItem Result;
 };
 
 UCLASS(ClassGroup=(Frette), meta=(BlueprintSpawnableComponent), Category="Inventory")
@@ -31,94 +79,36 @@ class FRETTE_API UInventoryComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	UInventoryComponent();
-
-	virtual void BeginPlay() override;
-
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	// Adding stuff
 	UFUNCTION(BlueprintCallable)
-	FGuid AddItem(FName ItemId);
+	FInventoryItem AddItem(UInventoryItemDataAsset* ItemType);
+
+	TOptional<FInventoryItem> FindItemSafe(const UInventoryItemDataAsset* ItemType, const TFunctionRef<FInventoryItem*()>& Predicate);
+	FInventoryItem* FindItem(const UInventoryItemDataAsset* ItemType, const TFunctionRef<bool(const FInventoryItem&)>& Predicate) const;
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FGuid> AddItems(FName ItemId, int32 Quantity);
-
-	UFUNCTION(BlueprintCallable)
-	FInventoryItem CreateItemCopy(FName ItemId) const;
-
-	// Removing stuff
-	UFUNCTION(BlueprintCallable)
-	bool RemoveItem(FGuid ItemGuid);
-
-	UFUNCTION(BlueprintCallable)
-	int32 RemoveItems(const TArray<FGuid>& ItemGuids);
-
-	UFUNCTION(BlueprintCallable)
-	int32 RemoveItemsOfId(FName ItemId);
-
-	// Getting stuff
-	UFUNCTION(BlueprintCallable)
-	FGuid GetFirstItem(FName ItemId) const;
-
-	UFUNCTION(BlueprintCallable)
-	TArray<FGuid> GetItems(FName ItemId) const;
-
-	UFUNCTION(BlueprintCallable)
-	int32 GetTotalNumItems() const;
-
-	UFUNCTION(BlueprintCallable)
-	int32 GetNumItems(FName ItemId) const;
-
-	UFUNCTION(BlueprintCallable)
-	FInventoryItem GetItemCopy(FGuid ItemGuid) const;
-
-	UFUNCTION(BlueprintCallable)
-	TArray<FInventoryItem> GetItemCopies(const TArray<FGuid>& ItemGuids) const;
-
-	// Modifying stuff in C++
-	bool WithItem(FGuid ItemGuid, TFunctionRef<void(FInventoryItem&)> Func);
-
-	int32 WithItems(const TArray<FGuid>& ItemGuids, const TFunctionRef<void(FInventoryItem&)>& Func);
-
-	// You damn copy dance, I hate you!!
-	UFUNCTION(BlueprintCallable)
-	bool SetItem(const FInventoryItem& NewItemData);
-	UFUNCTION(BlueprintCallable)
-	int SetItems(const TArray<FInventoryItem>& NewItemsData);
-
-	// Predicates
-	UFUNCTION(BlueprintCallable)
-	bool IsFull() const;
-
-	UFUNCTION(BlueprintCallable)
-	bool HasItem(FName ItemId) const;
-
-	// Events
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryReady);
-
-	UPROPERTY(BlueprintAssignable)
-	FOnInventoryReady OnInventoryReady;
-
-	// Visible state in blueprints for debugging
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	TArray<FInventoryItem> Items;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	TMap<FName, UInventoryItemDataAsset*> ItemIdLookup;
-
-	// Modifiable state in blueprints
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
-	int32 MaxNumItems = 100;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
-	int32 MaxArea = 100;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
-	bool bUseArea = false;
+	FInventoryQueryResult K2_FindItem(UInventoryItemDataAsset* ItemType, FInventoryQuery Query) const;
 
 private:
-	void OnItemDataAssetsLoaded();
+	TMultiMap<FPrimaryAssetId, FInventoryItem> Items;
+	static TArray<FInventoryItem> FoundItems;
 
-	FGuid BadGuid = FGuid::NewGuid();
+	static bool CompareFloat(float A, float B, EComparisonPredicate Predicate)
+	{
+		switch (Predicate)
+		{
+			case EComparisonPredicate::Less:
+				return A < B;
+			case EComparisonPredicate::LessOrEqual:
+				return A <= B;
+			case EComparisonPredicate::Equal:
+				return A == B;
+			case EComparisonPredicate::GreaterOrEqual:
+				return A >= B;
+			case EComparisonPredicate::Greater:
+				return A > B;
+			case EComparisonPredicate::NotEqual:
+				return A != B;
+		}
+		return false;
+	}
 };
