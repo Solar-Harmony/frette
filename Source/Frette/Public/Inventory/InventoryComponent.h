@@ -1,10 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "InstancedStruct.h"
-#include "InventoryItemDataAsset.h"
-#include "StructView.h"
 #include "Components/ActorComponent.h"
+#include "Inventory/Items/InventoryItemDataAsset.h"
 #include "InventoryComponent.generated.h"
 
 UINTERFACE()
@@ -18,9 +16,9 @@ class IInventoryComponent
 	GENERATED_BODY()
 
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, const FInstancedStruct&)
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, const FInstancedStruct&)
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemSelected, const FInstancedStruct&)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, UInventoryItem*)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, UInventoryItem*)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemSelected, UInventoryItem*)
 
 	FOnItemAdded OnItemAdded;
 	FOnItemRemoved OnItemRemoved;

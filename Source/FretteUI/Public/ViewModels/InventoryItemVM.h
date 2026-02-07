@@ -15,8 +15,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	FText Name;
 
-	void SetName(const FInventoryItem& Item)
+	void SetName(UInventoryItem* Item)
 	{
-		UE_MVVM_SET_PROPERTY_VALUE(Name, Item.Data->DisplayName);
+		UE_MVVM_SET_PROPERTY_VALUE(Name, Item->Data->DisplayName);
 	}
 };

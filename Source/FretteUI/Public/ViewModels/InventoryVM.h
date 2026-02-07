@@ -4,6 +4,8 @@
 #include "FretteViewModel.h"
 #include "InventoryItemVM.h"
 #include "Character/FrettePlayerCharacter.h"
+#include "Inventory/SlotsInventoryComponent.h"
+#include "Player/FrettePlayerState.h"
 #include "InventoryVM.generated.h"
 
 UCLASS()
@@ -20,18 +22,15 @@ public:
 		const auto* PlayerCharacter = Cast<AFrettePlayerCharacter>(OwningController->GetPawn());
 		check(PlayerCharacter);
 
-		// auto* Inventory = PlayerCharacter->GetComponentByClass<UInventoryComponent>();
-		// check(Inventory);
-
-		// TODO: Add api to inventory
-		// Inventory->OnItemAdded.AddDynamic(
-		// 	this,
-		// 	&UInventoryVM::AddItem
-		// 	);
+		if (const AFrettePlayerState* State = Cast<AFrettePlayerState>(OwningController->PlayerState))
+		{
+			USlotsInventoryComponent* Inventory = State->GetSlotsInventory();
+			Inventory->OnItemAdded.AddUObject(this, &UInventoryVM::AddItem);
+		}
 	}
 
 	UFUNCTION(BlueprintCallable)
-	void AddItem(const FInventoryItem& NewItem)
+	void AddItem(UInventoryItem* NewItem)
 	{
 		UInventoryItemVM* SubViewModel = NewObject<UInventoryItemVM>(this);
 		SubViewModel->SetName(NewItem);
