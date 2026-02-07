@@ -5,6 +5,9 @@
 
 AFrettePlayerState::AFrettePlayerState()
 {
+	NonStackableInventory = CreateDefaultSubobject<USlotsInventoryComponent>("Equipment Inventory");
+	StackableInventory = CreateDefaultSubobject<UStacksInventoryComponent>("Backpack Inventory");
+
 	AbilitySystemComponent = CreateDefaultSubobject<UFretteAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
 

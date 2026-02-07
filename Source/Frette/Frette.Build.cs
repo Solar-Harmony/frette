@@ -17,7 +17,8 @@ public class Frette : ModuleRules
 			"EnhancedInput",
 			"GameplayAbilities",
 			"GameplayTags",
-			"GameplayTasks"
+			"GameplayTasks",
+			"StructUtils"
 		});
 
 		PrivateDependencyModuleNames.AddRange([]);

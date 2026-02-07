@@ -20,8 +20,8 @@ public:
 		const auto* PlayerCharacter = Cast<AFrettePlayerCharacter>(OwningController->GetPawn());
 		check(PlayerCharacter);
 
-		auto* Inventory = PlayerCharacter->GetComponentByClass<UInventoryComponent>();
-		check(Inventory);
+		// auto* Inventory = PlayerCharacter->GetComponentByClass<UInventoryComponent>();
+		// check(Inventory);
 
 		// TODO: Add api to inventory
 		// Inventory->OnItemAdded.AddDynamic(

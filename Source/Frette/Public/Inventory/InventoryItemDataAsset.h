@@ -1,41 +1,77 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "InventoryItemDataAsset.generated.h"
 
+USTRUCT(BlueprintType)
+struct FInventoryItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UInventoryItemDataAsset> Data = nullptr;
+};
+
+USTRUCT(BlueprintType)
+struct FWeaponInventoryItem final : public FInventoryItem
+{
+	GENERATED_BODY()
+
+	FWeaponInventoryItem() = default;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Durability;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrentAmmo;
+};
+
 static const FPrimaryAssetType GInventoryItemPrimaryAssetType("Item");
 
-UCLASS()
+UCLASS(BlueprintType)
 class UInventoryItemDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 public:
+	virtual UScriptStruct* GetRuntimeDataType() const { return FInventoryItem::StaticStruct(); }
+
 	UPROPERTY(EditDefaultsOnly)
 	FText DisplayName;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, meta=(MultiLine = true))
 	FText Description;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UTexture2D> Icon;
 
-	// In which section of the UI we should display the item.
-	UPROPERTY(EditDefaultsOnly, meta = (Categories = "Inventory.Section"))
-	FGameplayTag Section;
-
-	// If the item's Section is a slot container, defines the space it takes. Ignored otherwise.
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 1))
-	int SlotWidth = 1;
-
-	// If the item's Section is a slot container, defines the space it takes. Ignored otherwise.
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 1))
-	int SlotHeight = 1;
-
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId(GInventoryItemPrimaryAssetType, GetFName());
 	}
+};
+
+UCLASS()
+class UTestWeaponInventoryItemDataAsset : public UInventoryItemDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	virtual UScriptStruct* GetRuntimeDataType() const override { return FWeaponInventoryItem::StaticStruct(); }
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> WeaponActorClass;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0))
+	int MaxDurability = 100;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0))
+	int BaseDamage = 10;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0, Units = "cm"))
+	float MaxSpreadRadiusCm = 5.0f;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0))
+	int MagazineCapacity = 30;
 };

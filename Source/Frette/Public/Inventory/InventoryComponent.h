@@ -1,18 +1,11 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "InstancedStruct.h"
 #include "InventoryItemDataAsset.h"
+#include "StructView.h"
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
-
-USTRUCT(BlueprintType)
-struct FInventoryItem
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly)
-	UInventoryItemDataAsset* Data;
-};
 
 UINTERFACE()
 class UInventoryComponent : public UInterface
@@ -25,11 +18,13 @@ class IInventoryComponent
 	GENERATED_BODY()
 
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, const FInventoryItem&)
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, const FInventoryItem&)
-	
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, const FInstancedStruct&)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, const FInstancedStruct&)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemSelected, const FInstancedStruct&)
+
 	FOnItemAdded OnItemAdded;
 	FOnItemRemoved OnItemRemoved;
-	
+	FOnItemSelected OnItemSelected;
+
 	virtual int32 GetItemCount(UInventoryItemDataAsset* ItemType) = 0;
 };
