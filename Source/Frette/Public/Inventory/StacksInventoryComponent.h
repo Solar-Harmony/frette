@@ -15,10 +15,8 @@ public:
 	UInventoryItem* GetItem(UInventoryItemDataAsset* ItemType);
 	virtual int32 GetItemCount(UInventoryItemDataAsset* ItemType) override;
 
-	UInventoryItem* AddItem(UInventoryItemDataAsset* ItemType, int32 Quantity = 1);
-
 	UFUNCTION(BlueprintCallable)
-	UInventoryItem* K2_AddItem(UInventoryItemDataAsset* ItemType, int32 Quantity = 1) { return AddItem(ItemType, Quantity); }
+	UInventoryItem* AddItem(UInventoryItemDataAsset* ItemType, int32 Quantity = 1);
 
 	bool RemoveItem(UInventoryItemDataAsset* ItemType, int32 Quantity = 1);
 
