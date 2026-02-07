@@ -19,17 +19,21 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AFretteProjectile> ProjectileType;
 
-	UPROPERTY(EditAnywhere)
-	int MaxAmmo = 30;
+	int GetCurrentAmmo() const { return CurrentClipAmmo; }
 
-	int CurrentAmmo;
-
-	UPROPERTY(EditAnywhere)
-	int BulletPerCartridge;
-
-	UPROPERTY(EditAnywhere)
-	float MaxDamageRange;
+	void UseAmmo();
 
 	UPROPERTY(EditAnywhere)
 	FRuntimeFloatCurve DistanceDamageFalloff;
+
+private:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_ClipAmmo)
+	int CurrentClipAmmo;
+
+	int MaxClipAmmo = 30;
+
+	UFUNCTION()
+	virtual void OnRep_ClipAmmo(int OldPrimaryClipAmmo);
 };

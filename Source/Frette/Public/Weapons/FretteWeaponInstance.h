@@ -14,7 +14,7 @@ class UFretteWeaponInstance : public UObject
 	GENERATED_BODY()
 
 public:
-	UFretteWeaponInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UFretteWeaponInstance();
 
 	//~UObject interface
 	virtual bool IsSupportedForNetworking() const override { return true; }

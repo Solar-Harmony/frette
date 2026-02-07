@@ -12,7 +12,7 @@ void UFretteAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	//Le REPNOTIFY_Always fait que  même si la valeur est modifier a la même valeur, la fonction de notification sera appelé
 	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, Health, COND_None, REPNOTIFY_Always)
 	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always)
-	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, Stamina, COND_None, REPNOTIFY_Always)
+	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, Stamina, COND_None, REPNOTIFY_OnChanged)
 	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, MaxStamina, COND_None, REPNOTIFY_Always)
 	DOREPLIFETIME_CONDITION_NOTIFY(UFretteAttributeSet, MaxSpeed, COND_None, REPNOTIFY_Always)
 }

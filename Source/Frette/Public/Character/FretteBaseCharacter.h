@@ -22,7 +22,6 @@ protected:
 	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
 	void ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
-
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> AbilitySystemComponent;
 

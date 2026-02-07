@@ -4,11 +4,11 @@
 #include "AbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 
-UFretteWeaponInstance::UFretteWeaponInstance(const FObjectInitializer& ObjectInitializer) {}
+UFretteWeaponInstance::UFretteWeaponInstance() {}
 
 UWorld* UFretteWeaponInstance::GetWorld() const
 {
-	if (APawn* OwningPawn = GetPawn())
+	if (const APawn* OwningPawn = GetPawn())
 	{
 		return OwningPawn->GetWorld();
 	}
@@ -26,15 +26,15 @@ void UFretteWeaponInstance::OnEquipped()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("Owner is ") + GetPawn()->GetName());
 	UFretteAbilitySystemComponent* ASC = Cast<UFretteAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn()));
-	check(ASC);
-	ASC->GrantAbilitiesFromAbilitySet(AbilitySet, this);
+	//Mis en If pour éviter de crash si on run un simulated proxy
+	if (ASC)
+		ASC->GrantAbilitiesFromAbilitySet(AbilitySet, this);
 }
 
 void UFretteWeaponInstance::OnUnequipped()
 {
 	UFretteAbilitySystemComponent* ASC = Cast<UFretteAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn()));
-	check(ASC);
+	ensure(ASC);
 	ASC->RemoveAbilitiesFromAbilitySet(AbilitySet);
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("Unequipped weapon from ") + GetPawn()->GetName());
-
 }
