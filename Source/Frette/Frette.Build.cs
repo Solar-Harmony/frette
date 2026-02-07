@@ -18,7 +18,8 @@ public class Frette : ModuleRules
 			"GameplayAbilities",
 			"GameplayTags",
 			"GameplayTasks",
-			"StructUtils"
+			"StructUtils",
+			"NetCore"
 		});
 
 		PrivateDependencyModuleNames.AddRange([]);

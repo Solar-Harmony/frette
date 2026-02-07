@@ -24,7 +24,7 @@ struct FInventoryList : public FFastArraySerializer
     TArray<FInventoryListEntry> Items; 
     
     UPROPERTY(NotReplicated) 
-    IInventoryComponent* Owner = nullptr; 
+    TScriptInterface<IInventoryComponent> Owner = nullptr; 
     
     bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParams) 
     { 
