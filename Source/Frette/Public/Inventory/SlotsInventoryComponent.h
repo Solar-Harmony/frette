@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InventoryList.h"
 #include "Components/ActorComponent.h"
 #include "Inventory/InventoryComponent.h"
 
@@ -12,6 +13,8 @@ class FRETTE_API USlotsInventoryComponent : public UActorComponent, public IInve
 	GENERATED_BODY()
 
 public:
+	USlotsInventoryComponent();
+	
 	UFUNCTION(BlueprintCallable)
 	virtual int32 GetItemCount(UInventoryItemDataAsset* ItemType) override;
 
@@ -33,7 +36,9 @@ public:
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Swap Two Items"))
 	void SwapItems(int32 FromIndex, int32 ToIndex);
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out) const override;
+	
 private:
-	UPROPERTY()
-	TArray<TObjectPtr<UInventoryItem>> Items;
+	UPROPERTY(Replicated)
+	FInventoryList Inventory;
 };

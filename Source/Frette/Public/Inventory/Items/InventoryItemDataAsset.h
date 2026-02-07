@@ -6,16 +6,16 @@
 
 class UInventoryItemDataAsset;
 
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, EditInlineNew)
 class UInventoryItem : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UInventoryItemDataAsset> Data = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Quantity = 1;
 
 	virtual bool IsSupportedForNetworking() const override { return true; }

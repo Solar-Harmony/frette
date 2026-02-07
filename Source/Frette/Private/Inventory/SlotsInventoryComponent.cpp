@@ -1,26 +1,26 @@
 ﻿#include "Inventory/SlotsInventoryComponent.h"
 
+#include "Net/UnrealNetwork.h"
+
+USlotsInventoryComponent::USlotsInventoryComponent()
+{
+	SetIsReplicatedByDefault(true);
+	Inventory.Owner = this;
+}
+
 int32 USlotsInventoryComponent::GetItemCount(UInventoryItemDataAsset* ItemType)
 {
 	if (!ItemType)
 	{
-		return Items.Num();
+		return Inventory.Items.Num();
 	}
 
-	int32 Count = 0;
-	for (const UInventoryItem* Item : Items)
-	{
-		if (Item && Item->Data == ItemType)
-		{
-			Count++;
-		}
-	}
-	return Count;
+	return 67;
 }
 
 UInventoryItem* USlotsInventoryComponent::GetItem(int32 Index)
 {
-	return Items.IsValidIndex(Index) ? Items[Index] : nullptr;
+	return Inventory.Items.IsValidIndex(Index) ? Inventory.Items[Index].Item : nullptr;
 }
 
 int32 USlotsInventoryComponent::AddItem(UInventoryItemDataAsset* ItemData)
@@ -29,29 +29,33 @@ int32 USlotsInventoryComponent::AddItem(UInventoryItemDataAsset* ItemData)
 
 	UInventoryItem* NewItem = ItemData->CreateRuntimeItem(this);
 	check(NewItem);
-
-	const int32 Index = Items.Add(NewItem);
-	OnItemAdded.Broadcast(NewItem);
+	
+	FInventoryListEntry Entry;
+	Entry.Item = NewItem;
+	const int32 Index = Inventory.Items.Add(MoveTemp(Entry));
+	Inventory.MarkItemDirty(Entry);
 	return Index;
 }
 
 void USlotsInventoryComponent::RemoveItem(int32 Index)
 {
-	if (!Items.IsValidIndex(Index))
+	if (!Inventory.Items.IsValidIndex(Index))
 		return;
-
-	UInventoryItem* Item = Items[Index];
-	check(Item);
-
-	Items.RemoveAt(Index);
-	// TODO: this must be in OnRep to work with replication
-	OnItemRemoved.Broadcast(Item);
+	
+	Inventory.Items.RemoveAt(Index);
+	Inventory.MarkArrayDirty();
 }
 
 void USlotsInventoryComponent::SwapItems(int32 FromIndex, int32 ToIndex)
 {
-	if (Items.IsValidIndex(FromIndex) && Items.IsValidIndex(ToIndex))
+	if (Inventory.Items.IsValidIndex(FromIndex) && Inventory.Items.IsValidIndex(ToIndex))
 	{
-		Items.Swap(FromIndex, ToIndex);
+		Inventory.Items.Swap(FromIndex, ToIndex);
 	}
+}
+
+void USlotsInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(USlotsInventoryComponent, Inventory);
 }
