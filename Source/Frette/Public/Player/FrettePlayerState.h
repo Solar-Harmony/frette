@@ -19,6 +19,7 @@ class FRETTE_API AFrettePlayerState : public APlayerState, public IAbilitySystem
 public:
 	AFrettePlayerState();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
 	UFUNCTION(BlueprintCallable)
@@ -31,10 +32,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TObjectPtr<UStacksInventoryComponent> StackableInventory;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TObjectPtr<USlotsInventoryComponent> NonStackableInventory;
 
 	UPROPERTY()

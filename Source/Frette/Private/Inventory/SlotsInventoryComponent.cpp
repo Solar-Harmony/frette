@@ -1,56 +1,54 @@
 ﻿#include "Inventory/SlotsInventoryComponent.h"
 
+#include "Engine/ActorChannel.h"
 #include "Net/UnrealNetwork.h"
 
 USlotsInventoryComponent::USlotsInventoryComponent()
 {
 	SetIsReplicatedByDefault(true);
-	Inventory.Owner = this;
 }
 
 int32 USlotsInventoryComponent::GetItemCount(UInventoryItemDataAsset* ItemType)
 {
-	if (!ItemType)
-	{
-		return Inventory.Items.Num();
-	}
-
-	return 67;
+	return 67; // TODO: implement
 }
 
 UInventoryItem* USlotsInventoryComponent::GetItem(int32 Index)
 {
-	return Inventory.Items.IsValidIndex(Index) ? Inventory.Items[Index].Item : nullptr;
+	TArray<UInventoryItem*> Items = Inventory.GetAllItems(); // FIXME: dumb
+	return Items.IsValidIndex(Index) ? Items[Index] : nullptr;
 }
 
-int32 USlotsInventoryComponent::AddItem(UInventoryItemDataAsset* ItemData)
+UInventoryItem* USlotsInventoryComponent::AddItem(UInventoryItemDataAsset* ItemData)
 {
-	check(ItemData);
-
-	UInventoryItem* NewItem = ItemData->CreateRuntimeItem(this);
-	check(NewItem);
-	
-	FInventoryListEntry Entry;
-	Entry.Item = NewItem;
-	const int32 Index = Inventory.Items.Add(MoveTemp(Entry));
-	Inventory.MarkItemDirty(Entry);
-	return Index;
+	return Inventory.AddEntry(ItemData, 1);
 }
 
 void USlotsInventoryComponent::RemoveItem(int32 Index)
 {
-	if (!Inventory.Items.IsValidIndex(Index))
-		return;
-	
-	Inventory.Items.RemoveAt(Index);
-	Inventory.MarkArrayDirty();
+	unimplemented(); // TODO:
 }
 
 void USlotsInventoryComponent::SwapItems(int32 FromIndex, int32 ToIndex)
 {
-	if (Inventory.Items.IsValidIndex(FromIndex) && Inventory.Items.IsValidIndex(ToIndex))
+	unimplemented(); // TODO:
+}
+
+void USlotsInventoryComponent::ReadyForReplication()
+{
+	Super::ReadyForReplication();
+
+	if (IsUsingRegisteredSubObjectList())
 	{
-		Inventory.Items.Swap(FromIndex, ToIndex);
+		for (const FInventoryListEntry& Entry : Inventory.Entries)
+		{
+			UInventoryItem* Instance = Entry.Item;
+
+			if (IsValid(Instance))
+			{
+				AddReplicatedSubObject(Instance);
+			}
+		}
 	}
 }
 
@@ -58,4 +56,19 @@ void USlotsInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(USlotsInventoryComponent, Inventory);
+}
+
+bool USlotsInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+
+	for (const FInventoryListEntry& Entry : Inventory.Entries)
+	{
+		if (Entry.Item)
+		{
+			bWroteSomething |= Channel->ReplicateSubobject(Entry.Item, *Bunch, *RepFlags);
+		}
+	}
+
+	return bWroteSomething;
 }

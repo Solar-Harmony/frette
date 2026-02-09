@@ -12,6 +12,7 @@ void AFrettePlayerController::BeginPlay()
 
 	check(DefaultInputContext);
 
+	// FIXME: already added in BP
 	if (auto* Input = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Input->AddMappingContext(DefaultInputContext, 0);
@@ -36,6 +37,13 @@ void AFrettePlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
 	if (GetASC())
 		GetASC()->AbilityInputReleased(InputTag);
+}
+
+void AFrettePlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	
+	
 }
 
 UFretteAbilitySystemComponent* AFrettePlayerController::GetASC()

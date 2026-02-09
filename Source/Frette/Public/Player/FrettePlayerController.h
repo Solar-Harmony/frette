@@ -29,6 +29,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Input")
 	TObjectPtr<UFretteInputConfig> InputConfig;
 
+	virtual void OnRep_PlayerState() override;
+
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> FretteAbilitySystemComponent;
 

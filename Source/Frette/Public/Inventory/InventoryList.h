@@ -6,46 +6,52 @@
 
 #include "InventoryList.generated.h"
 
+struct FInventoryList;
+
 USTRUCT()
 struct FInventoryListEntry : public FFastArraySerializerItem
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
-    UPROPERTY()
-    UInventoryItem* Item = nullptr;
+	UPROPERTY()
+	TObjectPtr<UInventoryItem> Item = nullptr;
 };
 
-USTRUCT() 
-struct FInventoryList : public FFastArraySerializer 
+USTRUCT()
+struct FInventoryList : public FFastArraySerializer
 {
-    GENERATED_BODY() 
-    
-    UPROPERTY() 
-    TArray<FInventoryListEntry> Items; 
-    
-    UPROPERTY(NotReplicated) 
-    TScriptInterface<IInventoryComponent> Owner = nullptr; 
-    
-    bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParams) 
-    { 
-        return FFastArraySerializer::FastArrayDeltaSerialize<FInventoryListEntry, FInventoryList>(Items, DeltaParams, *this); 
-    } 
-    
-    void PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize)
-    {
-    	for (int32 Index : AddedIndices)
-    	{
-    		if (Owner)
-    		{
-    			UInventoryItem* Item = Items[Index].Item; 
-    			Owner->OnItemAdded.Broadcast(Item);
-    		}
-    	}   
-    }
-//    void PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize);
+	GENERATED_BODY()
+
+	FInventoryList() = default;
+
+	explicit FInventoryList(UActorComponent* InOwner)
+		: Owner(InOwner) {}
+
+	TArray<UInventoryItem*> GetAllItems() const;
+	void AddEntry(UInventoryItem* Instance);
+	UInventoryItem* AddEntry(UInventoryItemDataAsset* ItemClass, int32 StackCount);
+	// TODO: Remove entry
+
+	//~FFastArraySerializer contract
+	void PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize);
+	void PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize);
+	void PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize);
+	//~End of FFastArraySerializer contract
+
+	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
+	{
+		return FastArrayDeltaSerialize<FInventoryListEntry, FInventoryList>(Entries, DeltaParms, *this);
+	}
+
+	UPROPERTY()
+	TArray<FInventoryListEntry> Entries;
+
+private:
+	UPROPERTY(NotReplicated)
+	UActorComponent* Owner = nullptr;
 };
 
-template<> struct TStructOpsTypeTraits<FInventoryList> : public TStructOpsTypeTraitsBase2<FInventoryList>
+template <> struct TStructOpsTypeTraits<FInventoryList> : public TStructOpsTypeTraitsBase2<FInventoryList>
 {
 	enum { WithNetDeltaSerializer = true };
 };

@@ -2,6 +2,7 @@
 
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Net/UnrealNetwork.h"
 
 AFrettePlayerState::AFrettePlayerState()
 {
@@ -23,4 +24,12 @@ AFrettePlayerState::AFrettePlayerState()
 UAbilitySystemComponent* AFrettePlayerState::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+void AFrettePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFrettePlayerState, NonStackableInventory);
+	DOREPLIFETIME(AFrettePlayerState, StackableInventory);
 }

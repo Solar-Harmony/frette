@@ -22,7 +22,7 @@ public:
 		const auto* PlayerCharacter = Cast<AFrettePlayerCharacter>(OwningController->GetPawn());
 		check(PlayerCharacter);
 
-		if (const AFrettePlayerState* State = Cast<AFrettePlayerState>(OwningController->PlayerState))
+		if (const AFrettePlayerState* State = Cast<AFrettePlayerState>(OwningController->GetPawn()->GetPlayerState()))
 		{
 			USlotsInventoryComponent* Inventory = State->GetSlotsInventory();
 			Inventory->OnItemAdded.AddUObject(this, &UInventoryVM::AddItem);

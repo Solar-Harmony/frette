@@ -14,7 +14,7 @@ class FRETTE_API USlotsInventoryComponent : public UActorComponent, public IInve
 
 public:
 	USlotsInventoryComponent();
-	
+
 	UFUNCTION(BlueprintCallable)
 	virtual int32 GetItemCount(UInventoryItemDataAsset* ItemType) override;
 
@@ -28,7 +28,7 @@ public:
 	const T* GetItem(int32 Index) const { return GetItem<T>(Index); }
 
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Give Item"))
-	int32 AddItem(UInventoryItemDataAsset* ItemData);
+	UInventoryItem* AddItem(UInventoryItemDataAsset* ItemData);
 
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Remove Item"))
 	void RemoveItem(int32 Index);
@@ -36,9 +36,11 @@ public:
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Swap Two Items"))
 	void SwapItems(int32 FromIndex, int32 ToIndex);
 
+	virtual void ReadyForReplication() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out) const override;
-	
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+
 private:
 	UPROPERTY(Replicated)
-	FInventoryList Inventory;
+	FInventoryList Inventory{ this };
 };
