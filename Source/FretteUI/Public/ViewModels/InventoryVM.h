@@ -21,7 +21,7 @@ public:
 	{
 		if (const AFrettePlayerState* State = OwningController->GetPlayerState<AFrettePlayerState>())
 		{
-			USlotsInventoryComponent* Inventory = State->GetSlotsInventory();
+			USlotsInventoryComponent* Inventory = State->GetPlayerInventory();
 			Inventory->OnItemAdded.AddUObject(this, &UInventoryVM::AddItem);
 		}
 	}

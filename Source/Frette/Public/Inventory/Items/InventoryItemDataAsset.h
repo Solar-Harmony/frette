@@ -7,32 +7,44 @@
 
 class UInventoryItemDataAsset;
 
-UCLASS(BlueprintType, EditInlineNew)
+UCLASS(Abstract, BlueprintType)
 class UInventoryItem : public UObject
+{
+	GENERATED_BODY()
+	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	UInventoryItemDataAsset* Data = nullptr;
+	
+	virtual bool IsSupportedForNetworking() const override { return true; }
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
+	{
+		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+		DOREPLIFETIME(ThisClass, Data);
+	}
+};
+
+// An item with no runtime data, but a stack size.
+UCLASS(BlueprintType)
+class UInventoryStack final : public UInventoryItem
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
-	TObjectPtr<UInventoryItemDataAsset> Data = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	int32 Quantity = 1;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-		DOREPLIFETIME(UInventoryItem, Data);
-		DOREPLIFETIME(UInventoryItem, Quantity);
+		DOREPLIFETIME(ThisClass, Quantity);
 	}
-
-	virtual bool IsSupportedForNetworking() const override { return true; }
 };
 
 static const FPrimaryAssetType GInventoryItemPrimaryAssetType("Item");
 
-UCLASS(BlueprintType)
+UCLASS(Abstract, BlueprintType)
 class UInventoryItemDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
@@ -47,17 +59,32 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UTexture2D> Icon;
 
-	// TODO: not used by stacking
 	virtual UInventoryItem* CreateRuntimeItem(UObject* Outer)
 	{
 		UInventoryItem* Item = NewObject<UInventoryItem>(Outer);
 		Item->Data = this;
-		Item->Quantity = 0;
 		return Item;
 	}
 
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId(GInventoryItemPrimaryAssetType, GetFName());
+	}
+};
+
+UCLASS(BlueprintType)
+class UInventoryStackDataAsset : public UInventoryItemDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	int32 MaxStackSize = 64;
+
+	virtual UInventoryItem* CreateRuntimeItem(UObject* Outer) override
+	{
+		UInventoryStack* Item = Cast<UInventoryStack>(Super::CreateRuntimeItem(Outer));
+		Item->Quantity = 1;
+		return Item;
 	}
 };

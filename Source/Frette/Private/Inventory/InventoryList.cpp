@@ -18,18 +18,17 @@ TArray<UInventoryItem*> FInventoryList::GetAllItems() const
 void FInventoryList::AddEntry(UInventoryItem* Instance)
 {
 	check(Instance);
+	check(Instance->Data);
+	check(Owner);
 
 	FInventoryListEntry& Entry = Entries.AddDefaulted_GetRef();
 	Entry.Item = Instance;
 	MarkItemDirty(Entry);
 
-	if (Owner)
-	{
-		Cast<IInventoryComponent>(Owner)->OnItemAdded.Broadcast(Entry.Item);
-	}
+	Cast<IInventoryComponent>(Owner)->OnItemAdded.Broadcast(Entry.Item);
 }
 
-UInventoryItem* FInventoryList::AddEntry(UInventoryItemDataAsset* ItemClass, int32 StackCount)
+UInventoryItem* FInventoryList::AddEntry(UInventoryItemDataAsset* ItemClass)
 {
 	check(ItemClass);
 	check(Owner);
@@ -39,7 +38,6 @@ UInventoryItem* FInventoryList::AddEntry(UInventoryItemDataAsset* ItemClass, int
 
 	FInventoryListEntry& Entry = Entries.AddDefaulted_GetRef();
 	Entry.Item = ItemClass->CreateRuntimeItem(Owner);
-	Entry.Item->Quantity = StackCount;
 	MarkItemDirty(Entry);
 
 	if (Owner)

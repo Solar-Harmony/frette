@@ -27,8 +27,12 @@ public:
 	template <typename T>
 	const T* GetItem(int32 Index) const { return GetItem<T>(Index); }
 
-	UFUNCTION(Server, Reliable, BlueprintCallable, meta=(DisplayName="Give Item"))
-	void AddItem(UInventoryItemDataAsset* ItemData);
+	UFUNCTION(Server, Reliable, BlueprintCallable, BlueprintAuthorityOnly, meta=(DisplayName="Give Item Stack"))
+	void AddItemStack(UInventoryStackDataAsset* Template, int32 Quantity = 1);
+	
+	UFUNCTION(Server, Reliable, BlueprintCallable, BlueprintAuthorityOnly, meta=(DisplayName="Give Item"))
+	void AddItem(UInventoryItem* ItemData);
+	
 
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Remove Item"))
 	void RemoveItem(int32 Index);
@@ -39,7 +43,7 @@ public:
 	virtual void ReadyForReplication() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out) const override;
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
-
+	
 private:
 	UPROPERTY(Replicated)
 	FInventoryList Inventory{ this };

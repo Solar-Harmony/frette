@@ -6,12 +6,11 @@
 
 AFrettePlayerState::AFrettePlayerState()
 {
-	NonStackableInventory = CreateDefaultSubobject<USlotsInventoryComponent>("Equipment Inventory");
-	StackableInventory = CreateDefaultSubobject<UStacksInventoryComponent>("Backpack Inventory");
-
+	PlayerInventory = CreateDefaultSubobject<USlotsInventoryComponent>("Equipment Inventory");
+	PlayerInventory->SetIsReplicated(true);
+	
 	AbilitySystemComponent = CreateDefaultSubobject<UFretteAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
-
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 
 	AttributeSet = CreateDefaultSubobject<UFretteAttributeSet>("AttributeSet");
@@ -30,6 +29,5 @@ void AFrettePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(AFrettePlayerState, NonStackableInventory);
-	DOREPLIFETIME(AFrettePlayerState, StackableInventory);
+	DOREPLIFETIME(AFrettePlayerState, PlayerInventory);
 }

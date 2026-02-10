@@ -5,7 +5,6 @@
 
 #include "GameFramework/PlayerState.h"
 #include "Inventory/SlotsInventoryComponent.h"
-#include "Inventory/StacksInventoryComponent.h"
 #include "FrettePlayerState.generated.h"
 
 class UAttributeSet;
@@ -21,22 +20,16 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
-
+	
 	UFUNCTION(BlueprintCallable)
-	UStacksInventoryComponent* GetStacksInventory() const { return StackableInventory; }
-
-	UFUNCTION(BlueprintCallable)
-	USlotsInventoryComponent* GetSlotsInventory() const { return NonStackableInventory; }
+	USlotsInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
 
 protected:
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY(Replicated)
-	TObjectPtr<UStacksInventoryComponent> StackableInventory;
-
-	UPROPERTY(Replicated)
-	TObjectPtr<USlotsInventoryComponent> NonStackableInventory;
+	TObjectPtr<USlotsInventoryComponent> PlayerInventory;
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;

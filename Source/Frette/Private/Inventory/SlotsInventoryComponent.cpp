@@ -19,9 +19,16 @@ UInventoryItem* USlotsInventoryComponent::GetItem(int32 Index)
 	return Items.IsValidIndex(Index) ? Items[Index] : nullptr;
 }
 
-void USlotsInventoryComponent::AddItem_Implementation(UInventoryItemDataAsset* ItemData)
+void USlotsInventoryComponent::AddItemStack_Implementation(UInventoryStackDataAsset* Template, int32 Quantity)
 {
-	Inventory.AddEntry(ItemData, 1);
+	UInventoryStack* Stack = Cast<UInventoryStack>(Template->CreateRuntimeItem(this));
+	Stack->Quantity = Quantity;
+	Inventory.AddEntry(Stack);
+}
+
+void USlotsInventoryComponent::AddItem_Implementation(UInventoryItem* ItemData)
+{
+	Inventory.AddEntry(ItemData);
 }
 
 void USlotsInventoryComponent::RemoveItem(int32 Index)
@@ -55,7 +62,7 @@ void USlotsInventoryComponent::ReadyForReplication()
 void USlotsInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(USlotsInventoryComponent, Inventory);
+	DOREPLIFETIME_CONDITION(USlotsInventoryComponent, Inventory, COND_OwnerOnly);
 }
 
 bool USlotsInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)

@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
-#include "Inventory/StacksInventoryComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
 class UCameraComponent;

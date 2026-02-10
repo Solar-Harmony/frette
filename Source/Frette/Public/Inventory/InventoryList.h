@@ -14,7 +14,7 @@ struct FInventoryListEntry : public FFastArraySerializerItem
 	GENERATED_BODY()
 
 	UPROPERTY()
-	TObjectPtr<UInventoryItem> Item = nullptr;
+	UInventoryItem* Item = nullptr;
 };
 
 USTRUCT()
@@ -29,7 +29,7 @@ struct FInventoryList : public FFastArraySerializer
 
 	TArray<UInventoryItem*> GetAllItems() const;
 	void AddEntry(UInventoryItem* Instance);
-	UInventoryItem* AddEntry(UInventoryItemDataAsset* ItemClass, int32 StackCount);
+	UInventoryItem* AddEntry(UInventoryItemDataAsset* ItemClass);
 	// TODO: Remove entry
 
 	//~FFastArraySerializer contract
