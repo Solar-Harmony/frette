@@ -17,22 +17,22 @@ class FRETTE_API AFrettePlayerController : public APlayerController
 protected:
 	virtual void SetupInputComponent() override;
 
-private:
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Setup Widgets and Bindings"))
+	void SetupWidgetsAndBindings();
 
+private:
 	UPROPERTY(EditDefaultsOnly, Category = "Frette")
 	TObjectPtr<class UInputMappingContext> DefaultInputContext;
-
-	void AbilityInputTagPressed(FGameplayTag InputTag);
-	void AbilityInputTagReleased(FGameplayTag InputTag);
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Input")
 	TObjectPtr<UFretteInputConfig> InputConfig;
 
-	virtual void OnRep_PlayerState() override;
-
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> FretteAbilitySystemComponent;
 
+	virtual void BeginPlay() override;
+	virtual void OnRep_PlayerState() override;
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	void AbilityInputTagReleased(FGameplayTag InputTag);
 	UFretteAbilitySystemComponent* GetASC();
 };

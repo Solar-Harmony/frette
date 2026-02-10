@@ -27,8 +27,8 @@ public:
 	template <typename T>
 	const T* GetItem(int32 Index) const { return GetItem<T>(Index); }
 
-	UFUNCTION(BlueprintCallable, meta=(DisplayName="Give Item"))
-	UInventoryItem* AddItem(UInventoryItemDataAsset* ItemData);
+	UFUNCTION(Server, Reliable, BlueprintCallable, meta=(DisplayName="Give Item"))
+	void AddItem(UInventoryItemDataAsset* ItemData);
 
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Remove Item"))
 	void RemoveItem(int32 Index);

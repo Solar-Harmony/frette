@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Net/UnrealNetwork.h"
 #include "InventoryItemDataAsset.generated.h"
 
 class UInventoryItemDataAsset;
@@ -12,11 +13,19 @@ class UInventoryItem : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	TObjectPtr<UInventoryItemDataAsset> Data = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	int32 Quantity = 1;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
+	{
+		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+		DOREPLIFETIME(UInventoryItem, Data);
+		DOREPLIFETIME(UInventoryItem, Quantity);
+	}
 
 	virtual bool IsSupportedForNetworking() const override { return true; }
 };

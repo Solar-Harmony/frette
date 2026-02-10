@@ -19,9 +19,9 @@ UInventoryItem* USlotsInventoryComponent::GetItem(int32 Index)
 	return Items.IsValidIndex(Index) ? Items[Index] : nullptr;
 }
 
-UInventoryItem* USlotsInventoryComponent::AddItem(UInventoryItemDataAsset* ItemData)
+void USlotsInventoryComponent::AddItem_Implementation(UInventoryItemDataAsset* ItemData)
 {
-	return Inventory.AddEntry(ItemData, 1);
+	Inventory.AddEntry(ItemData, 1);
 }
 
 void USlotsInventoryComponent::RemoveItem(int32 Index)

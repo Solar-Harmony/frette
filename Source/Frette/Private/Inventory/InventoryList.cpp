@@ -22,6 +22,11 @@ void FInventoryList::AddEntry(UInventoryItem* Instance)
 	FInventoryListEntry& Entry = Entries.AddDefaulted_GetRef();
 	Entry.Item = Instance;
 	MarkItemDirty(Entry);
+
+	if (Owner)
+	{
+		Cast<IInventoryComponent>(Owner)->OnItemAdded.Broadcast(Entry.Item);
+	}
 }
 
 UInventoryItem* FInventoryList::AddEntry(UInventoryItemDataAsset* ItemClass, int32 StackCount)
@@ -36,6 +41,12 @@ UInventoryItem* FInventoryList::AddEntry(UInventoryItemDataAsset* ItemClass, int
 	Entry.Item = ItemClass->CreateRuntimeItem(Owner);
 	Entry.Item->Quantity = StackCount;
 	MarkItemDirty(Entry);
+
+	if (Owner)
+	{
+		Cast<IInventoryComponent>(Owner)->OnItemAdded.Broadcast(Entry.Item);
+	}
+
 	return Entry.Item;
 }
 

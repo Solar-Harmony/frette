@@ -19,10 +19,7 @@ public:
 
 	virtual void Bind(APlayerController* OwningController) override
 	{
-		const auto* PlayerCharacter = Cast<AFrettePlayerCharacter>(OwningController->GetPawn());
-		check(PlayerCharacter);
-
-		if (const AFrettePlayerState* State = Cast<AFrettePlayerState>(OwningController->GetPawn()->GetPlayerState()))
+		if (const AFrettePlayerState* State = OwningController->GetPlayerState<AFrettePlayerState>())
 		{
 			USlotsInventoryComponent* Inventory = State->GetSlotsInventory();
 			Inventory->OnItemAdded.AddUObject(this, &UInventoryVM::AddItem);

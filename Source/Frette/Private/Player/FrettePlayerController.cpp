@@ -2,6 +2,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
 #include "Input/FretteInputComponent.h"
+#include "Player/FrettePlayerState.h"
+
+class AFrettePlayerState;
 
 void AFrettePlayerController::BeginPlay()
 {
@@ -42,8 +45,8 @@ void AFrettePlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 void AFrettePlayerController::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
-	
-	
+
+	SetupWidgetsAndBindings();
 }
 
 UFretteAbilitySystemComponent* AFrettePlayerController::GetASC()
