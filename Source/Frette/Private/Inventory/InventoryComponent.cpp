@@ -8,16 +8,16 @@ UFretteInventoryComponent::UFretteInventoryComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-UInventoryItem* UFretteInventoryComponent::GetItem(int32 Index)
+UInventoryItem* UFretteInventoryComponent::GetItem(int32 Index) const
 {
 	TArray<UInventoryItem*> Items = Inventory.GetAllItems(); // FIXME: dumb
 	return Items.IsValidIndex(Index) ? Items[Index] : nullptr;
 }
 
-void UFretteInventoryComponent::AddItem_Implementation(UInventoryStackDataAsset* Template)
+void UFretteInventoryComponent::AddItem_Implementation(UInventoryItemDataAsset* Template)
 {
-	UInventoryStack* Stack = Cast<UInventoryStack>(Template->CreateRuntimeItem(this));
-	Inventory.AddEntry(Stack);
+	UInventoryItem* Item = Template->CreateRuntimeItem(this);
+	Inventory.AddEntry(Item);
 }
 
 void UFretteInventoryComponent::RemoveItem(int32 Index)

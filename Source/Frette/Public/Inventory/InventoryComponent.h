@@ -32,10 +32,10 @@ public:
 	const T* GetItem(int32 Index) const { return GetItem<T>(Index); }
 
 	UFUNCTION(BlueprintPure, Category="Frette Inventory")
-	UInventoryItem* GetItem(int32 Index);
+	UInventoryItem* GetItem(int32 Index) const;
 
-	UFUNCTION(Server, Reliable, BlueprintCallable, meta=(DisplayName="Give Item Stack"))
-	void AddItem(UInventoryStackDataAsset* Template);
+	UFUNCTION(Server, Reliable, BlueprintCallable, meta=(DisplayName="Give Item"))
+	void AddItem(UInventoryItemDataAsset* Template);
 
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Remove Item"))
 	void RemoveItem(int32 Index);
