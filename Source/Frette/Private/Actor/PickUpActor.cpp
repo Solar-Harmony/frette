@@ -10,12 +10,14 @@ APickUpActor::APickUpActor()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	SetRootComponent(Root);
 	
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item"));
 	StaticMesh->SetupAttachment(Root);
 	
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
 	Sphere->SetupAttachment(Root);
+	Sphere->OnComponentBeginOverlap.AddDynamic(this, &APickUpActor::PickedUp);
 }
 
 void APickUpActor::OnConstruction(const FTransform& Transform)
@@ -30,8 +32,9 @@ void APickUpActor::OnConstruction(const FTransform& Transform)
 		const float MaxDim = FMath::Max3(CurrentSize.X, CurrentSize.Y, CurrentSize.Z);
 		const float ScaleFactor = (MaxDim > 0.0f) ? (Item_Size / MaxDim) : 1.0f;
 		StaticMesh->SetRelativeScale3D(FVector(ScaleFactor));
-		Sphere->SetSphereRadius(Item_Size / 2.f);
-		Sphere->OnComponentBeginOverlap.AddDynamic(this, &APickUpActor::PickedUp);
+		const float SphereRadius = Item_Size / 2.f * 1.3f;
+		Sphere->SetSphereRadius(SphereRadius); // Make sure it's not too hard to pick it up
+		Sphere->SetRelativeLocation(FVector(0.f, 0.f, SphereRadius));
 	}
 }
 
