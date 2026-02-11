@@ -7,17 +7,17 @@
 
 class UInventoryItemDataAsset;
 
-UCLASS(Abstract, BlueprintType)
+UCLASS(BlueprintType, Blueprintable)
 class UInventoryItem : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	UInventoryItemDataAsset* Data = nullptr;
-	
+
 	virtual bool IsSupportedForNetworking() const override { return true; }
-	
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -83,7 +83,8 @@ public:
 
 	virtual UInventoryItem* CreateRuntimeItem(UObject* Outer) override
 	{
-		UInventoryStack* Item = Cast<UInventoryStack>(Super::CreateRuntimeItem(Outer));
+		UInventoryStack* Item = NewObject<UInventoryStack>(Outer);
+		Item->Data = this;
 		Item->Quantity = 1;
 		return Item;
 	}

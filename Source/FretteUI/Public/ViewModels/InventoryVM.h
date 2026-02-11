@@ -4,7 +4,7 @@
 #include "FretteViewModel.h"
 #include "InventoryItemVM.h"
 #include "Character/FrettePlayerCharacter.h"
-#include "Inventory/SlotsInventoryComponent.h"
+#include "Inventory/InventoryComponent.h"
 #include "Player/FrettePlayerState.h"
 #include "InventoryVM.generated.h"
 
@@ -21,7 +21,7 @@ public:
 	{
 		if (const AFrettePlayerState* State = OwningController->GetPlayerState<AFrettePlayerState>())
 		{
-			USlotsInventoryComponent* Inventory = State->GetPlayerInventory();
+			UFretteInventoryComponent* Inventory = State->GetPlayerInventory();
 			Inventory->OnItemAdded.AddUObject(this, &UInventoryVM::AddItem);
 		}
 	}

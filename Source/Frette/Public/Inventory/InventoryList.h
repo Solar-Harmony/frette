@@ -1,11 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InventoryComponent.h"
+#include "Items/InventoryItemDataAsset.h"
 #include "Net/Serialization/FastArraySerializer.h"
 
 #include "InventoryList.generated.h"
 
+class UFretteInventoryComponent;
 struct FInventoryList;
 
 USTRUCT()
@@ -24,7 +25,7 @@ struct FInventoryList : public FFastArraySerializer
 
 	FInventoryList() = default;
 
-	explicit FInventoryList(UActorComponent* InOwner)
+	explicit FInventoryList(UFretteInventoryComponent* InOwner)
 		: Owner(InOwner) {}
 
 	TArray<UInventoryItem*> GetAllItems() const;
@@ -48,7 +49,7 @@ struct FInventoryList : public FFastArraySerializer
 
 private:
 	UPROPERTY(NotReplicated)
-	UActorComponent* Owner = nullptr;
+	UFretteInventoryComponent* Owner = nullptr;
 };
 
 template <> struct TStructOpsTypeTraits<FInventoryList> : public TStructOpsTypeTraitsBase2<FInventoryList>

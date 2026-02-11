@@ -1,5 +1,7 @@
 ﻿#include "Inventory/InventoryList.h"
 
+#include "Inventory/InventoryComponent.h"
+
 TArray<UInventoryItem*> FInventoryList::GetAllItems() const
 {
 	TArray<UInventoryItem*> Results;
@@ -25,7 +27,7 @@ void FInventoryList::AddEntry(UInventoryItem* Instance)
 	Entry.Item = Instance;
 	MarkItemDirty(Entry);
 
-	Cast<IInventoryComponent>(Owner)->OnItemAdded.Broadcast(Entry.Item);
+	Owner->OnItemAdded.Broadcast(Entry.Item);
 }
 
 UInventoryItem* FInventoryList::AddEntry(UInventoryItemDataAsset* ItemClass)
@@ -40,11 +42,6 @@ UInventoryItem* FInventoryList::AddEntry(UInventoryItemDataAsset* ItemClass)
 	Entry.Item = ItemClass->CreateRuntimeItem(Owner);
 	MarkItemDirty(Entry);
 
-	if (Owner)
-	{
-		Cast<IInventoryComponent>(Owner)->OnItemAdded.Broadcast(Entry.Item);
-	}
-
 	return Entry.Item;
 }
 
@@ -58,7 +55,7 @@ void FInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndices, int
 	for (int32 Index : AddedIndices)
 	{
 		FInventoryListEntry& Stack = Entries[Index];
-		Cast<IInventoryComponent>(Owner)->OnItemAdded.Broadcast(Stack.Item);
+		Owner->OnItemAdded.Broadcast(Stack.Item);
 	}
 }
 

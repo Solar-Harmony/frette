@@ -1,47 +1,36 @@
-﻿#include "Inventory/SlotsInventoryComponent.h"
+﻿#include "Inventory/InventoryComponent.h"
 
 #include "Engine/ActorChannel.h"
 #include "Net/UnrealNetwork.h"
 
-USlotsInventoryComponent::USlotsInventoryComponent()
+UFretteInventoryComponent::UFretteInventoryComponent()
 {
 	SetIsReplicatedByDefault(true);
 }
 
-int32 USlotsInventoryComponent::GetItemCount(UInventoryItemDataAsset* ItemType)
-{
-	return 67; // TODO: implement
-}
-
-UInventoryItem* USlotsInventoryComponent::GetItem(int32 Index)
+UInventoryItem* UFretteInventoryComponent::GetItem(int32 Index)
 {
 	TArray<UInventoryItem*> Items = Inventory.GetAllItems(); // FIXME: dumb
 	return Items.IsValidIndex(Index) ? Items[Index] : nullptr;
 }
 
-void USlotsInventoryComponent::AddItemStack_Implementation(UInventoryStackDataAsset* Template, int32 Quantity)
+void UFretteInventoryComponent::AddItem_Implementation(UInventoryStackDataAsset* Template)
 {
 	UInventoryStack* Stack = Cast<UInventoryStack>(Template->CreateRuntimeItem(this));
-	Stack->Quantity = Quantity;
 	Inventory.AddEntry(Stack);
 }
 
-void USlotsInventoryComponent::AddItem_Implementation(UInventoryItem* ItemData)
-{
-	Inventory.AddEntry(ItemData);
-}
-
-void USlotsInventoryComponent::RemoveItem(int32 Index)
+void UFretteInventoryComponent::RemoveItem(int32 Index)
 {
 	unimplemented(); // TODO:
 }
 
-void USlotsInventoryComponent::SwapItems(int32 FromIndex, int32 ToIndex)
+void UFretteInventoryComponent::SwapItems(int32 FromIndex, int32 ToIndex)
 {
 	unimplemented(); // TODO:
 }
 
-void USlotsInventoryComponent::ReadyForReplication()
+void UFretteInventoryComponent::ReadyForReplication()
 {
 	Super::ReadyForReplication();
 
@@ -59,13 +48,13 @@ void USlotsInventoryComponent::ReadyForReplication()
 	}
 }
 
-void USlotsInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void UFretteInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME_CONDITION(USlotsInventoryComponent, Inventory, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UFretteInventoryComponent, Inventory, COND_OwnerOnly);
 }
 
-bool USlotsInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+bool UFretteInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
 {
 	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 

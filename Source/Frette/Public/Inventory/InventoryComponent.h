@@ -1,28 +1,53 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
+#include "InventoryList.h"
 #include "Components/ActorComponent.h"
-#include "Inventory/Items/InventoryItemDataAsset.h"
+
 #include "InventoryComponent.generated.h"
 
-UINTERFACE()
-class UInventoryComponent : public UInterface
-{
-	GENERATED_BODY()
-};
+class UInventoryStackDataAsset;
+class UInventoryItem;
 
-class IInventoryComponent
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, UInventoryItem*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, UInventoryItem*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemSelected, UInventoryItem*)
+
+UCLASS(ClassGroup=(Frette), meta=(BlueprintSpawnableComponent))
+class FRETTE_API UFretteInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, UInventoryItem*)
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, UInventoryItem*)
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemSelected, UInventoryItem*)
+	UFretteInventoryComponent();
 
 	FOnItemAdded OnItemAdded;
 	FOnItemRemoved OnItemRemoved;
 	FOnItemSelected OnItemSelected;
 
-	virtual int32 GetItemCount(UInventoryItemDataAsset* ItemType) = 0;
+	template <typename T>
+	T* GetItem(int32 Index) { return Cast<T>(GetItem(Index)); }
+
+	template <typename T>
+	const T* GetItem(int32 Index) const { return GetItem<T>(Index); }
+
+	UFUNCTION(BlueprintPure, Category="Frette Inventory")
+	UInventoryItem* GetItem(int32 Index);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, meta=(DisplayName="Give Item Stack"))
+	void AddItem(UInventoryStackDataAsset* Template);
+
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="Remove Item"))
+	void RemoveItem(int32 Index);
+
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="Swap Two Items"))
+	void SwapItems(int32 FromIndex, int32 ToIndex);
+
+	virtual void ReadyForReplication() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out) const override;
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+
+private:
+	UPROPERTY(Replicated)
+	FInventoryList Inventory{ this };
 };
