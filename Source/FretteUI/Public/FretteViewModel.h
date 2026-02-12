@@ -13,11 +13,11 @@ class FRETTEUI_API UFretteViewModel : public UMVVMViewModelBase
 public:
 	virtual void Bind(AFrettePlayerState* PlayerState) {}
 
-	UFUNCTION(BlueprintCallable, Category = "Frette|UI", meta = (DisplayName = "Create Frette View Model", DefaultToSelf = "Outer"))
-	static UFretteViewModel* CreateFretteViewModel(UObject* Outer, TSubclassOf<UFretteViewModel> ViewModelClass, AFrettePlayerState* InPlayerState)
+	UFUNCTION(BlueprintCallable, Category = "Frette|UI", meta = (DisplayName = "Create Frette View Model", DefaultToSelf = "Outer", DeterminesOutputType = "ViewModelClass"))
+	static UFretteViewModel* CreateFretteViewModel(UObject* Outer, UPARAM(meta=(AllowAbstract = false)) TSubclassOf<UFretteViewModel> ViewModelClass, AFrettePlayerState* PlayerState)
 	{
 		UFretteViewModel* ViewModel = NewObject<UFretteViewModel>(Outer, ViewModelClass);
-		ViewModel->Bind(InPlayerState);
+		ViewModel->Bind(PlayerState);
 		return ViewModel;
 	}
 };

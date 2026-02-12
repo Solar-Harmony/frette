@@ -46,7 +46,10 @@ void AFrettePlayerController::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	SetupWidgetsAndBindings();
+	if (IsLocalController())
+	{
+		SetupWidgetsAndViewModels();
+	}
 }
 
 UFretteAbilitySystemComponent* AFrettePlayerController::GetASC()

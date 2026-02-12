@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FrettePlayerState.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/PlayerController.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
@@ -18,7 +19,7 @@ protected:
 	virtual void SetupInputComponent() override;
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Create Widgets and Viewmodels"))
-	void SetupWidgetsAndBindings();
+	void SetupWidgetsAndViewModels();
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Frette")
@@ -29,6 +30,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> FretteAbilitySystemComponent;
+
+	UFUNCTION(BlueprintPure, Category = "Frette")
+	AFrettePlayerState* GetFrettePlayerState() const { return GetPlayerState<AFrettePlayerState>(); }
 
 	virtual void BeginPlay() override;
 	virtual void OnRep_PlayerState() override;

@@ -4,7 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "FretteWidget.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class FRETTEUI_API UFretteWidget : public UUserWidget
 {
 	GENERATED_BODY()
