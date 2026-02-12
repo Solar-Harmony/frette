@@ -50,13 +50,13 @@ class UInventoryItemDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FText DisplayName;
 
-	UPROPERTY(EditDefaultsOnly, meta=(MultiLine = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(MultiLine = true))
 	FText Description;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UTexture2D> Icon;
 
 	virtual UInventoryItem* CreateRuntimeItem(UObject* Outer)

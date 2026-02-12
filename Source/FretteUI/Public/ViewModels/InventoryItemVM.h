@@ -15,8 +15,19 @@ public:
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	FText Name;
 
-	void SetName(UInventoryItem* Item)
+	UPROPERTY(BlueprintReadOnly, FieldNotify)
+	TObjectPtr<UTexture2D> Icon;
+
+	void SetName(const UInventoryItem* Item)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(Name, Item->Data->DisplayName);
+	}
+
+	void SetIcon(const UInventoryItem* Item)
+	{
+		// we might want async loading, or preloading
+		// also check out Common Lazy Image?
+		UTexture2D* IconPtr = Item->Data->Icon.LoadSynchronous();
+		UE_MVVM_SET_PROPERTY_VALUE(Icon, IconPtr);
 	}
 };

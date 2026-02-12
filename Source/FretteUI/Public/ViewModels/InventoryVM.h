@@ -17,6 +17,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TArray<TObjectPtr<UInventoryItemVM>> Items;
 
+	UFUNCTION(BlueprintCallable)
 	virtual void Bind(APlayerController* OwningController) override
 	{
 		if (const AFrettePlayerState* State = OwningController->GetPlayerState<AFrettePlayerState>())
@@ -31,6 +32,7 @@ public:
 	{
 		UInventoryItemVM* SubViewModel = NewObject<UInventoryItemVM>(this);
 		SubViewModel->SetName(NewItem);
+		SubViewModel->SetIcon(NewItem);
 		Items.Add(SubViewModel);
 
 		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Items);
