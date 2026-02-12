@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "FretteViewModel.h"
 #include "InventoryItemVM.h"
-#include "Character/FrettePlayerCharacter.h"
 #include "Inventory/InventoryComponent.h"
 #include "Player/FrettePlayerState.h"
 #include "InventoryVM.generated.h"
@@ -13,22 +12,17 @@ class FRETTEUI_API UInventoryVM : public UFretteViewModel
 {
 	GENERATED_BODY()
 
-public:
+protected:
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TArray<TObjectPtr<UInventoryItemVM>> Items;
 
-	UFUNCTION(BlueprintCallable)
-	virtual void Bind(APlayerController* OwningController) override
+	virtual void Bind(AFrettePlayerState* PlayerState) override
 	{
-		if (const AFrettePlayerState* State = OwningController->GetPlayerState<AFrettePlayerState>())
-		{
-			UFretteInventoryComponent* Inventory = State->GetPlayerInventory();
-			Inventory->OnItemAdded.AddUObject(this, &UInventoryVM::AddItem);
-		}
+		UFretteInventoryComponent* Inventory = PlayerState->GetPlayerInventory();
+		Inventory->OnItemAdded.AddUObject(this, &UInventoryVM::AddItem);
 	}
 
-	UFUNCTION(BlueprintCallable)
-	void AddItem(UInventoryItem* NewItem)
+	void AddItem(const UInventoryItem* NewItem)
 	{
 		UInventoryItemVM* SubViewModel = NewObject<UInventoryItemVM>(this);
 		SubViewModel->SetName(NewItem);

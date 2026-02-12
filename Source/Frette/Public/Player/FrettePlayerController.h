@@ -17,7 +17,7 @@ class FRETTE_API AFrettePlayerController : public APlayerController
 protected:
 	virtual void SetupInputComponent() override;
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Setup Widgets and Bindings"))
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Create Widgets and Viewmodels"))
 	void SetupWidgetsAndBindings();
 
 private:

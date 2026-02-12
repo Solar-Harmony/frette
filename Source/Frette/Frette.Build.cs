@@ -8,6 +8,8 @@ public class Frette : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core",
@@ -18,7 +20,6 @@ public class Frette : ModuleRules
 			"GameplayAbilities",
 			"GameplayTags",
 			"GameplayTasks",
-			"StructUtils",
 			"NetCore"
 		});
 

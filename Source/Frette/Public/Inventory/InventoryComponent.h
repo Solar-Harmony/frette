@@ -9,9 +9,9 @@
 class UInventoryStackDataAsset;
 class UInventoryItem;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, UInventoryItem*)
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, UInventoryItem*)
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemSelected, UInventoryItem*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, const UInventoryItem*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, const UInventoryItem*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemSelected, const UInventoryItem*)
 
 UCLASS(ClassGroup=(Frette), meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFretteInventoryComponent : public UActorComponent
