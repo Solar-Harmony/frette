@@ -4,7 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
-#include "Inventory/InventoryComponent.h"
+#include "Inventory/FretteInventoryComponent.h"
 #include "Player/FrettePlayerState.h"
 
 class AFrettePlayerState;

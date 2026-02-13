@@ -4,7 +4,7 @@
 #include "AbilitySystemInterface.h"
 
 #include "GameFramework/PlayerState.h"
-#include "Inventory/InventoryComponent.h"
+#include "Inventory/FretteInventoryComponent.h"
 #include "FrettePlayerState.generated.h"
 
 class UAttributeSet;

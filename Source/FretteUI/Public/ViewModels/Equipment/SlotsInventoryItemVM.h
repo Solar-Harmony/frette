@@ -3,11 +3,11 @@
 #include "CoreMinimal.h"
 #include "FretteViewModel.h"
 #include "MVVMViewModelBase.h"
-#include "Inventory/InventoryComponent.h"
-#include "InventoryItemVM.generated.h"
+#include "Inventory/FretteInventoryComponent.h"
+#include "SlotsInventoryItemVM.generated.h"
 
 UCLASS()
-class FRETTEUI_API UInventoryItemVM : public UFretteViewModel
+class FRETTEUI_API USlotsInventoryItemVM : public UFretteViewModel
 {
 	GENERATED_BODY()
 
@@ -18,12 +18,12 @@ public:
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TObjectPtr<UTexture2D> Icon;
 
-	void SetName(const UInventoryItem* Item)
+	void SetName(const UFretteInventoryItem* Item)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(Name, Item->Data->DisplayName);
 	}
 
-	void SetIcon(const UInventoryItem* Item)
+	void SetIcon(const UFretteInventoryItem* Item)
 	{
 		// we might want async loading, or preloading
 		// also check out Common Lazy Image?

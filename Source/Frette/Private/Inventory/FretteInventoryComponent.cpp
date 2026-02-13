@@ -1,4 +1,4 @@
-﻿#include "Inventory/InventoryComponent.h"
+﻿#include "Inventory/FretteInventoryComponent.h"
 
 #include "Engine/ActorChannel.h"
 #include "Net/UnrealNetwork.h"
@@ -8,24 +8,18 @@ UFretteInventoryComponent::UFretteInventoryComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-UInventoryItem* UFretteInventoryComponent::GetItem(int32 Index) const
+UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Index)
 {
-	TArray<UInventoryItem*> Items = Inventory.GetAllItems(); // FIXME: dumb
-	return Items.IsValidIndex(Index) ? Items[Index] : nullptr;
+	return Inventory.GetEntry(Index);
 }
 
-void UFretteInventoryComponent::AddItem_Implementation(UInventoryItemDataAsset* Template)
+void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* Template)
 {
-	UInventoryItem* Item = Template->CreateRuntimeItem(this);
+	UFretteInventoryItem* Item = Template->CreateRuntimeItem(this);
 	Inventory.AddEntry(Item);
 }
 
 void UFretteInventoryComponent::RemoveItem(int32 Index)
-{
-	unimplemented(); // TODO:
-}
-
-void UFretteInventoryComponent::SwapItems(int32 FromIndex, int32 ToIndex)
 {
 	unimplemented(); // TODO:
 }
@@ -36,9 +30,9 @@ void UFretteInventoryComponent::ReadyForReplication()
 
 	if (IsUsingRegisteredSubObjectList())
 	{
-		for (const FInventoryListEntry& Entry : Inventory.Entries)
+		for (const FFretteInventoryListEntry& Entry : Inventory.Entries)
 		{
-			UInventoryItem* Instance = Entry.Item;
+			UFretteInventoryItem* Instance = Entry.Item;
 
 			if (IsValid(Instance))
 			{
@@ -58,7 +52,7 @@ bool UFretteInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOut
 {
 	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 
-	for (const FInventoryListEntry& Entry : Inventory.Entries)
+	for (const FFretteInventoryListEntry& Entry : Inventory.Entries)
 	{
 		if (Entry.Item)
 		{
