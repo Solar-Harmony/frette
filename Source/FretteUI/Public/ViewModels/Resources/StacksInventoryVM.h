@@ -4,7 +4,7 @@
 #include "FretteViewModel.h"
 #include "StacksInventoryItemVM.h"
 #include "Inventory/FretteInventoryComponent.h"
-#include "Inventory/Items/FretteStackedItem.h"
+#include "Inventory/Items/FretteStackableItem.h"
 #include "Player/FrettePlayerState.h"
 #include "StacksInventoryVM.generated.h"
 
@@ -25,7 +25,7 @@ protected:
 
 	void AddItem(const UFretteInventoryItem* NewItem)
 	{
-		if (!NewItem->IsA<UFretteStackedItem>())
+		if (!NewItem->IsA<UFretteStackableItem>())
 			return;
 
 		UStacksInventoryItemVM* SubViewModel = NewObject<UStacksInventoryItemVM>(this);

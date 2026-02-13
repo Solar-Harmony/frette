@@ -6,7 +6,7 @@
 
 #include "FretteInventoryComponent.generated.h"
 
-class UFretteInventoryStackDataAsset;
+class UFretteStackableItemDataAsset;
 class UFretteInventoryItem;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, const UFretteInventoryItem*)

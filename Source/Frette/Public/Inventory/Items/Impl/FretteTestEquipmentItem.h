@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Inventory/Items/FretteEquipmentItem.h"
 #include "Inventory/Items/FretteInventoryItem.h"
-#include "Inventory/Items/FretteSlottedItem.h"
-#include "TestSlottedItem.generated.h"
+#include "FretteTestEquipmentItem.generated.h"
 
 UCLASS(BlueprintType)
-class UTestSlottedItem : public UFretteSlottedItem
+class UFretteTestEquipmentItem : public UFretteEquipmentItem
 {
 	GENERATED_BODY()
 
@@ -21,7 +21,7 @@ public:
 };
 
 UCLASS()
-class UTestSlottedItemDataAsset : public UFretteInventoryItemDataAsset
+class UFretteTestEquipmentItemDataAsset : public UFretteInventoryItemDataAsset
 {
 	GENERATED_BODY()
 
@@ -43,7 +43,7 @@ public:
 
 	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
 	{
-		UTestSlottedItem* Item = NewObject<UTestSlottedItem>(Outer);
+		UFretteTestEquipmentItem* Item = NewObject<UFretteTestEquipmentItem>(Outer);
 		Item->Data = this;
 		Item->Durability = MaxDurability;
 		Item->CurrentAmmo = MagazineCapacity;
