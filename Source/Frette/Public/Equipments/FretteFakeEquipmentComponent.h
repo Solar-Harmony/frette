@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Weapons/FretteWeaponInstance.h"
 #include "FretteFakeEquipmentComponent.generated.h"
 
@@ -16,6 +17,7 @@ public:
 	void Equip(UFretteWeaponInstance* Equipment);
 	void Unequip(UFretteWeaponInstance* Equipment);
 	TObjectPtr<UFretteWeaponInstance> EquippedWeapon;
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
 protected:
 	// Called when the game starts

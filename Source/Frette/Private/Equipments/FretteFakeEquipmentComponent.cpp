@@ -1,32 +1,34 @@
 #include "Equipments/FretteFakeEquipmentComponent.h"
 
+#include "Engine/ActorChannel.h"
+
 UFretteFakeEquipmentComponent::UFretteFakeEquipmentComponent()
 {
-	bReplicateUsingRegisteredSubObjectList = true;
 	SetIsReplicated(true);
 }
 
 void UFretteFakeEquipmentComponent::Equip(UFretteWeaponInstance* Equipment)
 {
-	UFretteWeaponInstance* WeaponInstance = Cast<UFretteWeaponInstance>(Equipment);
-	EquippedWeapon = WeaponInstance;
+	EquippedWeapon = Equipment;
 	EquippedWeapon->OnEquipped();
-
-	if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
-	{
-		AddReplicatedSubObject(EquippedWeapon);
-	}
 }
 
 void UFretteFakeEquipmentComponent::Unequip(UFretteWeaponInstance* Equipment)
 {
-	if (IsUsingRegisteredSubObjectList())
-	{
-		RemoveReplicatedSubObject(Equipment);
-	}
-
 	Equipment->OnUnequipped();
 	EquippedWeapon = nullptr;
+}
+
+bool UFretteFakeEquipmentComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+
+	if (EquippedWeapon)
+	{
+		bWroteSomething |= Channel->ReplicateSubobject(EquippedWeapon, *Bunch, *RepFlags);
+	}
+
+	return bWroteSomething;
 }
 
 void UFretteFakeEquipmentComponent::BeginPlay()
