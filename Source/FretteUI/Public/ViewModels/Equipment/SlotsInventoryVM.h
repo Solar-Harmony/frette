@@ -4,7 +4,7 @@
 #include "FretteViewModel.h"
 #include "SlotsInventoryItemVM.h"
 #include "Inventory/FretteInventoryComponent.h"
-#include "Inventory/Items/FretteEquipmentItem.h"
+#include "Inventory/Items/FretteGearItem.h"
 #include "Player/FrettePlayerState.h"
 #include "SlotsInventoryVM.generated.h"
 
@@ -25,7 +25,7 @@ protected:
 
 	void AddItem(const UFretteInventoryItem* NewItem)
 	{
-		if (!NewItem->IsA<UFretteEquipmentItem>())
+		if (!NewItem->IsA<UFretteGearItem>())
 			return;
 
 		auto* SubViewModel = NewObject<USlotsInventoryItemVM>(this);

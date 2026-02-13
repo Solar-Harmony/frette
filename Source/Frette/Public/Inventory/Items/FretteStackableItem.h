@@ -21,7 +21,7 @@ public:
 	}
 };
 
-UCLASS(BlueprintType, Category = "Frette❄️|Inventory")
+UCLASS(BlueprintType, Category = "Frette|Inventory")
 class UFretteStackableItemDataAsset : public UFretteInventoryItemDataAsset
 {
 	GENERATED_BODY()
@@ -31,7 +31,6 @@ public:
 	{
 		auto* Item = NewObject<UFretteStackableItem>(Outer);
 		Item->Data = this;
-		Item->Quantity = 1;
 		return Item;
 	}
 };

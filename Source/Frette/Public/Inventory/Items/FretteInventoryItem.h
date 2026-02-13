@@ -7,7 +7,7 @@
 
 class UFretteInventoryItemDataAsset;
 
-static const FPrimaryAssetType GInventoryItemPrimaryAssetType("Item");
+static const FPrimaryAssetType GInventoryItemPrimaryAssetType("FretteInventoryItem");
 
 UCLASS(Abstract, BlueprintType, Blueprintable)
 class UFretteInventoryItem : public UObject
@@ -17,11 +17,6 @@ class UFretteInventoryItem : public UObject
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	UFretteInventoryItemDataAsset* Data = nullptr;
-
-	virtual void Use() {}
-
-	UFUNCTION(BlueprintCallable)
-	void K2_Use() { Use(); }
 
 	virtual bool IsSupportedForNetworking() const override { return true; }
 

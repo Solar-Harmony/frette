@@ -2,13 +2,12 @@
 
 #include "FretteInventoryItem.h"
 #include "GameplayTagContainer.h"
-#include "NativeGameplayTags.h"
-#include "FretteEquipmentItem.generated.h"
+#include "FretteGearItem.generated.h"
 
 // An equippable item that supports arbitrary positioning, with no stacking support.
 // Use for unique items that require per-item data like durability, ammo count, etc.
 UCLASS(BlueprintType)
-class UFretteEquipmentItem : public UFretteInventoryItem
+class UFretteGearItem : public UFretteInventoryItem
 {
 	GENERATED_BODY()
 
@@ -17,6 +16,9 @@ public:
 	// This is managed by the UI widget and may differ from the item's index in the replicated inventory array.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	int32 SlotIndex = -1;
+	
+	UFUNCTION(BlueprintCallable)
+	virtual void Use() {}
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
@@ -25,8 +27,8 @@ public:
 	}
 };
 
-UCLASS(BlueprintType, Category = "Frette❄️|Inventory")
-class UFretteEquipmentItemDataAsset : public UFretteInventoryItemDataAsset
+UCLASS(BlueprintType, Category = "Frette|Inventory")
+class UFretteGearItemDataAsset : public UFretteInventoryItemDataAsset
 {
 	GENERATED_BODY()
 
@@ -37,7 +39,7 @@ public:
 
 	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
 	{
-		auto* Item = NewObject<UFretteEquipmentItem>(Outer);
+		auto* Item = NewObject<UFretteGearItem>(Outer);
 		Item->Data = this;
 		return Item;
 	}

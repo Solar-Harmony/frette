@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Inventory/Items/FretteEquipmentItem.h"
+#include "Inventory/Items/FretteGearItem.h"
 #include "Inventory/Items/FretteInventoryItem.h"
 #include "FretteTestEquipmentItem.generated.h"
 
 UCLASS(BlueprintType)
-class UFretteTestEquipmentItem : public UFretteEquipmentItem
+class UFretteTestEquipmentItem : public UFretteGearItem
 {
 	GENERATED_BODY()
 
