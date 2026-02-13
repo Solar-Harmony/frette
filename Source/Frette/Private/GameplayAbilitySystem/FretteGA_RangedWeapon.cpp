@@ -1,16 +1,18 @@
 #include "GameplayAbilitySystem/FretteGA_RangedWeapon.h"
 
-#include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
 #include "Weapons/FretteProjectile.h"
 #include "Weapons/FretteRangedWeaponInstance.h"
 
+//TODO: Faire que tout les équipements ont un Use ability qui peut être associer 
+//
 void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponInstance* WeaponInstance)
 {
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
 
 	//@TODO: Devrait utiliser un socket/muzzle location plutôt que le PawnViewLocation
 	FVector MuzzleLocation = Character->GetPawnViewLocation();
+
 	//Utilise le controller.Rotation pour les IA ce qui n'est peut-être pas ce que l'on veux
 	FRotator AimRotation = Character->GetBaseAimRotation();
 
@@ -29,12 +31,17 @@ void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponInstance* 
 		);
 }
 
+UFretteRangedWeaponInstance* UFretteGA_RangedWeapon::GetWeaponInstance() const
+{
+	return Cast<UFretteRangedWeaponInstance>(GetCurrentSourceObject());
+}
+
 bool UFretteGA_RangedWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!Super::CheckCost(Handle, ActorInfo, OptionalRelevantTags))
 		return false;
 
-	const UFretteRangedWeaponInstance* WeaponInstance = Cast<UFretteRangedWeaponInstance>(GetSourceObject(Handle, ActorInfo));
+	const UFretteRangedWeaponInstance* WeaponInstance = GetWeaponInstance();
 	check(WeaponInstance);
 
 	return WeaponInstance->GetCurrentAmmo() > 0;
@@ -44,7 +51,7 @@ void UFretteGA_RangedWeapon::ApplyCost(const FGameplayAbilitySpecHandle Handle, 
 {
 	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
 
-	UFretteRangedWeaponInstance* WeaponInstance = Cast<UFretteRangedWeaponInstance>(GetSourceObject(Handle, ActorInfo));
+	UFretteRangedWeaponInstance* WeaponInstance = GetWeaponInstance();
 	check(WeaponInstance);
 
 	WeaponInstance->UseAmmo();

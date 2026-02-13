@@ -7,6 +7,9 @@
 
 void AFretteBaseCharacter::ApplyStartupEffects()
 {
+	if (!HasAuthority())
+		return;
+
 	check(AbilitySystemComponent)
 
 	if (!DefaultAttributes)
@@ -20,6 +23,13 @@ void AFretteBaseCharacter::ApplyStartupEffects()
 	ApplyDefaultAttributeEffect(EffectContext);
 	ApplyDefaultStartupEffect(EffectContext);
 	AbilitySystemComponent->GrantAbilitiesFromAbilitySet(ArchetypeLoadout, this);
+
+	//@TODO: Remplacer avec l'inventaire
+	if (!EquippedItem)
+		return;
+
+	CurrentWeaponInstance = NewObject<UFretteWeaponInstance>(this, EquippedItem->InstanceType);
+	CurrentWeaponInstance->OnEquipped();
 }
 
 void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const
@@ -59,15 +69,4 @@ void AFretteBaseCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data)
 	{
 		MovementComp->MaxWalkSpeed = Data.NewValue;
 	}
-}
-
-void AFretteBaseCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (!EquippedItem)
-		return;
-
-	CurrentWeaponInstance = NewObject<UFretteWeaponInstance>(this, EquippedItem->InstanceType);
-	CurrentWeaponInstance->OnEquipped();
 }

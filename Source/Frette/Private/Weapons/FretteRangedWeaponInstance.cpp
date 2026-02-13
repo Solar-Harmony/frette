@@ -4,7 +4,6 @@
 
 UFretteRangedWeaponInstance::UFretteRangedWeaponInstance()
 {
-
 	CurrentClipAmmo = MaxClipAmmo;
 }
 
@@ -13,7 +12,7 @@ void UFretteRangedWeaponInstance::UseAmmo()
 	CurrentClipAmmo -= 1;
 }
 
-void UFretteRangedWeaponInstance::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+void UFretteRangedWeaponInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME_CONDITION(UFretteRangedWeaponInstance, CurrentClipAmmo, COND_OwnerOnly);

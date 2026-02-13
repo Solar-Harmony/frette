@@ -46,9 +46,8 @@ protected:
 
 	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
 
-	virtual void BeginPlay() override;
 	//For testing purposes
-	//@TODO:Faudrait le changer pour faire un vrai equiment manager system ou wtv
+	//@TODO:Inventaire | Faudrait le changer pour faire un vrai equiment manager system ou wtv
 	UPROPERTY(EditAnywhere, Category="Frette|Equipment")
 	TObjectPtr<UFretteEquipmentDataAsset> EquippedItem;
 

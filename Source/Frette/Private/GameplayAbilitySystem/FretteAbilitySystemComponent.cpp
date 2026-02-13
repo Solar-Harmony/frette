@@ -58,8 +58,19 @@ void UFretteAbilitySystemComponent::GrantAbilitiesFromAbilitySet(UAbilitySetData
 		Spec.SourceObject = SourceObject;
 		Spec.GetDynamicSpecSourceTags().AddTag(Mapping.InputTag);
 
-		FGameplayAbilitySpecHandle Handle = GiveAbility(Spec);
-		InputAbilityMap.Add(Mapping.InputTag, Handle);
+		GiveAbility(Spec);
+	}
+}
+
+void UFretteAbilitySystemComponent::OnGiveAbility(FGameplayAbilitySpec& AbilitySpec)
+{
+	Super::OnGiveAbility(AbilitySpec);
+
+	const FGameplayTagContainer& SourceTags = AbilitySpec.GetDynamicSpecSourceTags();
+
+	for (const FGameplayTag& Tag : SourceTags)
+	{
+		InputAbilityMap.Add(Tag, AbilitySpec.Handle);
 	}
 }
 

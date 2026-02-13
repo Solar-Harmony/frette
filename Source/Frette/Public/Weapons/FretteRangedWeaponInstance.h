@@ -27,12 +27,11 @@ public:
 	FRuntimeFloatCurve DistanceDamageFalloff;
 
 private:
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	int MaxClipAmmo = 30;
 
+	//Change at runtime
 	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_ClipAmmo)
 	int CurrentClipAmmo;
-
-	int MaxClipAmmo = 30;
 
 	UFUNCTION()
 	virtual void OnRep_ClipAmmo(int OldPrimaryClipAmmo);

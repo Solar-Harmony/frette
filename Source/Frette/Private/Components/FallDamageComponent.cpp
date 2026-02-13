@@ -47,11 +47,11 @@ void UFallDamageComponent::OnJumpApexReached()
 	FallStartHeight = OwnerCharacter->GetActorLocation().Z;
 }
 
-void UFallDamageComponent::ApplyFallDamage(float DistanceFell) const
+void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 {
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
-	if (DistanceFell > Config->MinFallHeight)
+	if (DistanceFallen > Config->MinFallHeight)
 		return;
 
 	ensureMsgf(Config, TEXT("FallDamageComponent missing Config Data Asset"));
@@ -61,7 +61,7 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFell) const
 
 	const FGameplayEffectSpecHandle NewHandle = ASC->MakeOutgoingSpec(Config->FallDamageEffect, 1, EffectContext);
 
-	const float DamageAmount = Config->DamageCurve.GetRichCurveConst()->Eval(FMath::Abs(DistanceFell));
+	const float DamageAmount = Config->DamageCurve.GetRichCurveConst()->Eval(FMath::Abs(DistanceFallen));
 
 	NewHandle.Data->SetSetByCallerMagnitude(TAG_Effect_Movement_FallDamage, -DamageAmount);
 

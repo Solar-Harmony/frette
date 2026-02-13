@@ -5,6 +5,23 @@
 #include "UObject/Object.h"
 #include "FretteWeaponInstance.generated.h"
 
+USTRUCT()
+struct FFretteEquipmentActorToSpawn
+{
+	GENERATED_BODY()
+
+	FFretteEquipmentActorToSpawn() {}
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> ActorToSpawn;
+
+	UPROPERTY(EditAnywhere)
+	FName AttachSocket;
+
+	UPROPERTY(EditAnywhere)
+	FTransform AttachTransform;
+};
+
 /**
  * 
  */
@@ -23,8 +40,16 @@ public:
 	//~End of UObject interface
 
 	virtual void OnEquipped();
+	virtual void SpawnEquipmentActor();
 	virtual void OnUnequipped();
 
+	//Change pas at runtime
 	UPROPERTY(EditDefaultsOnly)
 	UAbilitySetDataAsset* AbilitySet;
+
+	UPROPERTY(EditDefaultsOnly)
+	FFretteEquipmentActorToSpawn EquipmentActor;
+
+	UPROPERTY(Replicated)
+	TArray<TObjectPtr<AActor>> SpawnedActors;
 };

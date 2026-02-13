@@ -22,4 +22,6 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Frette|Ability")
 	AActor* GetAvatarActor() const { return CurrentActorInfo ? CurrentActorInfo->AvatarActor.Get() : nullptr; }
+
+	//Ajouter un additionnal cost
 };

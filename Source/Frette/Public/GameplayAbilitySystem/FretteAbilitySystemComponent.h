@@ -14,6 +14,7 @@ public:
 	void AbilityInputPressed(const FGameplayTag& InputTag);
 	void AbilityInputReleased(const FGameplayTag& InputTag);
 	void GrantAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout, UObject* SourceObject);
+	virtual void OnGiveAbility(FGameplayAbilitySpec& AbilitySpec) override;
 	void RemoveAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout);
 
 protected:

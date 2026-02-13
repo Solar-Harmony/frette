@@ -18,7 +18,7 @@ class FRETTE_API UFallDamageComponent : public UActorComponent
 protected:
 	virtual void BeginPlay() override;
 	void BindMovementEvents();
-	void ApplyFallDamage(float DistanceFell) const;
+	void ApplyFallDamage(float DistanceFallen) const;
 
 	UFUNCTION()
 	void MovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
