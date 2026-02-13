@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
+#include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
 class UCameraComponent;
@@ -29,6 +30,9 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteEquipmentComponent> Equipment;
 
 private:
 	virtual void InitAbilityActorInfo() override;

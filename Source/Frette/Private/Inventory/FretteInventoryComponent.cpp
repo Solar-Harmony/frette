@@ -13,6 +13,17 @@ UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Index)
 	return Inventory.GetEntry(Index);
 }
 
+bool UFretteInventoryComponent::SelectItem(int32 Index)
+{
+	if (const UFretteInventoryItem* Item = GetItem(Index))
+	{
+		OnItemSelected.Broadcast(Item);
+		return true;
+	}
+
+	return false;
+}
+
 void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* Template)
 {
 	UFretteInventoryItem* Item = Template->CreateRuntimeItem(this);

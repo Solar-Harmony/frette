@@ -12,22 +12,24 @@ class FRETTEUI_API USlotsInventoryItemVM : public UFretteViewModel
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadOnly, FieldNotify)
-	FText Name;
+	UFUNCTION(BlueprintPure, FieldNotify)
+	FText GetDisplayName() const { return Item->Data->DisplayName; }
 
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TObjectPtr<UTexture2D> Icon;
 
-	void SetName(const UFretteInventoryItem* Item)
+	void SetModel(const UFretteInventoryItem* InItem)
 	{
-		UE_MVVM_SET_PROPERTY_VALUE(Name, Item->Data->DisplayName);
+		this->Item = InItem;
+		this->Icon = Item->Data->Icon.LoadSynchronous(); // FIXME: Async load
+
+		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(GetDisplayName);
+		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Icon);
 	}
 
-	void SetIcon(const UFretteInventoryItem* Item)
-	{
-		// we might want async loading, or preloading
-		// also check out Common Lazy Image?
-		UTexture2D* IconPtr = Item->Data->Icon.LoadSynchronous();
-		UE_MVVM_SET_PROPERTY_VALUE(Icon, IconPtr);
-	}
+	const UFretteInventoryItem* GetPtr() const { return Item; }
+
+private:
+	UPROPERTY()
+	const UFretteInventoryItem* Item;
 };

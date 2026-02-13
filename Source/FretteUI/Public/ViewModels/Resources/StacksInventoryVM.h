@@ -17,7 +17,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TArray<TObjectPtr<UStacksInventoryItemVM>> Items;
 
-	virtual void Bind(AFrettePlayerState* PlayerState) override
+	virtual void Bind() override
 	{
 		UFretteInventoryComponent* Inventory = PlayerState->GetPlayerInventory();
 		Inventory->OnItemAdded.AddUObject(this, &UStacksInventoryVM::AddItem);

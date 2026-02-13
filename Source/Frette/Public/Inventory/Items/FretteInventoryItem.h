@@ -18,6 +18,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	UFretteInventoryItemDataAsset* Data = nullptr;
 
+	virtual void Use() {}
+
+	UFUNCTION(BlueprintCallable)
+	void K2_Use() { Use(); }
+
 	virtual bool IsSupportedForNetworking() const override { return true; }
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override

@@ -11,6 +11,8 @@ class UTestSlottedItem : public UFretteSlottedItem
 	GENERATED_BODY()
 
 public:
+	virtual void Use() override {}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true))
 	int Durability;
 

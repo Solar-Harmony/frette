@@ -10,14 +10,18 @@ class FRETTEUI_API UFretteViewModel : public UMVVMViewModelBase
 {
 	GENERATED_BODY()
 
-public:
-	virtual void Bind(AFrettePlayerState* PlayerState) {}
+protected:
+	virtual void Bind() {}
+
+	UPROPERTY()
+	TObjectPtr<AFrettePlayerState> PlayerState;
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|UI", meta = (DisplayName = "Create Frette View Model", DefaultToSelf = "Outer", DeterminesOutputType = "ViewModelClass"))
-	static UFretteViewModel* CreateFretteViewModel(UObject* Outer, UPARAM(meta=(AllowAbstract = false)) TSubclassOf<UFretteViewModel> ViewModelClass, AFrettePlayerState* PlayerState)
+	static UFretteViewModel* CreateFretteViewModel(UObject* Outer, UPARAM(meta=(AllowAbstract = false)) TSubclassOf<UFretteViewModel> ViewModelClass, UPARAM(meta=(DisplayName = "Player State")) AFrettePlayerState* InPlayerState)
 	{
 		UFretteViewModel* ViewModel = NewObject<UFretteViewModel>(Outer, ViewModelClass);
-		ViewModel->Bind(PlayerState);
+		ViewModel->PlayerState = InPlayerState;
+		ViewModel->Bind();
 		return ViewModel;
 	}
 };

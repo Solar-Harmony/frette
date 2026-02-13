@@ -13,6 +13,8 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetCapsuleComponent());
+
+	Equipment = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment"));
 }
 
 //Client side
@@ -27,6 +29,7 @@ void AFrettePlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 	InitAbilityActorInfo();
+	Equipment->Initialize(GetPlayerState<AFrettePlayerState>());
 }
 
 void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)

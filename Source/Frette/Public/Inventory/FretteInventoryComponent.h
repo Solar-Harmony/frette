@@ -34,10 +34,13 @@ public:
 	UFUNCTION(BlueprintPure, Category="Frette Inventory")
 	UFretteInventoryItem* GetItem(int32 Index);
 
-	UFUNCTION(Server, Reliable, BlueprintCallable, meta=(DisplayName="Give Item"))
+	UFUNCTION(BlueprintCallable, Category="Frette Inventory")
+	bool SelectItem(int32 Index);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void AddItem(UFretteInventoryItemDataAsset* Template);
 
-	UFUNCTION(BlueprintCallable, meta=(DisplayName="Remove Item"))
+	UFUNCTION(BlueprintCallable)
 	void RemoveItem(int32 Index);
 
 	virtual void ReadyForReplication() override;

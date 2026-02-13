@@ -20,16 +20,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	int32 SlotIndex = -1;
 
-	// Tag to restrict which inventory slots the item can be placed in.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
-	FGameplayTag SlotTag;
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 		DOREPLIFETIME(ThisClass, SlotIndex);
 		DOREPLIFETIME(ThisClass, bEquipped);
-
 	}
 };
 
@@ -39,10 +34,20 @@ class USlottedItemDataAsset : public UFretteInventoryItemDataAsset
 	GENERATED_BODY()
 
 public:
+	// Tag to restrict which inventory slots the item can be placed in.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	FGameplayTag SlotTag = FGameplayTag();
+
 	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
 	{
 		auto* Item = NewObject<UFretteSlottedItem>(Outer);
 		Item->Data = this;
 		return Item;
+	}
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
+	{
+		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+		DOREPLIFETIME(ThisClass, SlotTag);
 	}
 };

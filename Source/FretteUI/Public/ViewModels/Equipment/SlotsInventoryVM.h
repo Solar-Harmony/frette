@@ -17,7 +17,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TArray<TObjectPtr<USlotsInventoryItemVM>> Items;
 
-	virtual void Bind(AFrettePlayerState* PlayerState) override
+	virtual void Bind() override
 	{
 		UFretteInventoryComponent* Inventory = PlayerState->GetPlayerInventory();
 		Inventory->OnItemAdded.AddUObject(this, &USlotsInventoryVM::AddItem);
@@ -28,11 +28,20 @@ protected:
 		if (!NewItem->IsA<UFretteSlottedItem>())
 			return;
 
-		USlotsInventoryItemVM* SubViewModel = NewObject<USlotsInventoryItemVM>(this);
-		SubViewModel->SetName(NewItem);
-		SubViewModel->SetIcon(NewItem);
+		auto* SubViewModel = NewObject<USlotsInventoryItemVM>(this);
+		SubViewModel->SetModel(NewItem);
 		Items.Add(SubViewModel);
 
 		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Items);
+	}
+
+	UFUNCTION(BlueprintCallable)
+	void OnItemSelectionChange(UObject* Item, bool bIsSelected) const
+	{
+		if (bIsSelected)
+		{
+			auto* ItemVM = Cast<USlotsInventoryItemVM>(Item);
+			PlayerState->GetPlayerInventory()->OnItemSelected.Broadcast(ItemVM->GetPtr());
+		}
 	}
 };
