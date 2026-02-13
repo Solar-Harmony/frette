@@ -4,6 +4,7 @@
 #include "FakeInventoryComponent.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Equipments/FretteFakeEquipmentComponent.h"
 
 #include "FrettePlayerCharacter.generated.h"
 

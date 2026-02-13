@@ -42,7 +42,8 @@ bool UFretteGA_RangedWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, 
 		return false;
 
 	const UFretteRangedWeaponInstance* WeaponInstance = GetWeaponInstance();
-	check(WeaponInstance);
+	if (!WeaponInstance)
+		return false;
 
 	return WeaponInstance->GetCurrentAmmo() > 0;
 }

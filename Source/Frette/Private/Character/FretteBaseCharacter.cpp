@@ -5,6 +5,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
+AFretteBaseCharacter::AFretteBaseCharacter()
+{
+	EquipmentComponent = CreateDefaultSubobject<UFretteFakeEquipmentComponent>(TEXT("Equipments"));
+}
+
 void AFretteBaseCharacter::ApplyStartupEffects()
 {
 	if (!HasAuthority())
@@ -29,7 +34,7 @@ void AFretteBaseCharacter::ApplyStartupEffects()
 		return;
 
 	CurrentWeaponInstance = NewObject<UFretteWeaponInstance>(this, EquippedItem->InstanceType);
-	CurrentWeaponInstance->OnEquipped();
+	EquipmentComponent->Equip(CurrentWeaponInstance);
 }
 
 void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const

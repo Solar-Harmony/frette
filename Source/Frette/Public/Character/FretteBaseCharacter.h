@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "Equipments/FretteEquipmentDataAsset.h"
+#include "Equipments/FretteFakeEquipmentComponent.h"
 #include "GameFramework/Character.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "Weapons/FretteRangedWeaponInstance.h"
@@ -17,6 +18,7 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 	GENERATED_BODY()
 
 protected:
+	AFretteBaseCharacter();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
 	void ApplyStartupEffects();
 	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
@@ -53,5 +55,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UFretteWeaponInstance> CurrentWeaponInstance = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UFretteFakeEquipmentComponent> EquipmentComponent;
 
 };

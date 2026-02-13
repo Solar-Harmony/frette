@@ -1,6 +1,7 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Equipments/FretteFakeEquipmentComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "Player/FrettePlayerState.h"
