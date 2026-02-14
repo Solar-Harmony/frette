@@ -41,7 +41,7 @@ protected:
 		if (bIsSelected)
 		{
 			auto* ItemVM = Cast<USlotsInventoryItemVM>(Item);
-			PlayerCharacter->GetPlayerInventory()->OnItemSelected.Broadcast(ItemVM->GetPtr());
+			PlayerCharacter->GetPlayerInventory()->SelectItem(ItemVM->GetPtr());
 		}
 	}
 };

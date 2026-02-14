@@ -26,6 +26,19 @@ void FFretteInventoryList::AddEntry(UFretteInventoryItem* Instance)
 	MarkItemDirty(Entry);
 }
 
+void FFretteInventoryList::ChangeEntry(int32 Index, UFretteInventoryItem* NewInstance)
+{
+	check(Entries.IsValidIndex(Index));	
+	check(NewInstance);
+	check(NewInstance->Data);
+	check(Owner);
+	check(Owner->GetOwner()->HasAuthority());
+
+	FFretteInventoryListEntry& Entry = Entries[Index];
+	Entry.Item = NewInstance;
+	MarkItemDirty(Entry);
+}
+
 void FFretteInventoryList::RemoveEntry(int32 Index)
 {
 	check(Entries.IsValidIndex(Index));

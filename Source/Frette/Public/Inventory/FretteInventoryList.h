@@ -32,7 +32,9 @@ struct FFretteInventoryList : public FFastArraySerializer
 		: Owner(InOwner) {}
 
 	UFretteInventoryItem* GetEntry(int32 Index);
+	int32 Num() const { return Entries.Num(); }
 	void AddEntry(UFretteInventoryItem* Instance);
+	void ChangeEntry(int32 Index, UFretteInventoryItem* NewInstance);
 	void RemoveEntry(int32 Index);
 
 	//~FFastArraySerializer contract
@@ -46,10 +48,10 @@ struct FFretteInventoryList : public FFastArraySerializer
 		return FastArrayDeltaSerialize<FFretteInventoryListEntry, FFretteInventoryList>(Entries, DeltaParms, *this);
 	}
 
+private:
 	UPROPERTY()
 	TArray<FFretteInventoryListEntry> Entries;
-
-private:
+	
 	UPROPERTY(NotReplicated)
 	UFretteInventoryComponent* Owner = nullptr;
 };

@@ -1,11 +1,13 @@
 ﻿#include "Inventory/FretteInventoryComponent.h"
 
 #include "Engine/ActorChannel.h"
+#include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
 
 UFretteInventoryComponent::UFretteInventoryComponent()
 {
 	SetIsReplicatedByDefault(true);
+	bReplicateUsingRegisteredSubObjectList = true;
 }
 
 UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Index)
@@ -13,26 +15,40 @@ UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Index)
 	return Inventory.GetEntry(Index);
 }
 
-bool UFretteInventoryComponent::SelectItem(int32 Index)
+void UFretteInventoryComponent::SelectItem(const UFretteInventoryItem* Item) const
 {
-	if (const UFretteInventoryItem* Item = GetItem(Index))
-	{
-		OnItemSelected.Broadcast(Item);
-		return true;
-	}
-
-	return false;
+	check(Item);
+	check(Item->GetOuter() == this);
+	check(Item->Data);
+	
+	OnItemSelected.Broadcast(Item);
 }
 
 void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* Template)
 {
 	UFretteInventoryItem* Item = Template->CreateRuntimeItem(this);
+	AddReplicatedSubObject(Item);
 	Inventory.AddEntry(Item);
+	IdToIndexMap.Add(Item->GetItemId(), Inventory.Num() - 1);
 }
 
-void UFretteInventoryComponent::RemoveItem(int32 Index)
+void UFretteInventoryComponent::EditItem_Implementation(UFretteInventoryItem* ModifiedItem)
 {
-	unimplemented(); // TODO:
+	check(ModifiedItem);
+	
+	int32* Index = IdToIndexMap.Find(ModifiedItem->GetItemId());
+	check(Index);
+	Inventory.ChangeEntry(*Index, ModifiedItem);
+}
+
+void UFretteInventoryComponent::RemoveItem_Implementation(int32 Index)
+{
+	if (UFretteInventoryItem* Item = GetItem(Index))
+	{
+		RemoveReplicatedSubObject(Item);
+		Inventory.RemoveEntry(Index);
+		IdToIndexMap.Remove(Item->GetItemId());
+	}
 }
 
 void UFretteInventoryComponent::ReadyForReplication()
@@ -41,15 +57,7 @@ void UFretteInventoryComponent::ReadyForReplication()
 
 	if (IsUsingRegisteredSubObjectList())
 	{
-		for (const FFretteInventoryListEntry& Entry : Inventory.Entries)
-		{
-			UFretteInventoryItem* Instance = Entry.Item;
-
-			if (IsValid(Instance))
-			{
-				AddReplicatedSubObject(Instance);
-			}
-		}
+		// AddReplicatedSubObject for default inventory items (none at the moment)
 	}
 }
 
@@ -57,19 +65,4 @@ void UFretteInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME_CONDITION(UFretteInventoryComponent, Inventory, COND_OwnerOnly);
-}
-
-bool UFretteInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
-{
-	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
-
-	for (const FFretteInventoryListEntry& Entry : Inventory.Entries)
-	{
-		if (Entry.Item)
-		{
-			bWroteSomething |= Channel->ReplicateSubobject(Entry.Item, *Bunch, *RepFlags);
-		}
-	}
-
-	return bWroteSomething;
 }
