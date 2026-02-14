@@ -14,6 +14,9 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetCapsuleComponent());
 
+	PlayerInventory = CreateDefaultSubobject<UFretteInventoryComponent>("Equipment Inventory");
+	PlayerInventory->SetIsReplicated(true);
+	
 	Equipment = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment"));
 }
 
@@ -29,7 +32,7 @@ void AFrettePlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 	InitAbilityActorInfo();
-	Equipment->Initialize(GetPlayerState<AFrettePlayerState>());
+	Equipment->Initialize(PlayerInventory);
 }
 
 void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)

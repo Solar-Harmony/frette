@@ -26,6 +26,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
+	
+	UFUNCTION(BlueprintCallable)
+    UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -33,6 +36,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteEquipmentComponent> Equipment;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
 
 private:
 	virtual void InitAbilityActorInfo() override;

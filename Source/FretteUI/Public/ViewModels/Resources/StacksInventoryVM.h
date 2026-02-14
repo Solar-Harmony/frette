@@ -19,7 +19,7 @@ protected:
 
 	virtual void Bind() override
 	{
-		UFretteInventoryComponent* Inventory = PlayerState->GetPlayerInventory();
+		UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
 		Inventory->OnItemAdded.AddUObject(this, &UStacksInventoryVM::AddItem);
 	}
 

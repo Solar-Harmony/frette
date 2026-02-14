@@ -6,9 +6,6 @@
 
 AFrettePlayerState::AFrettePlayerState()
 {
-	PlayerInventory = CreateDefaultSubobject<UFretteInventoryComponent>("Equipment Inventory");
-	PlayerInventory->SetIsReplicated(true);
-
 	AbilitySystemComponent = CreateDefaultSubobject<UFretteAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
@@ -23,11 +20,4 @@ AFrettePlayerState::AFrettePlayerState()
 UAbilitySystemComponent* AFrettePlayerState::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
-}
-
-void AFrettePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AFrettePlayerState, PlayerInventory);
 }

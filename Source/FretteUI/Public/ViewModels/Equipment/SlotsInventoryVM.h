@@ -19,7 +19,7 @@ protected:
 
 	virtual void Bind() override
 	{
-		UFretteInventoryComponent* Inventory = PlayerState->GetPlayerInventory();
+		UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
 		Inventory->OnItemAdded.AddUObject(this, &USlotsInventoryVM::AddItem);
 	}
 
@@ -41,7 +41,7 @@ protected:
 		if (bIsSelected)
 		{
 			auto* ItemVM = Cast<USlotsInventoryItemVM>(Item);
-			PlayerState->GetPlayerInventory()->OnItemSelected.Broadcast(ItemVM->GetPtr());
+			PlayerCharacter->GetPlayerInventory()->OnItemSelected.Broadcast(ItemVM->GetPtr());
 		}
 	}
 };

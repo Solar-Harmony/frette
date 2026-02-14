@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "NativeGameplayTags.h"
+#include "Inventory/FretteInventoryComponent.h"
 #include "Inventory/Items/FretteInventoryItem.h"
 #include "FretteEquipmentComponent.generated.h"
 
@@ -19,7 +20,7 @@ class FRETTE_API UFretteEquipmentComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	void Initialize(const AFrettePlayerState* PlayerState);
+	void Initialize(UFretteInventoryComponent* PlayerState);
 
 private:
 	void OnInventoryItemSelected(const UFretteInventoryItem* Item);

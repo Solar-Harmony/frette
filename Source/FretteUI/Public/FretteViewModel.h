@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
-#include "Player/FrettePlayerState.h"
+#include "Character/FrettePlayerCharacter.h"
 #include "FretteViewModel.generated.h"
 
 UCLASS(Abstract)
@@ -14,13 +14,13 @@ protected:
 	virtual void Bind() {}
 
 	UPROPERTY()
-	TObjectPtr<AFrettePlayerState> PlayerState;
+	TObjectPtr<AFrettePlayerCharacter> PlayerCharacter;
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|UI", meta = (DisplayName = "Create Frette View Model", DefaultToSelf = "Outer", DeterminesOutputType = "ViewModelClass"))
-	static UFretteViewModel* CreateFretteViewModel(UObject* Outer, UPARAM(meta=(AllowAbstract = false)) TSubclassOf<UFretteViewModel> ViewModelClass, UPARAM(meta=(DisplayName = "Player State")) AFrettePlayerState* InPlayerState)
+	static UFretteViewModel* CreateFretteViewModel(UObject* Outer, UPARAM(meta=(AllowAbstract = false)) TSubclassOf<UFretteViewModel> ViewModelClass, UPARAM(meta=(DisplayName = "Player Character")) AFrettePlayerCharacter* InPlayerCharacter)
 	{
 		UFretteViewModel* ViewModel = NewObject<UFretteViewModel>(Outer, ViewModelClass);
-		ViewModel->PlayerState = InPlayerState;
+		ViewModel->PlayerCharacter = InPlayerCharacter;
 		ViewModel->Bind();
 		return ViewModel;
 	}

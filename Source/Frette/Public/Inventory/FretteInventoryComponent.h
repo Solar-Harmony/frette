@@ -48,6 +48,9 @@ public:
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
 private:
+	UPROPERTY()
+	TMap<int32, UFretteInventoryItem*> LookupCache;
+	
 	UPROPERTY(Replicated)
-	FFretteInventoryList Inventory{ this };
+	FFretteInventoryList Inventory { this };
 };
