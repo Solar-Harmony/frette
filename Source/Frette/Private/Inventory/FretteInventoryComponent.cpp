@@ -62,7 +62,7 @@ void UFretteInventoryComponent::RemoveItem_Implementation(UFretteInventoryItem* 
 
 	if (!Inventory.HasValidItemData(ItemToRemove))
 	{
-		HOSTIE(Warning, "Inventory: Attempted to remove an invalid item.");
+		LOG_FRETTE(Warning, "Inventory: Attempted to remove an invalid item.");
 		return;
 	}
 
