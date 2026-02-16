@@ -10,7 +10,7 @@ UFretteInventoryComponent::UFretteInventoryComponent()
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
-UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Index) const
+UFretteInventoryItem* UFretteInventoryComponent::GetItemByIndex(int32 Index) const
 {
 	return Inventory.GetEntry(Index);
 }
@@ -27,7 +27,7 @@ void UFretteInventoryComponent::SelectItem(const UFretteInventoryItem* Item) con
 
 void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* ItemData)
 {
-	if (!GetOwner()->HasAuthority())
+	if (!GetOwner()->HasAuthority() || GetNetMode() == NM_Client)
 		return;
 
 	if (!IsValid(ItemData))

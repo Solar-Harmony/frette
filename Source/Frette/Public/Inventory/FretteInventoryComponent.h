@@ -28,9 +28,12 @@ public:
 	template <typename T>
 	const T* GetItem(int32 Index) const { return GetItem<T>(Index); }
 
+	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
+	int32 GetNumItems() const { return Inventory.Num(); }
+
 	// Warning: the index is not stable and may change when items are added/removed. 
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
-	UFretteInventoryItem* GetItem(int32 Index) const;
+	UFretteInventoryItem* GetItemByIndex(int32 Index) const;
 
 	UFUNCTION(BlueprintCallable, Category="Frette|Inventory")
 	void SelectItem(const UFretteInventoryItem* Item) const;

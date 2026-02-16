@@ -11,11 +11,11 @@ UFretteInventoryItem* FFretteInventoryList::GetEntry(int32 Index) const
 void FFretteInventoryList::AddEntry(UFretteInventoryItem* ItemToAdd)
 {
 	check(Owner->GetOwner()->HasAuthority());
-	check(IsValidItem(ItemToAdd));
 
 	FFretteInventoryListEntry& Entry = Entries.AddDefaulted_GetRef();
 	Entry.Item = ItemToAdd;
 	Entry.Item->Id = NextId++;
+	check(IsValidItem(Entry.Item));
 	IdToIndexMap.Add(Entry.Item->Id, Entries.Num() - 1);
 	MarkItemDirty(Entry);
 }
