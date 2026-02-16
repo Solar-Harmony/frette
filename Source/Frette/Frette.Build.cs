@@ -20,7 +20,8 @@ public class Frette : ModuleRules
 			"GameplayAbilities",
 			"GameplayTags",
 			"GameplayTasks",
-			"NetCore"
+			"NetCore",
+			"Boost"
 		});
 
 		PrivateDependencyModuleNames.AddRange([]);

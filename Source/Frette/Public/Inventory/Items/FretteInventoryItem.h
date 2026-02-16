@@ -15,21 +15,11 @@ class UFretteInventoryItem : public UObject
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(Replicated)
+	uint64 Id;
+
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	UFretteInventoryItemDataAsset* Data = nullptr;
-	
-	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
-	FGuid GetItemId() const { return Id; }
-	
-	virtual void PostInitProperties() override
-	{
-		Super::PostInitProperties();
-
-		if (!Id.IsValid())
-		{
-			Id = FGuid::NewGuid();
-		}
-	}
 
 	virtual bool IsSupportedForNetworking() const override { return true; }
 
@@ -39,10 +29,6 @@ public:
 		DOREPLIFETIME(ThisClass, Data);
 		DOREPLIFETIME(ThisClass, Id);
 	}
-	
-protected:
-	UPROPERTY(BlueprintReadOnly, Replicated)
-	FGuid Id;
 };
 
 UCLASS(Abstract, BlueprintType)

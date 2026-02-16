@@ -10,55 +10,64 @@ UFretteInventoryComponent::UFretteInventoryComponent()
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
-UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Index)
+UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Index) const
 {
 	return Inventory.GetEntry(Index);
 }
 
 void UFretteInventoryComponent::SelectItem(const UFretteInventoryItem* Item) const
 {
-	check(Item);
-	check(Item->GetOuter() == this);
-	check(Item->Data);
-	
+	if (!Inventory.IsValidItem(Item))
+	{
+		HOSTIE(Warning, "Inventory: Selected item is invalid");
+	}
+
 	OnItemSelected.Broadcast(Item);
 }
 
-void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* Template)
+void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* ItemData)
 {
-	UFretteInventoryItem* Item = Template->CreateRuntimeItem(this);
+	if (!GetOwner()->HasAuthority())
+		return;
+
+	if (!IsValid(ItemData))
+	{
+		CALISSE(Warning, "Inventory: Invalid data asset passed to AddItem.");
+		return;
+	}
+
+	UFretteInventoryItem* Item = ItemData->CreateRuntimeItem(this);
 	AddReplicatedSubObject(Item);
 	Inventory.AddEntry(Item);
-	IdToIndexMap.Add(Item->GetItemId(), Inventory.Num() - 1);
 }
 
-void UFretteInventoryComponent::EditItem_Implementation(UFretteInventoryItem* ModifiedItem)
+void UFretteInventoryComponent::ChangeItem_Implementation(UFretteInventoryItem* ItemToChange)
 {
-	check(ModifiedItem);
-	
-	int32* Index = IdToIndexMap.Find(ModifiedItem->GetItemId());
-	check(Index);
-	Inventory.ChangeEntry(*Index, ModifiedItem);
-}
+	if (!GetOwner()->HasAuthority())
+		return;
 
-void UFretteInventoryComponent::RemoveItem_Implementation(int32 Index)
-{
-	if (UFretteInventoryItem* Item = GetItem(Index))
+	if (!Inventory.IsValidItem(ItemToChange))
 	{
-		RemoveReplicatedSubObject(Item);
-		Inventory.RemoveEntry(Index);
-		IdToIndexMap.Remove(Item->GetItemId());
+		HOSTIE(Warning, "Inventory: Attempted to change an invalid item.");
+		return;
 	}
+
+	Inventory.ChangeEntry(ItemToChange);
 }
 
-void UFretteInventoryComponent::ReadyForReplication()
+void UFretteInventoryComponent::RemoveItem_Implementation(UFretteInventoryItem* ItemToRemove)
 {
-	Super::ReadyForReplication();
+	if (!GetOwner()->HasAuthority())
+		return;
 
-	if (IsUsingRegisteredSubObjectList())
+	if (!Inventory.IsValidItem(ItemToRemove))
 	{
-		// AddReplicatedSubObject for default inventory items (none at the moment)
+		HOSTIE(Warning, "Inventory: Attempted to remove an invalid item.");
+		return;
 	}
+
+	RemoveReplicatedSubObject(ItemToRemove);
+	Inventory.RemoveEntry(ItemToRemove);
 }
 
 void UFretteInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -1,62 +1,80 @@
 ﻿#include "Inventory/FretteInventoryList.h"
 
-#include "Frette/Frette.h"
 #include "Inventory/FretteInventoryComponent.h"
 
-UFretteInventoryItem* FFretteInventoryList::GetEntry(int32 Index)
+UFretteInventoryItem* FFretteInventoryList::GetEntry(int32 Index) const
 {
-	if (!Entries.IsValidIndex(Index))
-	{
-		UE_LOG(LogFrette, Warning, TEXT("Inventory: Out of bounds GetEntry at index %d"), Index);
-		return nullptr;
-	}
-
+	check(Entries.IsValidIndex(Index));
 	return Entries[Index].Item;
 }
 
-void FFretteInventoryList::AddEntry(UFretteInventoryItem* Instance)
+void FFretteInventoryList::AddEntry(UFretteInventoryItem* ItemToAdd)
 {
-	check(Instance);
-	check(Instance->Data);
-	check(Owner);
 	check(Owner->GetOwner()->HasAuthority());
+	check(IsValidItem(ItemToAdd));
 
 	FFretteInventoryListEntry& Entry = Entries.AddDefaulted_GetRef();
-	Entry.Item = Instance;
+	Entry.Item = ItemToAdd;
+	Entry.Item->Id = NextId++;
+	IdToIndexMap.Add(Entry.Item->Id, Entries.Num() - 1);
 	MarkItemDirty(Entry);
 }
 
-void FFretteInventoryList::ChangeEntry(int32 Index, UFretteInventoryItem* NewInstance)
+void FFretteInventoryList::ChangeEntry(UFretteInventoryItem* ItemToChange)
 {
-	check(Entries.IsValidIndex(Index));	
-	check(NewInstance);
-	check(NewInstance->Data);
-	check(Owner);
 	check(Owner->GetOwner()->HasAuthority());
 
-	FFretteInventoryListEntry& Entry = Entries[Index];
-	Entry.Item = NewInstance;
+	const int32 Idx = GetItemIndexChecked(ItemToChange);
+	FFretteInventoryListEntry& Entry = Entries[Idx];
+	Entry.Item = ItemToChange;
 	MarkItemDirty(Entry);
 }
 
-void FFretteInventoryList::RemoveEntry(int32 Index)
+void FFretteInventoryList::RemoveEntry(const UFretteInventoryItem* ItemToRemove)
 {
-	check(Entries.IsValidIndex(Index));
-	check(Owner);
 	check(Owner->GetOwner()->HasAuthority());
 
-	UFretteInventoryItem* Item = Entries[Index].Item;
-	Entries.RemoveAt(Index);
+	const int32 Idx = GetItemIndexChecked(ItemToRemove);
+	const int32 LastIdx = Entries.Num() - 1;
+	const FFretteInventoryListEntry& EntryToRemove = Entries[Idx];
+
+	if (Idx != LastIdx)
+	{
+		const FFretteInventoryListEntry& EntryToMove = Entries[LastIdx];
+		IdToIndexMap[EntryToMove.Item->Id] = Idx;
+		Entries.Swap(Idx, LastIdx);
+	}
+
+	IdToIndexMap.Remove(EntryToRemove.Item->Id);
+	Entries.RemoveAt(LastIdx);
 	MarkArrayDirty();
 }
 
-void FFretteInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
+bool FFretteInventoryList::IsValidItem(const UFretteInventoryItem* Item) const
 {
-	for (const int32 Index : RemovedIndices)
-	{
-		const FFretteInventoryListEntry& Stack = Entries[Index];
-		Owner->OnItemRemoved.Broadcast(Stack.Item);
-	}
+	if (!IsValid(Item))
+		return false;
+
+	if (Item->GetOuter() != Owner)
+		return false; // not from the same inventory
+
+	if (Item->Id == InvalidID)
+		return false; // was never added to inventory
+
+	if (!IsValid(Item->Data))
+		return false;
+
+	return true;
+}
+
+int32 FFretteInventoryList::GetItemIndexChecked(const UFretteInventoryItem* Item) const
+{
+	check(IsValidItem(Item));
+
+	const int32& Idx = IdToIndexMap.FindChecked(Item->Id);
+	check(Entries.IsValidIndex(Idx));
+	check(Entries[Idx].Item == Item);
+	return Idx;
 }
 
 void FFretteInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize)
@@ -64,6 +82,7 @@ void FFretteInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndice
 	for (const int32 Index : AddedIndices)
 	{
 		const FFretteInventoryListEntry& Stack = Entries[Index];
+		IdToIndexMap.Add(Stack.Item->Id, Index);
 		Owner->OnItemAdded.Broadcast(Stack.Item);
 	}
 }
@@ -71,4 +90,14 @@ void FFretteInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndice
 void FFretteInventoryList::PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)
 {
 	// TODO: nothing for now
+}
+
+void FFretteInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
+{
+	for (const int32 Index : RemovedIndices)
+	{
+		const FFretteInventoryListEntry& Stack = Entries[Index];
+		IdToIndexMap.Remove(Stack.Item->Id);
+		Owner->OnItemRemoved.Broadcast(Stack.Item);
+	}
 }

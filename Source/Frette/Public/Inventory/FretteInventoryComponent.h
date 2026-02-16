@@ -20,39 +20,33 @@ class FRETTE_API UFretteInventoryComponent : public UActorComponent
 
 public:
 	UFretteInventoryComponent();
-	
+
 	FOnItemAdded OnItemAdded;
 	FOnItemRemoved OnItemRemoved;
 	FOnItemSelected OnItemSelected;
 
 	template <typename T>
-	T* GetItem(int32 Index) { return Cast<T>(GetItem(Index)); }
-
-	template <typename T>
 	const T* GetItem(int32 Index) const { return GetItem<T>(Index); }
 
+	// Warning: the index is not stable and may change when items are added/removed. 
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
-	UFretteInventoryItem* GetItem(int32 Index);
+	UFretteInventoryItem* GetItem(int32 Index) const;
 
 	UFUNCTION(BlueprintCallable, Category="Frette|Inventory")
 	void SelectItem(const UFretteInventoryItem* Item) const;
-	
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
-	void AddItem(UFretteInventoryItemDataAsset* Template);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
-	void EditItem(UFretteInventoryItem* ModifiedItem);
-	
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
-	void RemoveItem(int32 Index);
+	void AddItem(UFretteInventoryItemDataAsset* ItemData);
 
-	virtual void ReadyForReplication() override;
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
+	void ChangeItem(UFretteInventoryItem* ItemToChange);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
+	void RemoveItem(UFretteInventoryItem* ItemToRemove);
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	UPROPERTY()
-	TMap<FGuid, int32> IdToIndexMap; // used for O(1) lookups
-	
 	UPROPERTY(Replicated)
-	FFretteInventoryList Inventory { this };
+	FFretteInventoryList Inventory{ this };
 };
