@@ -15,8 +15,8 @@ class UFretteInventoryItem : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Replicated)
-	uint64 Id;
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	int32 Id;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	UFretteInventoryItemDataAsset* Data = nullptr;

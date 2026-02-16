@@ -10,16 +10,16 @@ UFretteInventoryComponent::UFretteInventoryComponent()
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
-UFretteInventoryItem* UFretteInventoryComponent::GetItemByIndex(int32 Index) const
+UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Id) const
 {
-	return Inventory.GetEntry(Index);
+	return Inventory.GetItemById(Id);
 }
 
 void UFretteInventoryComponent::SelectItem(const UFretteInventoryItem* Item) const
 {
-	if (!Inventory.IsValidItem(Item))
+	if (!Inventory.HasValidItemData(Item))
 	{
-		HOSTIE(Warning, "Inventory: Selected item is invalid");
+		LOG_FRETTE(Warning, "Inventory: Selected item is invalid");
 	}
 
 	OnItemSelected.Broadcast(Item);
@@ -27,12 +27,12 @@ void UFretteInventoryComponent::SelectItem(const UFretteInventoryItem* Item) con
 
 void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* ItemData)
 {
-	if (!GetOwner()->HasAuthority() || GetNetMode() == NM_Client)
+	if (!GetOwner()->HasAuthority())
 		return;
 
 	if (!IsValid(ItemData))
 	{
-		CALISSE(Warning, "Inventory: Invalid data asset passed to AddItem.");
+		LOG_FRETTE(Warning, "Inventory: Invalid data asset passed to AddItem.");
 		return;
 	}
 
@@ -46,9 +46,9 @@ void UFretteInventoryComponent::ChangeItem_Implementation(UFretteInventoryItem* 
 	if (!GetOwner()->HasAuthority())
 		return;
 
-	if (!Inventory.IsValidItem(ItemToChange))
+	if (!Inventory.HasValidItemData(ItemToChange))
 	{
-		HOSTIE(Warning, "Inventory: Attempted to change an invalid item.");
+		LOG_FRETTE(Warning, "Inventory: Attempted to change an invalid item.");
 		return;
 	}
 
@@ -60,7 +60,7 @@ void UFretteInventoryComponent::RemoveItem_Implementation(UFretteInventoryItem* 
 	if (!GetOwner()->HasAuthority())
 		return;
 
-	if (!Inventory.IsValidItem(ItemToRemove))
+	if (!Inventory.HasValidItemData(ItemToRemove))
 	{
 		HOSTIE(Warning, "Inventory: Attempted to remove an invalid item.");
 		return;

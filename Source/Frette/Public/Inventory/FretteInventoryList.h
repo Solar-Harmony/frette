@@ -31,13 +31,12 @@ struct FFretteInventoryList : public FFastArraySerializer
 	explicit FFretteInventoryList(UFretteInventoryComponent* InOwner)
 		: Owner(InOwner) {}
 
-	UFretteInventoryItem* GetEntry(int32 Index) const;
 	int32 Num() const { return Entries.Num(); }
+	UFretteInventoryItem* GetItemById(int32 ItemId) const;
 	void AddEntry(UFretteInventoryItem* ItemToAdd);
 	void ChangeEntry(UFretteInventoryItem* ItemToChange);
 	void RemoveEntry(const UFretteInventoryItem* ItemToRemove);
-	bool IsValidItem(const UFretteInventoryItem* Item) const;
-	int32 GetItemIndexChecked(const UFretteInventoryItem* Item) const;
+	bool HasValidItemData(const UFretteInventoryItem* Item) const;
 
 	//~FFastArraySerializer contract
 	void PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize);
@@ -57,9 +56,11 @@ private:
 	UPROPERTY(Transient)
 	TArray<FFretteInventoryListEntry> Entries;
 
-	TMap<uint64, int32> IdToIndexMap;
-	uint64 NextId = 1;
-	constexpr static uint64 InvalidID = 0;
+	int32 NextId = 1;
+	constexpr static int32 InvalidID = 0;
+	TMap<int32, int32> IdToIndexMap;
+
+	int32 GetIndexByIdChecked(int32 ItemId) const;
 };
 
 template <> struct TStructOpsTypeTraits<FFretteInventoryList> : public TStructOpsTypeTraitsBase2<FFretteInventoryList>

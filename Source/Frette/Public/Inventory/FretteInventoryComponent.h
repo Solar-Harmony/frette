@@ -10,6 +10,7 @@ class UFretteStackableItemDataAsset;
 class UFretteInventoryItem;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, const UFretteInventoryItem*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemChanged, const UFretteInventoryItem*)
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, const UFretteInventoryItem*)
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemSelected, const UFretteInventoryItem*)
 
@@ -22,18 +23,18 @@ public:
 	UFretteInventoryComponent();
 
 	FOnItemAdded OnItemAdded;
+	FOnItemChanged OnItemChanged;
 	FOnItemRemoved OnItemRemoved;
 	FOnItemSelected OnItemSelected;
 
-	template <typename T>
-	const T* GetItem(int32 Index) const { return GetItem<T>(Index); }
-
-	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
+	UFUNCTION(BlueprintPure, Category="Frette|Inventory", meta = (DisplayName="Number of Items"))
 	int32 GetNumItems() const { return Inventory.Num(); }
 
-	// Warning: the index is not stable and may change when items are added/removed. 
+	template <typename T>
+	const T* GetItem(int32 Id) const { return Cast<T>(GetItem(Id)); }
+
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
-	UFretteInventoryItem* GetItemByIndex(int32 Index) const;
+	UFretteInventoryItem* GetItem(int32 Id) const;
 
 	UFUNCTION(BlueprintCallable, Category="Frette|Inventory")
 	void SelectItem(const UFretteInventoryItem* Item) const;
