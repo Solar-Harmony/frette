@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
 
+	UPROPERTY(BlueprintReadWrite)
+	FTransform AimedGunTransform;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;

@@ -2,12 +2,15 @@
 
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
+#include "Components/FallDamageComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
 AFretteBaseCharacter::AFretteBaseCharacter()
 {
 	EquipmentComponent = CreateDefaultSubobject<UFretteFakeEquipmentComponent>(TEXT("Equipments"));
+	//@TODO: retirer le component ajouter sur le blueprint quand le character est pas locked
+	//CreateDefaultSubobject<UFallDamageComponent>(TEXT("FallDamageComponent"));
 }
 
 void AFretteBaseCharacter::ApplyStartupEffects()

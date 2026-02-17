@@ -52,10 +52,9 @@ void UFretteWeaponInstance::SpawnEquipmentActor()
 
 	NewActor->FinishSpawning(FTransform::Identity, /*bIsDefaultTransform=*/ true);
 	NewActor->SetActorRelativeTransform(EquipmentActor.AttachTransform);
-	//On a pas de skeletal mesh pour le player pour l'instant
-	NewActor->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform/*, EquipmentActor.AttachSocket*/);
+	NewActor->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, EquipmentActor.AttachSocket);
 
-	SpawnedActors.Add(NewActor);
+	SpawnedActor = NewActor;
 
 }
 
@@ -71,5 +70,5 @@ void UFretteWeaponInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, SpawnedActors);
+	DOREPLIFETIME(ThisClass, SpawnedActor);
 }

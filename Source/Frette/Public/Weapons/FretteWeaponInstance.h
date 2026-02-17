@@ -36,6 +36,8 @@ public:
 	//~UObject interface
 	virtual bool IsSupportedForNetworking() const override { return true; }
 	virtual UWorld* GetWorld() const override final;
+
+	UFUNCTION(BlueprintCallable)
 	APawn* GetPawn() const;
 	//~End of UObject interface
 
@@ -50,6 +52,6 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	FFretteEquipmentActorToSpawn EquipmentActor;
 
-	UPROPERTY(Replicated)
-	TArray<TObjectPtr<AActor>> SpawnedActors;
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	TObjectPtr<AActor> SpawnedActor;
 };
