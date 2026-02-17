@@ -30,6 +30,9 @@ public:
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory", meta = (DisplayName="Number of Items"))
 	int32 GetNumItems() const { return Inventory.Num(); }
 
+	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
+	bool HasItem(int32 Id) const;
+
 	template <typename T>
 	const T* GetItem(int32 Id) const { return Cast<T>(GetItem(Id)); }
 

@@ -1,6 +1,12 @@
 ﻿#include "Inventory/FretteInventoryList.h"
 
+#include "Frette/Frette.h"
 #include "Inventory/FretteInventoryComponent.h"
+
+bool FFretteInventoryList::HasEntry(int32 ItemId) const
+{
+	return IdToIndexMap.Contains(ItemId);
+}
 
 UFretteInventoryItem* FFretteInventoryList::GetItemById(int32 ItemId) const
 {
@@ -76,9 +82,9 @@ void FFretteInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndice
 {
 	for (const int32 Index : AddedIndices)
 	{
-		const FFretteInventoryListEntry& Stack = Entries[Index];
-		IdToIndexMap.Add(Stack.Item->Id, Index);
-		Owner->OnItemAdded.Broadcast(Stack.Item);
+		const FFretteInventoryListEntry& Entry = Entries[Index];
+		IdToIndexMap.Add(Entry.Item->Id, Index);
+		Owner->OnItemAdded.Broadcast(Entry.Item);
 	}
 }
 
@@ -86,7 +92,9 @@ void FFretteInventoryList::PostReplicatedChange(const TArrayView<int32> ChangedI
 {
 	for (const int32 Index : ChangedIndices)
 	{
-		Owner->OnItemChanged.Broadcast(Entries[Index].Item);
+		const FFretteInventoryListEntry& Entry = Entries[Index];
+		IdToIndexMap[Entry.Item->Id] = Index;
+		Owner->OnItemChanged.Broadcast(Entry.Item);
 	}
 }
 
@@ -94,8 +102,8 @@ void FFretteInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIn
 {
 	for (const int32 Index : RemovedIndices)
 	{
-		const FFretteInventoryListEntry& Stack = Entries[Index];
-		IdToIndexMap.Remove(Stack.Item->Id);
-		Owner->OnItemRemoved.Broadcast(Stack.Item);
+		const FFretteInventoryListEntry& Entry = Entries[Index];
+		IdToIndexMap.Remove(Entry.Item->Id);
+		Owner->OnItemRemoved.Broadcast(Entry.Item);
 	}
 }

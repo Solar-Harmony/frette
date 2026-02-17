@@ -16,7 +16,7 @@ public:
 	// This is managed by the UI widget and may differ from the item's index in the replicated inventory array.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	int32 SlotIndex = -1;
-	
+
 	UFUNCTION(BlueprintCallable)
 	virtual void Use() {}
 
@@ -34,7 +34,7 @@ class UFretteGearItemDataAsset : public UFretteInventoryItemDataAsset
 
 public:
 	// Tag to restrict which inventory slots the item can be placed in.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, meta = (Categories = "Frette.EquipmentSlot"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Categories = "Frette.EquipmentSlot"))
 	FGameplayTag SlotTag = FGameplayTag();
 
 	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
@@ -42,11 +42,5 @@ public:
 		auto* Item = NewObject<UFretteGearItem>(Outer);
 		Item->Data = this;
 		return Item;
-	}
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
-	{
-		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-		DOREPLIFETIME(ThisClass, SlotTag);
 	}
 };

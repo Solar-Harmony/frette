@@ -1,6 +1,5 @@
 ﻿#include "Inventory/FretteInventoryComponent.h"
 
-#include "Engine/ActorChannel.h"
 #include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
 
@@ -8,6 +7,11 @@ UFretteInventoryComponent::UFretteInventoryComponent()
 {
 	SetIsReplicatedByDefault(true);
 	bReplicateUsingRegisteredSubObjectList = true;
+}
+
+bool UFretteInventoryComponent::HasItem(int32 Id) const
+{
+	return Inventory.HasEntry(Id);
 }
 
 UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Id) const
@@ -19,7 +23,7 @@ void UFretteInventoryComponent::SelectItem(const UFretteInventoryItem* Item) con
 {
 	if (!Inventory.HasValidItemData(Item))
 	{
-		LOG_FRETTE(Warning, "Inventory: Selected item is invalid");
+		return;
 	}
 
 	OnItemSelected.Broadcast(Item);
@@ -48,7 +52,7 @@ void UFretteInventoryComponent::ChangeItem_Implementation(UFretteInventoryItem* 
 
 	if (!Inventory.HasValidItemData(ItemToChange))
 	{
-		LOG_FRETTE(Warning, "Inventory: Attempted to change an invalid item.");
+		// LOG_FRETTE(Warning, "Inventory: Attempted to change an invalid item.");
 		return;
 	}
 
@@ -62,7 +66,7 @@ void UFretteInventoryComponent::RemoveItem_Implementation(UFretteInventoryItem* 
 
 	if (!Inventory.HasValidItemData(ItemToRemove))
 	{
-		LOG_FRETTE(Warning, "Inventory: Attempted to remove an invalid item.");
+		// LOG_FRETTE(Warning, "Inventory: Attempted to remove an invalid item.");
 		return;
 	}
 

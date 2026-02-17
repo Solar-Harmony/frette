@@ -32,6 +32,7 @@ struct FFretteInventoryList : public FFastArraySerializer
 		: Owner(InOwner) {}
 
 	int32 Num() const { return Entries.Num(); }
+	bool HasEntry(int32 ItemId) const;
 	UFretteInventoryItem* GetItemById(int32 ItemId) const;
 	void AddEntry(UFretteInventoryItem* ItemToAdd);
 	void ChangeEntry(UFretteInventoryItem* ItemToChange);
@@ -53,12 +54,16 @@ private:
 	UPROPERTY(NotReplicated)
 	TWeakObjectPtr<UFretteInventoryComponent> Owner = nullptr;
 
-	UPROPERTY(Transient)
+	UPROPERTY()
 	TArray<FFretteInventoryListEntry> Entries;
 
+	UPROPERTY()
 	int32 NextId = 1;
-	constexpr static int32 InvalidID = 0;
+
+	UPROPERTY(NotReplicated)
 	TMap<int32, int32> IdToIndexMap;
+
+	constexpr static int32 InvalidID = 0;
 
 	int32 GetIndexByIdChecked(int32 ItemId) const;
 };
