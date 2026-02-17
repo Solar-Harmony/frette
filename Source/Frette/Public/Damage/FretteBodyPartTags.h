@@ -1,4 +1,5 @@
 #pragma once
+
 #include "FretteBodyPartDefinitions.h"
 #include "NativeGameplayTags.h"
 
@@ -17,10 +18,10 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_RightFoot);
 
 namespace Frette::BodyParts
 {
-	using FTagToAttributeSetMap = TMap<FGameplayTag, TSubclassOf<UFretteBodyPartAttributeSet>>;
+	using FTagToAttributeSetMap = TMap<FGameplayTag, TSubclassOf<UAttributeSet>>;
 	extern FTagToAttributeSetMap TagToAttributeSetMap;
 	
-	static const UFretteBodyPartAttributeSet* GetAttributeSetFromTag(UAbilitySystemComponent* ASC, FGameplayTag BodyPartTag)
+	static const UFretteBodyPartAttributeSet* GetAttributeSetFromTag(const UAbilitySystemComponent* ASC, const FGameplayTag BodyPartTag)
 	{
 		if (UNLIKELY(TagToAttributeSetMap.Num() == 0))
 		{
@@ -36,10 +37,10 @@ namespace Frette::BodyParts
 			TagToAttributeSetMap.Add(TAG_BodyPart_RightFoot, UFretteBodyPartAttributeSet_RightFoot::StaticClass());
 		}
 
-		const TSubclassOf<UFretteBodyPartAttributeSet> BodyPartAttributeSetClass = TagToAttributeSetMap[BodyPartTag];
-		const TSubclassOf<UAttributeSet> AttributeSetClass = StaticCast<TSubclassOf<UAttributeSet>>(BodyPartAttributeSetClass);
+		const TSubclassOf<UAttributeSet> AttributeSetClass = TagToAttributeSetMap[BodyPartTag];
 		const UAttributeSet* AttributeSet = ASC->GetAttributeSet(AttributeSetClass);
 		const UFretteBodyPartAttributeSet* BodyPartAttributeSet = Cast<UFretteBodyPartAttributeSet>(AttributeSet);
+		
 		return BodyPartAttributeSet;
 	}
 }

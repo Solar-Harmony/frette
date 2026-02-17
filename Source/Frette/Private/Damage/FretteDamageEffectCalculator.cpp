@@ -1,13 +1,14 @@
-#include "Damage/FretteDamageEffectExecCalc.h"
+#include "Damage/FretteDamageEffectCalculator.h"
 
 #include "AbilitySystemComponent.h"
 #include "GameplayTagContainer.h"
 #include "Damage/FretteBodyPartAttributeSet.h"
+#include "Damage/FretteBodyPartTags.h"
 
-void UFretteDamageEffectExecCalc::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
+void UFretteDamageEffectCalculator::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
 {
-	UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
-	UAbilitySystemComponent* TargetASC = ExecutionParams.GetTargetAbilitySystemComponent();
+	const UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
+	const UAbilitySystemComponent* TargetASC = ExecutionParams.GetTargetAbilitySystemComponent();
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
 	const FGameplayTag DamageTag = FGameplayTag::RequestGameplayTag("Frette.GameplayEffect.Damage");
 	const float DamageMagnitude = Spec.GetSetByCallerMagnitude(DamageTag, true, 0.0f);
@@ -18,7 +19,7 @@ void UFretteDamageEffectExecCalc::Execute_Implementation(const FGameplayEffectCu
 	
 	for (const FGameplayTag& Tag : BodyPartTags)
 	{
-		const UFretteBodyPartAttributeSet* AttributeSet = Frette::BodyParts::GetAttributeSetFromTag(Tag);
+		const UFretteBodyPartAttributeSet* AttributeSet = Frette::BodyParts::GetAttributeSetFromTag(TargetASC, Tag);
 		check(IsValid(AttributeSet));
 			
 		FGameplayModifierEvaluatedData OutputModifier(

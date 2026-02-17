@@ -3,9 +3,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
 #include "AttributeSet.h"
-#include "FretteBodyPartTags.h"
 #include "GameplayTagContainer.h"
-#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 #include "FretteBodyPartAttributeSet.generated.h"
 

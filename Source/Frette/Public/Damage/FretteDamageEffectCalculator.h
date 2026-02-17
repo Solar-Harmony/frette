@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameplayEffectExecutionCalculation.h"
-#include "FretteDamageEffectExecCalc.generated.h"
+#include "FretteDamageEffectCalculator.generated.h"
 
 UCLASS()
-class FRETTE_API UFretteDamageEffectExecCalc : public UGameplayEffectExecutionCalculation
+class FRETTE_API UFretteDamageEffectCalculator : public UGameplayEffectExecutionCalculation
 {
 	GENERATED_BODY()
 

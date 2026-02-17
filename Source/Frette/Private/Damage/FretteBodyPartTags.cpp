@@ -12,5 +12,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_RightLeg, "Frette.BodyPart.RightLeg");
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_LeftFoot, "Frette.BodyPart.LeftFoot");
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_RightFoot, "Frette.BodyPart.RightFoot");
 
-TMap<FGameplayTag, TSubclassOf<UFretteBodyPartAttributeSet>> Frette::Damage::TagToAttributeSetMap;
+namespace Frette::BodyParts
+{
+	FTagToAttributeSetMap BodyParts::TagToAttributeSetMap;
+}
 
