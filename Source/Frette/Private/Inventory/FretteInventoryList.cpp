@@ -28,6 +28,9 @@ void FFretteInventoryList::AddEntry(UFretteInventoryItem* ItemToAdd)
 	Entry.Item->Id = NextId++;
 	IdToIndexMap.Add(Entry.Item->Id, Entries.Num() - 1);
 	MarkItemDirty(Entry);
+
+	Owner->OnItemAdded.Broadcast(Entry.Item);
+	Owner->K2_OnItemAdded.Broadcast(Entry.Item);
 }
 
 void FFretteInventoryList::ChangeEntry(UFretteInventoryItem* ItemToChange)
@@ -41,6 +44,9 @@ void FFretteInventoryList::ChangeEntry(UFretteInventoryItem* ItemToChange)
 	FFretteInventoryListEntry& Entry = Entries[*Idx];
 	Entry.Item = ItemToChange;
 	MarkItemDirty(Entry);
+
+	Owner->OnItemChanged.Broadcast(Entry.Item);
+	Owner->K2_OnItemChanged.Broadcast(Entry.Item);
 }
 
 void FFretteInventoryList::RemoveEntry(const UFretteInventoryItem* ItemToRemove)
@@ -66,6 +72,10 @@ void FFretteInventoryList::RemoveEntry(const UFretteInventoryItem* ItemToRemove)
 	}
 
 	IdToIndexMap.Remove(EntryToRemove.Item->Id);
+
+	Owner->OnItemRemoved.Broadcast(EntryToRemove.Item);
+	Owner->K2_OnItemRemoved.Broadcast(EntryToRemove.Item);
+
 	Entries.RemoveAt(LastIdx);
 	MarkArrayDirty();
 }

@@ -9,16 +9,6 @@ UFretteInventoryComponent::UFretteInventoryComponent()
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
-bool UFretteInventoryComponent::HasItem(int32 Id) const
-{
-	return Inventory.HasEntry(Id);
-}
-
-UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Id) const
-{
-	return Inventory.GetItemById(Id);
-}
-
 void UFretteInventoryComponent::SelectItem(int32 ItemId) const
 {
 	const UFretteInventoryItem* ItemToSelect = GetItem(ItemId);
@@ -41,14 +31,14 @@ void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataA
 void UFretteInventoryComponent::ChangeItem_Implementation(UFretteInventoryItem* ItemToChange)
 {
 	require(GetOwner()->HasAuthority());
-	require(Inventory.IsValidItem(ItemToChange), "#%d", ItemToChange->Id);
+	require(Inventory.IsValidItem(ItemToChange), "Inventory: Cannot change item because it is invalid.");
 	Inventory.ChangeEntry(ItemToChange);
 }
 
 void UFretteInventoryComponent::RemoveItem_Implementation(UFretteInventoryItem* ItemToRemove)
 {
 	require(GetOwner()->HasAuthority());
-	require(Inventory.IsValidItem(ItemToRemove), "#%d", ItemToRemove->Id);
+	require(Inventory.IsValidItem(ItemToRemove), "Inventory: Cannot remove item because it is invalid.");
 
 	RemoveReplicatedSubObject(ItemToRemove);
 	Inventory.RemoveEntry(ItemToRemove);

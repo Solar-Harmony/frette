@@ -53,13 +53,16 @@ public:
 	int32 GetNumItems() const { return Inventory.Num(); }
 
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
-	bool HasItem(int32 Id) const;
+	bool HasItem(int32 Id) const { return Inventory.HasEntry(Id); }
 
 	template <typename T>
 	const T* GetItem(int32 Id) const { return Cast<T>(GetItem(Id)); }
 
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
-	UFretteInventoryItem* GetItem(int32 Id) const;
+	UFretteInventoryItem* GetItem(int32 Id) const { return Inventory.GetItemById(Id); }
+
+	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
+	bool IsItemValid(const UFretteInventoryItem* Item) const { return Inventory.IsValidItem(Item); }
 
 	UFUNCTION(BlueprintCallable, Category="Frette|Inventory")
 	void SelectItem(int32 ItemId) const;
@@ -87,16 +90,16 @@ private:
 	FOnItemRemoved OnItemRemoved;
 	FOnItemSelected OnItemSelected;
 
-	UPROPERTY(BlueprintAssignable, Category="Frette|Inventory")
+	UPROPERTY(BlueprintAssignable, Category="Frette|Inventory", meta=(DisplayName="On Item Added"))
 	FK2_OnItemAdded K2_OnItemAdded;
 
-	UPROPERTY(BlueprintAssignable, Category="Frette|Inventory")
+	UPROPERTY(BlueprintAssignable, Category="Frette|Inventory", meta=(DisplayName="On Item Changed"))
 	FK2_OnItemChanged K2_OnItemChanged;
 
-	UPROPERTY(BlueprintAssignable, Category="Frette|Inventory")
+	UPROPERTY(BlueprintAssignable, Category="Frette|Inventory", meta=(DisplayName="On Item Pending Remove"))
 	FK2_OnItemRemoved K2_OnItemRemoved;
 
-	UPROPERTY(BlueprintAssignable, Category="Frette|Inventory")
+	UPROPERTY(BlueprintAssignable, Category="Frette|Inventory", meta=(DisplayName="On Item Selected"))
 	FK2_OnItemSelected K2_OnItemSelected;
 
 	UPROPERTY(Replicated)
