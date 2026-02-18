@@ -15,11 +15,15 @@ class UFretteInventoryItem : public UObject
 	GENERATED_BODY()
 
 public:
+	constexpr static int32 InvalidID = -1;
+
 	UPROPERTY(BlueprintReadOnly, Replicated)
-	int32 Id;
+	int32 Id = InvalidID;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	UFretteInventoryItemDataAsset* Data = nullptr;
+
+	bool HasValidID() const { return Id != InvalidID; }
 
 	virtual bool IsSupportedForNetworking() const override { return true; }
 

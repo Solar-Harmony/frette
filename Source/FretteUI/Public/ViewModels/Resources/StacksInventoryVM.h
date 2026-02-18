@@ -20,7 +20,7 @@ protected:
 	virtual void Bind() override
 	{
 		UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
-		Inventory->OnItemAdded.AddUObject(this, &UStacksInventoryVM::AddItem);
+		Inventory->SubToItemAdded(FOnItemAdded::FDelegate::CreateUObject(this, &UStacksInventoryVM::AddItem));
 	}
 
 	void AddItem(const UFretteInventoryItem* NewItem)
@@ -35,4 +35,6 @@ protected:
 
 		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Items);
 	}
+
+	// TODO: Remove
 };

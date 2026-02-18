@@ -12,7 +12,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_EquipmentSlot_HandRight, "Frette.EquipmentSlot.HandRi
 
 void UFretteEquipmentComponent::Initialize(UFretteInventoryComponent* Inventory)
 {
-	Inventory->OnItemSelected.AddUObject(this, &UFretteEquipmentComponent::OnInventoryItemSelected);
+	Inventory->SubToItemSelected(FOnItemSelected::FDelegate::CreateUObject(this, &UFretteEquipmentComponent::OnInventoryItemSelected));
 }
 
 void UFretteEquipmentComponent::OnInventoryItemSelected(const UFretteInventoryItem* Item)

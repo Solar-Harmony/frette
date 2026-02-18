@@ -19,26 +19,19 @@ UFretteInventoryItem* UFretteInventoryComponent::GetItem(int32 Id) const
 	return Inventory.GetItemById(Id);
 }
 
-void UFretteInventoryComponent::SelectItem(const UFretteInventoryItem* Item) const
+void UFretteInventoryComponent::SelectItem(int32 ItemId) const
 {
-	if (!Inventory.HasValidItemData(Item))
-	{
-		return;
-	}
+	const UFretteInventoryItem* ItemToSelect = GetItem(ItemId);
+	require(ItemToSelect, "Inventory: Cannot select item #%d because it was not found in this inventory.", ItemId);
 
-	OnItemSelected.Broadcast(Item);
+	OnItemSelected.Broadcast(ItemToSelect);
+	K2_OnItemSelected.Broadcast(ItemToSelect);
 }
 
 void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* ItemData)
 {
-	if (!GetOwner()->HasAuthority())
-		return;
-
-	if (!IsValid(ItemData))
-	{
-		LOG_FRETTE(Warning, "Inventory: Invalid data asset passed to AddItem.");
-		return;
-	}
+	require(IsReadyForReplication() && GetOwner()->HasAuthority());
+	require(IsValid(ItemData), "Inventory: Cannot add item: item data asset is invalid.");
 
 	UFretteInventoryItem* Item = ItemData->CreateRuntimeItem(this);
 	AddReplicatedSubObject(Item);
@@ -47,31 +40,28 @@ void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataA
 
 void UFretteInventoryComponent::ChangeItem_Implementation(UFretteInventoryItem* ItemToChange)
 {
-	if (!GetOwner()->HasAuthority())
-		return;
-
-	if (!Inventory.HasValidItemData(ItemToChange))
-	{
-		// LOG_FRETTE(Warning, "Inventory: Attempted to change an invalid item.");
-		return;
-	}
-
+	require(GetOwner()->HasAuthority());
+	require(Inventory.IsValidItem(ItemToChange), "#%d", ItemToChange->Id);
 	Inventory.ChangeEntry(ItemToChange);
 }
 
 void UFretteInventoryComponent::RemoveItem_Implementation(UFretteInventoryItem* ItemToRemove)
 {
-	if (!GetOwner()->HasAuthority())
-		return;
-
-	if (!Inventory.HasValidItemData(ItemToRemove))
-	{
-		// LOG_FRETTE(Warning, "Inventory: Attempted to remove an invalid item.");
-		return;
-	}
+	require(GetOwner()->HasAuthority());
+	require(Inventory.IsValidItem(ItemToRemove), "#%d", ItemToRemove->Id);
 
 	RemoveReplicatedSubObject(ItemToRemove);
 	Inventory.RemoveEntry(ItemToRemove);
+}
+
+void UFretteInventoryComponent::ReadyForReplication()
+{
+	Super::ReadyForReplication();
+
+	for (TObjectPtr StartingItemData : StartingItems)
+	{
+		AddItem(StartingItemData);
+	}
 }
 
 void UFretteInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

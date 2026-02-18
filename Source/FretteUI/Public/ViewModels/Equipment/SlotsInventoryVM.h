@@ -17,10 +17,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TArray<TObjectPtr<USlotsInventoryItemVM>> Items;
 
+private:
 	virtual void Bind() override
 	{
 		UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
-		Inventory->OnItemAdded.AddUObject(this, &USlotsInventoryVM::AddItem);
+		Inventory->SubToItemAdded(FOnItemAdded::FDelegate::CreateUObject(this, &USlotsInventoryVM::AddItem));
+		Inventory->SubToItemRemoved(FOnItemRemoved::FDelegate::CreateUObject(this, &USlotsInventoryVM::RemoveItem));
 	}
 
 	void AddItem(const UFretteInventoryItem* NewItem)
@@ -35,13 +37,25 @@ protected:
 		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Items);
 	}
 
+	void RemoveItem(const UFretteInventoryItem* RemovedItem)
+	{
+		if (!RemovedItem->IsA<UFretteGearItem>())
+			return;
+
+		Items.RemoveAll([RemovedItem](const USlotsInventoryItemVM* ItemVM) {
+			return ItemVM->GetPtr()->Id == RemovedItem->Id;
+		});
+
+		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Items);
+	}
+
 	UFUNCTION(BlueprintCallable)
 	void OnItemSelectionChange(UObject* Item, bool bIsSelected) const
 	{
 		if (bIsSelected)
 		{
-			auto* ItemVM = Cast<USlotsInventoryItemVM>(Item);
-			PlayerCharacter->GetPlayerInventory()->SelectItem(ItemVM->GetPtr());
+			const auto* ItemVM = Cast<USlotsInventoryItemVM>(Item);
+			PlayerCharacter->GetPlayerInventory()->SelectItem(ItemVM->GetPtr()->Id);
 		}
 	}
 };

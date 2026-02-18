@@ -39,6 +39,7 @@ namespace Frette::Utils::Log
 	}
 }
 
+// Helper macro to auto convert log arguments to TCHAR* because I keep forgetting the fucking * in front of FStrings lol
 #define WRAP(r, data, elem) data(elem)
 
 #define MAP_ARGS(func, ...) \
@@ -59,22 +60,19 @@ namespace Frette::Utils::Log
 #define LOG_FRETTE(Verbosity, Format, ...) \
 	LOG_FRETTE_IMPL(Verbosity, Format, BOOST_PP_VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
 
-#define CALISS LOG_FRETTE
-#define CALISSE LOG_FRETTE
-#define CALVAIRE LOG_FRETTE
-#define CIBOIRE LOG_FRETTE
-#define CIBOLE LOG_FRETTE
-#define CRISS LOG_FRETTE
-#define CRISSE LOG_FRETTE
-#define ESTI LOG_FRETTE
-#define MAUDIT LOG_FRETTE
-#define MAUTADIT LOG_FRETTE
-#define OSTI LOG_FRETTE
-#define OSTIE LOG_FRETTE
-#define HOSTIE LOG_FRETTE
-#define SACRAMENT LOG_FRETTE
-#define SACREMENT LOG_FRETTE
-#define TABARNAC LOG_FRETTE
-#define TABARNAK LOG_FRETTE
-#define TABARNOUCHE LOG_FRETTE
-#define BOUT_DE_SAINT_SACERDOCE LOG_FRETTE
+// Helper for more readable precondition early returns. If the condition is FALSE, print msg then returns.
+// Usage:
+// require(Condition);
+// require(Condition, "Message with no args.");
+// require(Condition, "Message with args: %d, %s", Arg1, Arg2);
+// Note: format str will be auto-wrapped with TEXT(), and args will be auto-converted to TCHAR* if possible.
+#define require(...) BOOST_PP_OVERLOAD(FRETTE_PRIVATE_ENSURE_, __VA_ARGS__)(__VA_ARGS__)
+
+#define FRETTE_PRIVATE_ENSURE_1(Condition) \
+	if (!ensureAlways(Condition)) return;
+
+#define FRETTE_PRIVATE_ENSURE_2(Condition, Msg) \
+	if (!ensureAlwaysMsgf(Condition, TEXT(Msg))) return;
+
+#define FRETTE_PRIVATE_ENSURE_3(Condition, Format, ...) \
+	if (!ensureAlwaysMsgf(Condition, TEXT(Format), MAP_ARGS(Frette::Utils::Log::ToTCHAR, __VA_ARGS__))) return;
