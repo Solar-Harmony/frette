@@ -10,8 +10,14 @@ class AFrettePlayerState;
 
 AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(GetCapsuleComponent());
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera"));
+	Camera->SetupAttachment(GetMesh(), FName("head"));
+	Camera->SetRelativeLocationAndRotation(FVector(-2.8f, 5.89f, 0.0f), FRotator(0.0f, 90.0f, -90.0f));
+	Camera->bUsePawnControlRotation = true;
+	Camera->bEnableFirstPersonFieldOfView = true;
+	Camera->bEnableFirstPersonScale = true;
+	Camera->FirstPersonFieldOfView = 70.0f;
+	Camera->FirstPersonScale = 0.6f;
 
 	InventoryComponent = CreateDefaultSubobject<UFakeInventoryComponent>(TEXT("Inventory"));
 }

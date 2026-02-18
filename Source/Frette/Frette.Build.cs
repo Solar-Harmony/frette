@@ -20,6 +20,6 @@ public class Frette : ModuleRules
 			"GameplayTasks"
 		});
 
-		PrivateDependencyModuleNames.AddRange([]);
+		PrivateDependencyModuleNames.AddRange(["StateTreeModule"]);
 	}
 }
