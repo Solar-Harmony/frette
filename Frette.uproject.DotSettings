@@ -7,6 +7,12 @@
 	<s:Boolean x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadColonSpaces/@EntryIndexRemoved">True</s:Boolean>
     <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadCommaSpaces/@EntryIndexedValue"></s:String>
 	<s:Boolean x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadCommaSpaces/@EntryIndexRemoved">True</s:Boolean>
+	<s:Boolean x:Key="/Default/CodeEditing/UnrealLink/AutoUpdateRiderLinkPlugin/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/CodeEditing/UnrealLink/DefaultLocationForRiderLink/@EntryValue">Extract</s:String>
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadAngleBracketsSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadBracesSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadColonSpaces/@EntryIndexedValue">WARNING</s:String>
+    <s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadCommaSpaces/@EntryIndexedValue">WARNING</s:String>
 	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadControlBracesLineBreaks/@EntryIndexedValue">WARNING</s:String>
 	
 	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppBadDeclarationBracesLineBreaks/@EntryIndexedValue">WARNING</s:String>
