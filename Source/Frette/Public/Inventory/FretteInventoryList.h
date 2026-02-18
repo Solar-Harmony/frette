@@ -58,7 +58,7 @@ private:
 	UPROPERTY()
 	TArray<FFretteInventoryListEntry> Entries;
 
-	UPROPERTY()
+	UPROPERTY(NotReplicated)
 	int32 NextId = 0;
 
 	UPROPERTY(NotReplicated)

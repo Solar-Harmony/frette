@@ -20,6 +20,7 @@ UFretteInventoryItem* FFretteInventoryList::GetItemById(int32 ItemId) const
 
 void FFretteInventoryList::AddEntry(UFretteInventoryItem* ItemToAdd)
 {
+	check(Owner.IsValid());
 	check(Owner->GetOwner()->HasAuthority());
 	require(IsValidItem(ItemToAdd, true));
 
@@ -35,6 +36,7 @@ void FFretteInventoryList::AddEntry(UFretteInventoryItem* ItemToAdd)
 
 void FFretteInventoryList::ChangeEntry(UFretteInventoryItem* ItemToChange)
 {
+	check(Owner.IsValid());
 	check(Owner->GetOwner()->HasAuthority());
 	require(IsValidItem(ItemToChange));
 
@@ -62,20 +64,20 @@ void FFretteInventoryList::RemoveEntry(const UFretteInventoryItem* ItemToRemove)
 
 	const int32 Idx = *IdxPtr;
 	const int32 LastIdx = Entries.Num() - 1;
-	const FFretteInventoryListEntry& EntryToRemove = Entries[Idx];
+	ItemToRemove = Entries[Idx].Item;
 
 	if (Idx != LastIdx)
 	{
-		const FFretteInventoryListEntry& EntryToMove = Entries[LastIdx];
-		IdToIndexMap[EntryToMove.Item->Id] = Idx;
+		const int32 IdToMove = Entries[LastIdx].Item->Id;
+		IdToIndexMap[IdToMove] = Idx;
 		Entries.Swap(Idx, LastIdx);
+		MarkItemDirty(Entries[Idx]);
 	}
 
-	IdToIndexMap.Remove(EntryToRemove.Item->Id);
-
-	Owner->OnItemRemoved.Broadcast(EntryToRemove.Item);
-	Owner->K2_OnItemRemoved.Broadcast(EntryToRemove.Item);
-
+	Owner->OnItemRemoved.Broadcast(ItemToRemove);
+	Owner->K2_OnItemRemoved.Broadcast(ItemToRemove);
+	
+	IdToIndexMap.Remove(ItemToRemove->Id);
 	Entries.RemoveAt(LastIdx);
 	MarkArrayDirty();
 }
@@ -116,9 +118,12 @@ bool FFretteInventoryList::HasValidOwner() const
 
 void FFretteInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize)
 {
+	check(Owner.IsValid());
+	
 	for (const int32 Index : AddedIndices)
 	{
 		const FFretteInventoryListEntry& Entry = Entries[Index];
+		check(IsValidItem(Entry.Item));
 		IdToIndexMap.Add(Entry.Item->Id, Index);
 		Owner->OnItemAdded.Broadcast(Entry.Item);
 		Owner->K2_OnItemAdded.Broadcast(Entry.Item);
@@ -127,9 +132,12 @@ void FFretteInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndice
 
 void FFretteInventoryList::PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)
 {
+	check(Owner.IsValid());
+	
 	for (const int32 Index : ChangedIndices)
 	{
 		const FFretteInventoryListEntry& Entry = Entries[Index];
+		check(IsValidItem(Entry.Item));
 		IdToIndexMap[Entry.Item->Id] = Index;
 		Owner->OnItemChanged.Broadcast(Entry.Item);
 		Owner->K2_OnItemChanged.Broadcast(Entry.Item);
@@ -138,9 +146,12 @@ void FFretteInventoryList::PostReplicatedChange(const TArrayView<int32> ChangedI
 
 void FFretteInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
 {
+	check(Owner.IsValid());
+	
 	for (const int32 Index : RemovedIndices)
 	{
 		const FFretteInventoryListEntry& Entry = Entries[Index];
+		check(IsValidItem(Entry.Item));
 		IdToIndexMap.Remove(Entry.Item->Id);
 		Owner->OnItemRemoved.Broadcast(Entry.Item);
 		Owner->K2_OnItemRemoved.Broadcast(Entry.Item);

@@ -7,7 +7,7 @@
 
 class UFretteInventoryItemDataAsset;
 
-static const FPrimaryAssetType GInventoryItemPrimaryAssetType("FretteInventoryItem");
+inline const FPrimaryAssetType GInventoryItemPrimaryAssetType("FretteInventoryItem");
 
 UCLASS(Abstract, BlueprintType, Blueprintable)
 class UFretteInventoryItem : public UObject
@@ -50,12 +50,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UTexture2D> Icon;
 
-	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer)
-	{
-		auto* Item = NewObject<UFretteInventoryItem>(Outer);
-		Item->Data = this;
-		return Item;
-	}
+	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) 
+		PURE_VIRTUAL(UFretteInventoryItem*, return nullptr;);
 
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{

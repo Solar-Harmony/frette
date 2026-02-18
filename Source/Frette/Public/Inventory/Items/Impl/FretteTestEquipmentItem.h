@@ -13,15 +13,22 @@ class UFretteTestEquipmentItem : public UFretteGearItem
 public:
 	virtual void Use() override {}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true))
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, meta = (ExposeOnSpawn = true))
 	int Durability;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true))
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, meta = (ExposeOnSpawn = true))
 	int CurrentAmmo;
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
+	{
+		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+		DOREPLIFETIME(ThisClass, Durability);
+		DOREPLIFETIME(ThisClass, CurrentAmmo);
+	}
 };
 
 UCLASS()
-class UFretteTestEquipmentItemDataAsset : public UFretteInventoryItemDataAsset
+class UFretteTestEquipmentItemDataAsset : public UFretteGearItemDataAsset
 {
 	GENERATED_BODY()
 
