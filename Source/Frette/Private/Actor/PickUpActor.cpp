@@ -5,19 +5,20 @@
 APickUpActor::APickUpActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
-	SetRootComponent(OverlapSphere);
-	OverlapSphere->SetSphereRadius((Item_Size / 2.f) * Sphere_Radius_Ratio);
-	OverlapSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickUpActor::PickedUp);
-
+	
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item"));
-	StaticMesh->SetupAttachment(OverlapSphere);
-	StaticMesh->SetSimulatePhysics(false);
+	StaticMesh->SetSimulatePhysics(true);
 	StaticMesh->SetCollisionProfileName(TEXT("BlockAll"));
 	StaticMesh->SetEnableGravity(true);
 	StaticMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
+	SetRootComponent(StaticMesh);
+	
+	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
+	OverlapSphere->SetSphereRadius((Item_Size / 2.f) * Sphere_Radius_Ratio);
+	StaticMesh->SetSimulatePhysics(false);
+	OverlapSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickUpActor::PickedUp);
+	OverlapSphere->SetupAttachment(StaticMesh);
 }
 
 void APickUpActor::OnConstruction(const FTransform& Transform)
@@ -42,7 +43,6 @@ void APickUpActor::OnConstruction(const FTransform& Transform)
 		const float MaxDim = FMath::Max3(CurrentSize.X, CurrentSize.Y, CurrentSize.Z);
 		const float ScaleFactor = (MaxDim > 0.0f) ? (Item_Size / MaxDim) : 1.0f;
 		StaticMesh->SetRelativeScale3D(FVector(ScaleFactor));
-		StaticMesh->SetRelativeLocation(FVector(0.f, 0.f, Item_Size / 2.f));
 	}
 }
 
