@@ -2,6 +2,46 @@
 
 #include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
+
+#if !UE_BUILD_SHIPPING
+static FAutoConsoleCommandWithWorldAndArgs CmdDumpInventory(
+	TEXT("Frette.DumpInventory"),
+	TEXT("Dumps the inventory contents of the local player's pawn. Usage: Frette.DumpInventory"),
+	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+	{
+		if (!World)
+		{
+			UE_LOG(LogFrette, Warning, TEXT("DumpInventory: Invalid world"));
+			return;
+		}
+
+		APlayerController* PC = World->GetFirstPlayerController();
+		if (!PC)
+		{
+			UE_LOG(LogFrette, Warning, TEXT("DumpInventory: No player controller found"));
+			return;
+		}
+
+		APawn* Pawn = PC->GetPawn();
+		if (!Pawn)
+		{
+			UE_LOG(LogFrette, Warning, TEXT("DumpInventory: Player controller has no pawn"));
+			return;
+		}
+
+		UFretteInventoryComponent* InventoryComp = Pawn->FindComponentByClass<UFretteInventoryComponent>();
+		if (!InventoryComp)
+		{
+			UE_LOG(LogFrette, Warning, TEXT("DumpInventory: Pawn has no inventory component"));
+			return;
+		}
+
+		InventoryComp->DumpInventory();
+	})
+);
+#endif
 
 UFretteInventoryComponent::UFretteInventoryComponent()
 {
@@ -35,13 +75,16 @@ void UFretteInventoryComponent::ChangeItem_Implementation(UFretteInventoryItem* 
 	Inventory.ChangeEntry(ItemToChange);
 }
 
-void UFretteInventoryComponent::RemoveItem_Implementation(UFretteInventoryItem* ItemToRemove)
+void UFretteInventoryComponent::RemoveItem_Implementation(int32 ItemId)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Server RPC EXECUTED | NetMode: %d | Role: %d | RemoteRole: %d"),
+		(int32)GetNetMode(),
+		(int32)GetOwner()->GetLocalRole(),
+		(int32)GetOwner()->GetRemoteRole());
 	require(GetOwner()->HasAuthority());
-	require(Inventory.IsValidItem(ItemToRemove), "Inventory: Cannot remove item because it is invalid.");
+w	require(Inventory.HasEntry(ItemId), "Inventory: Cannot remove item #%d because this inventory has no item with that ID.", ItemId);
 
-	RemoveReplicatedSubObject(ItemToRemove);
-	Inventory.RemoveEntry(ItemToRemove);
+	Inventory.RemoveEntry(ItemId);
 }
 
 void UFretteInventoryComponent::ReadyForReplication()

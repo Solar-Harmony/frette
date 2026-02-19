@@ -37,7 +37,7 @@ struct FFretteInventoryList : public FFastArraySerializer
 	UFretteInventoryItem* GetItemById(int32 ItemId) const;
 	void AddEntry(UFretteInventoryItem* ItemToAdd);
 	void ChangeEntry(UFretteInventoryItem* ItemToChange);
-	void RemoveEntry(const UFretteInventoryItem* ItemToRemove);
+	void RemoveEntry(int32 ItemId);
 	bool IsValidItem(const UFretteInventoryItem* Item, bool bAllowInvalidId = false) const;
 
 	//~FFastArraySerializer contract
@@ -50,6 +50,10 @@ struct FFretteInventoryList : public FFastArraySerializer
 	{
 		return FastArrayDeltaSerialize<FFretteInventoryListEntry, FFretteInventoryList>(Entries, DeltaParms, *this);
 	}
+
+#if !UE_BUILD_SHIPPING
+	void DumpInventory() const;
+#endif
 
 private:
 	UPROPERTY(NotReplicated)
@@ -64,7 +68,7 @@ private:
 	UPROPERTY(NotReplicated)
 	TMap<int32, int32> IdToIndexMap;
 
-	const int32* GetIndexById(int32 ItemId) const;
+	int32 GetIndexById(int32 ItemId) const;
 	bool HasValidOwner() const;
 };
 

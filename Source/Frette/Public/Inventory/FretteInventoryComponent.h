@@ -74,11 +74,15 @@ public:
 	void ChangeItem(UFretteInventoryItem* ItemToChange);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
-	void RemoveItem(UFretteInventoryItem* ItemToRemove);
+	void RemoveItem(int32 ItemId);
 
 	virtual void ReadyForReplication() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+#if !UE_BUILD_SHIPPING
+	void DumpInventory() const { Inventory.DumpInventory(); }
+#endif
 
 protected:
 	UPROPERTY(EditDefaultsOnly)

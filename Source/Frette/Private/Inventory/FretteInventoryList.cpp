@@ -10,9 +10,11 @@ bool FFretteInventoryList::HasEntry(int32 ItemId) const
 
 UFretteInventoryItem* FFretteInventoryList::GetItemById(int32 ItemId) const
 {
-	if (const int32* Idx = GetIndexById(ItemId))
+	const int32 Idx = GetIndexById(ItemId);
+	
+	if (Idx != INDEX_NONE)
 	{
-		return Entries[*Idx].Item;
+		return Entries[Idx].Item;
 	}
 
 	return nullptr;
@@ -40,10 +42,10 @@ void FFretteInventoryList::ChangeEntry(UFretteInventoryItem* ItemToChange)
 	check(Owner->GetOwner()->HasAuthority());
 	require(IsValidItem(ItemToChange));
 
-	const int32* Idx = GetIndexById(ItemToChange->Id);
-	require(Idx, "Inventory: Cannot change item #%d because it was not found in this inventory.", ItemToChange->Id);
+	const int32 Idx = GetIndexById(ItemToChange->Id);
+	require(Idx != INDEX_NONE, "Inventory: Cannot change item #%d because it was not found in this inventory.", ItemToChange->Id);
 
-	FFretteInventoryListEntry& Entry = Entries[*Idx];
+	FFretteInventoryListEntry& Entry = Entries[Idx];
 	Entry.Item = ItemToChange;
 	MarkItemDirty(Entry);
 
@@ -51,20 +53,17 @@ void FFretteInventoryList::ChangeEntry(UFretteInventoryItem* ItemToChange)
 	Owner->K2_OnItemChanged.Broadcast(Entry.Item);
 }
 
-void FFretteInventoryList::RemoveEntry(const UFretteInventoryItem* ItemToRemove)
+void FFretteInventoryList::RemoveEntry(int32 ItemId)
 {
 	check(Owner.IsValid());
 	check(Owner->GetOwner()->HasAuthority());
-
 	require(Entries.Num() > 0, "Inventory: Cannot remove item because inventory is empty.");
-	require(IsValidItem(ItemToRemove));
 
-	const int32* IdxPtr = GetIndexById(ItemToRemove->Id);
-	require(IdxPtr, "Inventory: Cannot remove item #%d because it was not found in this inventory.", ItemToRemove->Id);
-
-	const int32 Idx = *IdxPtr;
+	const int32 Idx = GetIndexById(ItemId);
+	require(Idx != INDEX_NONE, "Inventory: Cannot remove item #%d because it was not found in this inventory.", ItemId);
+	
 	const int32 LastIdx = Entries.Num() - 1;
-	ItemToRemove = Entries[Idx].Item;
+	UFretteInventoryItem* ItemToRemove = Entries[Idx].Item;
 
 	if (Idx != LastIdx)
 	{
@@ -74,6 +73,7 @@ void FFretteInventoryList::RemoveEntry(const UFretteInventoryItem* ItemToRemove)
 		MarkItemDirty(Entries[Idx]);
 	}
 
+	Owner->RemoveReplicatedSubObject(ItemToRemove);
 	Owner->OnItemRemoved.Broadcast(ItemToRemove);
 	Owner->K2_OnItemRemoved.Broadcast(ItemToRemove);
 	
@@ -99,16 +99,17 @@ bool FFretteInventoryList::IsValidItem(const UFretteInventoryItem* Item, bool bA
 	return true;
 }
 
-const int32* FFretteInventoryList::GetIndexById(int32 ItemId) const
+int32 FFretteInventoryList::GetIndexById(int32 ItemId) const
 {
-	const int32* IdxPtr = IdToIndexMap.Find(ItemId);
-	if (IdxPtr == nullptr)
-		return nullptr;
+	if (!IdToIndexMap.Contains(ItemId))
+		return INDEX_NONE;
+	
+	const int32 Idx = IdToIndexMap[ItemId];
 
-	checkfSlow(Entries.IsValidIndex(*IdxPtr), TEXT("Inventory: Item ID maps to an out of bounds index."));
-	checkfSlow(Entries[*IdxPtr].Item->Id == ItemId, TEXT("Inventory: Item ID maps to the index of a different item."));
+	checkfSlow(Entries.IsValidIndex(Idx), TEXT("Inventory: Item ID maps to an out of bounds index."));
+	checkfSlow(Entries[Idx].Item->Id == ItemId, TEXT("Inventory: Item ID maps to the index of a different item."));
 
-	return IdxPtr;
+	return Idx;
 }
 
 bool FFretteInventoryList::HasValidOwner() const
@@ -156,4 +157,91 @@ void FFretteInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIn
 		Owner->OnItemRemoved.Broadcast(Entry.Item);
 		Owner->K2_OnItemRemoved.Broadcast(Entry.Item);
 	}
+}
+
+void FFretteInventoryList::DumpInventory() const
+{
+	if (!Owner.IsValid())
+	{
+		UE_LOG(LogFrette, Warning, TEXT("Inventory dump failed: Invalid owner"));
+		return;
+	}
+
+	AActor* OwnerActor = Owner->GetOwner();
+	if (!IsValid(OwnerActor))
+	{
+		UE_LOG(LogFrette, Warning, TEXT("Inventory dump failed: Invalid owner actor"));
+		return;
+	}
+
+	const bool bIsServer = OwnerActor->HasAuthority();
+	const FString RoleStr = bIsServer ? TEXT("SERVER") : TEXT("CLIENT");
+
+	UE_LOG(LogFrette, Log, TEXT("======================================"));
+	UE_LOG(LogFrette, Log, TEXT("Inventory Dump [%s] for: %s"), *RoleStr, *OwnerActor->GetName());
+	UE_LOG(LogFrette, Log, TEXT("======================================"));
+	UE_LOG(LogFrette, Log, TEXT("Total Items: %d"), Entries.Num());
+	UE_LOG(LogFrette, Log, TEXT("Next ID: %d"), NextId);
+	UE_LOG(LogFrette, Log, TEXT(""));
+
+	UE_LOG(LogFrette, Log, TEXT("--- Inventory Entries ---"));
+	for (int32 i = 0; i < Entries.Num(); ++i)
+	{
+		const FFretteInventoryListEntry& Entry = Entries[i];
+		if (IsValid(Entry.Item))
+		{
+			const FString DataName = IsValid(Entry.Item->Data) ? Entry.Item->Data->GetName() : TEXT("NULL");
+			const FString DisplayName = IsValid(Entry.Item->Data) ? Entry.Item->Data->DisplayName.ToString() : TEXT("N/A");
+			UE_LOG(LogFrette, Log, TEXT("  [%d] Item ID: %d | Data: %s (%s) | RepID: %d | RepKey: %d"), 
+				i, 
+				Entry.Item->Id, 
+				*DataName,
+				*DisplayName,
+				Entry.ReplicationID,
+				Entry.ReplicationKey);
+		}
+		else
+		{
+			UE_LOG(LogFrette, Log, TEXT("  [%d] Item: NULL | RepID: %d | RepKey: %d"), 
+				i,
+				Entry.ReplicationID,
+				Entry.ReplicationKey);
+		}
+	}
+
+	UE_LOG(LogFrette, Log, TEXT(""));
+	UE_LOG(LogFrette, Log, TEXT("--- ID to Index Map ---"));
+	UE_LOG(LogFrette, Log, TEXT("Map Size: %d"), IdToIndexMap.Num());
+	
+	TArray<int32> Keys;
+	IdToIndexMap.GetKeys(Keys);
+	Keys.Sort();
+
+	for (const int32 ItemId : Keys)
+	{
+		const int32 MappedIndex = IdToIndexMap[ItemId];
+		const bool bValidIndex = Entries.IsValidIndex(MappedIndex);
+		const bool bConsistent = bValidIndex && Entries[MappedIndex].Item && Entries[MappedIndex].Item->Id == ItemId;
+		const FString ConsistencyStr = bConsistent ? TEXT("OK") : TEXT("ERROR");
+		
+		UE_LOG(LogFrette, Log, TEXT("  ItemID %d -> Index %d [%s]"), ItemId, MappedIndex, *ConsistencyStr);
+		
+		if (!bConsistent)
+		{
+			if (!bValidIndex)
+			{
+				UE_LOG(LogFrette, Error, TEXT("    ERROR: Index %d is out of bounds (Num=%d)"), MappedIndex, Entries.Num());
+			}
+			else if (!Entries[MappedIndex].Item)
+			{
+				UE_LOG(LogFrette, Error, TEXT("    ERROR: Entry at index %d has NULL item"), MappedIndex);
+			}
+			else
+			{
+				UE_LOG(LogFrette, Error, TEXT("    ERROR: Entry at index %d has different ID (%d)"), MappedIndex, Entries[MappedIndex].Item->Id);
+			}
+		}
+	}
+
+	UE_LOG(LogFrette, Log, TEXT("======================================"));
 }
