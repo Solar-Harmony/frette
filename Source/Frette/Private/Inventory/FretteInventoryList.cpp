@@ -10,9 +10,7 @@ bool FFretteInventoryList::HasEntry(int32 ItemId) const
 
 UFretteInventoryItem* FFretteInventoryList::GetItemById(int32 ItemId) const
 {
-	const int32 Idx = GetIndexById(ItemId);
-	
-	if (Idx != INDEX_NONE)
+	if (const int32 Idx = GetIndexById(ItemId); Idx != INDEX_NONE)
 	{
 		return Entries[Idx].Item;
 	}
@@ -160,6 +158,19 @@ void FFretteInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIn
 }
 
 #if WITH_EDITOR
+void UFretteInventoryComponent::DumpInventory()
+{
+	if (GetOwner()->HasAuthority())
+	{
+		Inventory.DumpInventory();
+	}
+	else
+	{
+		Inventory.DumpInventory();
+		ServerDumpInventory();
+	}
+}
+
 void FFretteInventoryList::DumpInventory() const
 {
 	if (!Owner.IsValid())
@@ -168,7 +179,7 @@ void FFretteInventoryList::DumpInventory() const
 		return;
 	}
 
-	AActor* OwnerActor = Owner->GetOwner();
+	const AActor* OwnerActor = Owner->GetOwner();
 	if (!IsValid(OwnerActor))
 	{
 		UE_LOG(LogFrette, Warning, TEXT("Inventory dump failed: Invalid owner actor"));
@@ -176,16 +187,13 @@ void FFretteInventoryList::DumpInventory() const
 	}
 
 	const bool bIsServer = OwnerActor->HasAuthority();
-	const FString RoleStr = bIsServer ? TEXT("SERVER") : TEXT("CLIENT");
+	const TCHAR* RoleStr = bIsServer ? TEXT("SERVER") : TEXT("CLIENT");
 
-	UE_LOG(LogFrette, Log, TEXT("======================================"));
-	UE_LOG(LogFrette, Log, TEXT("Inventory Dump [%s] for: %s"), *RoleStr, *OwnerActor->GetName());
-	UE_LOG(LogFrette, Log, TEXT("======================================"));
-	UE_LOG(LogFrette, Log, TEXT("Total Items: %d"), Entries.Num());
-	UE_LOG(LogFrette, Log, TEXT("Next ID: %d"), NextId);
-	UE_LOG(LogFrette, Log, TEXT(""));
+	TStringBuilder<2048> Builder;
 
-	UE_LOG(LogFrette, Log, TEXT("--- Inventory Entries ---"));
+	Builder.Appendf(TEXT("Inventory dump on %s for: %s\n"), RoleStr, *OwnerActor->GetName());
+
+	Builder.Appendf(TEXT("=== %d inventory entries ===\n"), Entries.Num());
 	for (int32 i = 0; i < Entries.Num(); ++i)
 	{
 		const FFretteInventoryListEntry& Entry = Entries[i];
@@ -193,57 +201,76 @@ void FFretteInventoryList::DumpInventory() const
 		{
 			const FString DataName = IsValid(Entry.Item->Data) ? Entry.Item->Data->GetName() : TEXT("NULL");
 			const FString DisplayName = IsValid(Entry.Item->Data) ? Entry.Item->Data->DisplayName.ToString() : TEXT("N/A");
-			UE_LOG(LogFrette, Log, TEXT("  [%d] Item ID: %d | Data: %s (%s) | RepID: %d | RepKey: %d"), 
-				i, 
-				Entry.Item->Id, 
-				*DataName,
-				*DisplayName,
-				Entry.ReplicationID,
-				Entry.ReplicationKey);
+			Builder.Appendf(TEXT("  [%d] Item ID: %d | Data: %s (%s) | RepID: %d | RepKey: %d\n"),
+				i, Entry.Item->Id, *DataName, *DisplayName, Entry.ReplicationID, Entry.ReplicationKey);
 		}
 		else
 		{
-			UE_LOG(LogFrette, Log, TEXT("  [%d] Item: NULL | RepID: %d | RepKey: %d"), 
-				i,
-				Entry.ReplicationID,
-				Entry.ReplicationKey);
+			Builder.Appendf(TEXT("  [%d] Item: NULL | RepID: %d | RepKey: %d\n"),
+				i, Entry.ReplicationID, Entry.ReplicationKey);
 		}
 	}
 
-	UE_LOG(LogFrette, Log, TEXT(""));
-	UE_LOG(LogFrette, Log, TEXT("--- ID to Index Map ---"));
-	UE_LOG(LogFrette, Log, TEXT("Map Size: %d"), IdToIndexMap.Num());
-	
+	Builder.Appendf(TEXT("\n=== %d ID to index mappings ===\n"), IdToIndexMap.Num());
 	TArray<int32> Keys;
 	IdToIndexMap.GetKeys(Keys);
 	Keys.Sort();
+
+	bool bHasErrors = false;
+	TStringBuilder<512> ErrorBuilder;
 
 	for (const int32 ItemId : Keys)
 	{
 		const int32 MappedIndex = IdToIndexMap[ItemId];
 		const bool bValidIndex = Entries.IsValidIndex(MappedIndex);
 		const bool bConsistent = bValidIndex && Entries[MappedIndex].Item && Entries[MappedIndex].Item->Id == ItemId;
-		const FString ConsistencyStr = bConsistent ? TEXT("OK") : TEXT("ERROR");
-		
-		UE_LOG(LogFrette, Log, TEXT("  ItemID %d -> Index %d [%s]"), ItemId, MappedIndex, *ConsistencyStr);
-		
+
+		Builder.Appendf(TEXT("  ItemID %d -> Index %d [%s]\n"), ItemId, MappedIndex, bConsistent ? TEXT("OK") : TEXT("ERROR"));
+
 		if (!bConsistent)
 		{
+			bHasErrors = true;
 			if (!bValidIndex)
-			{
-				UE_LOG(LogFrette, Error, TEXT("    ERROR: Index %d is out of bounds (Num=%d)"), MappedIndex, Entries.Num());
-			}
+				ErrorBuilder.Appendf(TEXT("    ERROR: Index %d is out of bounds (Num=%d)\n"), MappedIndex, Entries.Num());
 			else if (!Entries[MappedIndex].Item)
-			{
-				UE_LOG(LogFrette, Error, TEXT("    ERROR: Entry at index %d has NULL item"), MappedIndex);
-			}
+				ErrorBuilder.Appendf(TEXT("    ERROR: Entry at index %d has NULL item\n"), MappedIndex);
 			else
-			{
-				UE_LOG(LogFrette, Error, TEXT("    ERROR: Entry at index %d has different ID (%d)"), MappedIndex, Entries[MappedIndex].Item->Id);
-			}
+				ErrorBuilder.Appendf(TEXT("    ERROR: Entry at index %d has different ID (%d)\n"), MappedIndex, Entries[MappedIndex].Item->Id);
 		}
 	}
 
-	UE_LOG(LogFrette, Log, TEXT("======================================"));
+	Builder.Append(TEXT("\n\n"));
+
+	UE_LOG(LogFrette, Log, TEXT("%s"), Builder.ToString());
+
+	if (bHasErrors)
+		UE_LOG(LogFrette, Error, TEXT("%s"), ErrorBuilder.ToString());
 }
-#endif
+
+void UFretteInventoryComponent::ServerDumpInventory_Implementation()
+{
+	Inventory.DumpInventory();
+}
+
+static void ExecDumpInventory(UWorld* World)
+{
+	require(World);
+
+	const APlayerController* PC = World->GetFirstPlayerController();
+	require(PC);
+
+	const APawn* Pawn = PC->GetPawn();
+	require(Pawn);
+
+	UFretteInventoryComponent* InventoryComp = Pawn->FindComponentByClass<UFretteInventoryComponent>();
+	require(InventoryComp, "DumpInventory: No inventory component found on pawn %s", *Pawn->GetName());
+
+	InventoryComp->DumpInventory();
+}
+
+static FAutoConsoleCommandWithWorld FCmdDumpInventory(
+	TEXT("Frette.DumpInventory"),
+	TEXT("Dumps the inventory contents of the local player's pawn on both server and client. Usage: Frette.DumpInventory"),
+	FConsoleCommandWithWorldDelegate::CreateStatic(ExecDumpInventory)
+);
+#endif // WITH_EDITOR

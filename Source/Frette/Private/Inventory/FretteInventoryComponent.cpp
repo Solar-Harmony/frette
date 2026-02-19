@@ -3,31 +3,6 @@
 #include "Engine/World.h"
 #include "Frette/Frette.h"
 #include "GameFramework/PlayerController.h"
-#include "Net/UnrealNetwork.h"
-
-#if WITH_EDITOR
-static void DumpInventory(UWorld* World)
-{
-	require(World);
-
-	const APlayerController* PC = World->GetFirstPlayerController();
-	require(PC);
-
-	const APawn* Pawn = PC->GetPawn();
-	require(Pawn);
-
-	const UFretteInventoryComponent* InventoryComp = Pawn->FindComponentByClass<UFretteInventoryComponent>();
-	require(InventoryComp, "DumpInventory: No inventory component found on pawn %s", *Pawn->GetName());
-
-	InventoryComp->DumpInventory();
-}
-
-static FAutoConsoleCommandWithWorld FCmdDumpInventory(
-	TEXT("Frette.DumpInventory"),
-	TEXT("Dumps the inventory contents of the local player's pawn. Usage: Frette.DumpInventory"),
-	FConsoleCommandWithWorldDelegate::CreateStatic(DumpInventory)
-);
-#endif
 
 UFretteInventoryComponent::UFretteInventoryComponent()
 {
@@ -68,7 +43,7 @@ void UFretteInventoryComponent::RemoveItem_Implementation(int32 ItemId)
 		(int32)GetOwner()->GetLocalRole(),
 		(int32)GetOwner()->GetRemoteRole());
 	require(GetOwner()->HasAuthority());
-w	require(Inventory.HasEntry(ItemId), "Inventory: Cannot remove item #%d because this inventory has no item with that ID.", ItemId);
+	require(Inventory.HasEntry(ItemId), "Inventory: Cannot remove item #%d because this inventory has no item with that ID.", ItemId);
 
 	Inventory.RemoveEntry(ItemId);
 }
@@ -81,10 +56,4 @@ void UFretteInventoryComponent::ReadyForReplication()
 	{
 		AddItem(StartingItemData);
 	}
-}
-
-void UFretteInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME_CONDITION(UFretteInventoryComponent, Inventory, COND_OwnerOnly);
 }

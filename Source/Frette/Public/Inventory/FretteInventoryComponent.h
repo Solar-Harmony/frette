@@ -77,11 +77,18 @@ public:
 	void RemoveItem(int32 ItemId);
 
 	virtual void ReadyForReplication() override;
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
+	{
+		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+		DOREPLIFETIME_CONDITION(UFretteInventoryComponent, Inventory, COND_OwnerOnly);
+	}
+
 #if WITH_EDITOR
-	void DumpInventory() const { Inventory.DumpInventory(); }
+	void DumpInventory();
+
+	UFUNCTION(Server, Reliable)
+	void ServerDumpInventory();
 #endif
 
 protected:

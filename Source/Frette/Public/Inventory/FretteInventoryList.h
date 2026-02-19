@@ -51,7 +51,7 @@ struct FFretteInventoryList : public FFastArraySerializer
 		return FastArrayDeltaSerialize<FFretteInventoryListEntry, FFretteInventoryList>(Entries, DeltaParms, *this);
 	}
 
-#if !UE_BUILD_SHIPPING
+#if WITH_EDITOR
 	void DumpInventory() const;
 #endif
 
