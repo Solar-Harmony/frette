@@ -1,45 +1,31 @@
 ﻿#include "Inventory/FretteInventoryComponent.h"
 
-#include "Frette/Frette.h"
-#include "Net/UnrealNetwork.h"
 #include "Engine/World.h"
+#include "Frette/Frette.h"
 #include "GameFramework/PlayerController.h"
+#include "Net/UnrealNetwork.h"
 
-#if !UE_BUILD_SHIPPING
-static FAutoConsoleCommandWithWorldAndArgs CmdDumpInventory(
+#if WITH_EDITOR
+static void DumpInventory(UWorld* World)
+{
+	require(World);
+
+	const APlayerController* PC = World->GetFirstPlayerController();
+	require(PC);
+
+	const APawn* Pawn = PC->GetPawn();
+	require(Pawn);
+
+	const UFretteInventoryComponent* InventoryComp = Pawn->FindComponentByClass<UFretteInventoryComponent>();
+	require(InventoryComp, "DumpInventory: No inventory component found on pawn %s", *Pawn->GetName());
+
+	InventoryComp->DumpInventory();
+}
+
+static FAutoConsoleCommandWithWorld FCmdDumpInventory(
 	TEXT("Frette.DumpInventory"),
 	TEXT("Dumps the inventory contents of the local player's pawn. Usage: Frette.DumpInventory"),
-	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
-	{
-		if (!World)
-		{
-			UE_LOG(LogFrette, Warning, TEXT("DumpInventory: Invalid world"));
-			return;
-		}
-
-		APlayerController* PC = World->GetFirstPlayerController();
-		if (!PC)
-		{
-			UE_LOG(LogFrette, Warning, TEXT("DumpInventory: No player controller found"));
-			return;
-		}
-
-		APawn* Pawn = PC->GetPawn();
-		if (!Pawn)
-		{
-			UE_LOG(LogFrette, Warning, TEXT("DumpInventory: Player controller has no pawn"));
-			return;
-		}
-
-		UFretteInventoryComponent* InventoryComp = Pawn->FindComponentByClass<UFretteInventoryComponent>();
-		if (!InventoryComp)
-		{
-			UE_LOG(LogFrette, Warning, TEXT("DumpInventory: Pawn has no inventory component"));
-			return;
-		}
-
-		InventoryComp->DumpInventory();
-	})
+	FConsoleCommandWithWorldDelegate::CreateStatic(DumpInventory)
 );
 #endif
 

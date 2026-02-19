@@ -159,6 +159,7 @@ void FFretteInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIn
 	}
 }
 
+#if WITH_EDITOR
 void FFretteInventoryList::DumpInventory() const
 {
 	if (!Owner.IsValid())
@@ -245,3 +246,4 @@ void FFretteInventoryList::DumpInventory() const
 
 	UE_LOG(LogFrette, Log, TEXT("======================================"));
 }
+#endif

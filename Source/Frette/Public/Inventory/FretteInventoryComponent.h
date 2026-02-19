@@ -80,7 +80,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-#if !UE_BUILD_SHIPPING
+#if WITH_EDITOR
 	void DumpInventory() const { Inventory.DumpInventory(); }
 #endif
 
