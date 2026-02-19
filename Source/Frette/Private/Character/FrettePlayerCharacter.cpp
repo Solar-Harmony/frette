@@ -10,9 +10,16 @@ class AFrettePlayerState;
 
 AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera"));
-	Camera->SetupAttachment(GetMesh(), FName("head"));
-	Camera->SetRelativeLocationAndRotation(FVector(-2.8f, 5.89f, 0.0f), FRotator(0.0f, 90.0f, -90.0f));
+	// Create the first person mesh that will be viewed only by this character's owner
+	FPMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("First Person Mesh"));
+
+	FPMesh->SetupAttachment(GetMesh());
+	FPMesh->SetOnlyOwnerSee(true);
+	FPMesh->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
+	FPMesh->SetCollisionProfileName(FName("NoCollision"));
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(GetCapsuleComponent());
 	Camera->bUsePawnControlRotation = true;
 	Camera->bEnableFirstPersonFieldOfView = true;
 	Camera->bEnableFirstPersonScale = true;
@@ -45,19 +52,8 @@ void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
 
 void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 {
-	const float YawDelta = LookAxis.X;
-	const float PitchDelta = LookAxis.Y;
-
-	FRotator CameraRotation = Camera->GetComponentRotation();
-	CameraRotation.Yaw += YawDelta;
-	CameraRotation.Pitch = FMath::Clamp(CameraRotation.Pitch + PitchDelta, -89.f, 89.f);
-	CameraRotation.Roll = 0.0f;
-
-	Camera->SetWorldRotation(CameraRotation.Quaternion());
-
-	CameraRotation.Yaw -= 90.0f;
-	CameraRotation.Pitch = 0.0f;
-	GetMesh()->SetWorldRotation(CameraRotation.Quaternion());
+	AddControllerYawInput(LookAxis.X);
+	AddControllerPitchInput(LookAxis.Y);
 }
 
 void AFrettePlayerCharacter::DoPlayerJump()
@@ -77,4 +73,12 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(State, this);
 	ApplyStartupEffects();
 	SubToAttributeChanges();
+}
+
+void AFrettePlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//Fixes weird rotation at the beginning of the game
+	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 }

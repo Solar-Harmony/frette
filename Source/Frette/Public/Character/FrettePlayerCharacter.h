@@ -37,6 +37,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USkeletalMeshComponent> FPMesh;
+
+	virtual void BeginPlay() override;
+
 private:
 	virtual void InitAbilityActorInfo() override;
 };
