@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "Input/FretteInputConfig.h"
+#include "Interface/InteractibleInterface.h"
 #include "FrettePlayerController.generated.h"
 
 class UCameraComponent;
@@ -16,6 +17,7 @@ class FRETTE_API AFrettePlayerController : public APlayerController
 
 protected:
 	virtual void SetupInputComponent() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 private:
 	virtual void BeginPlay() override;
@@ -33,4 +35,15 @@ private:
 	TObjectPtr<UFretteAbilitySystemComponent> FretteAbilitySystemComponent;
 
 	UFretteAbilitySystemComponent* GetASC();
+
+	void UpdateInteractableTarget();
+
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Interaction")
+	float InteractTraceRange = 500.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Interaction")
+	float InteractTraceRadius = 25.f;
+
+	UPROPERTY()
+	TScriptInterface<IInteractibleInterface> CurrentHoveredActor;
 };
