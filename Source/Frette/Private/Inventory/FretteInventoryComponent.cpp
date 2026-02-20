@@ -38,10 +38,6 @@ void UFretteInventoryComponent::ChangeItem_Implementation(UFretteInventoryItem* 
 
 void UFretteInventoryComponent::RemoveItem_Implementation(int32 ItemId)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Server RPC EXECUTED | NetMode: %d | Role: %d | RemoteRole: %d"),
-		(int32)GetNetMode(),
-		(int32)GetOwner()->GetLocalRole(),
-		(int32)GetOwner()->GetRemoteRole());
 	require(GetOwner()->HasAuthority());
 	require(Inventory.HasEntry(ItemId), "Inventory: Cannot remove item #%d because this inventory has no item with that ID.", ItemId);
 

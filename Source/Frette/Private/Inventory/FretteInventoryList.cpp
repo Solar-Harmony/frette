@@ -45,6 +45,7 @@ void FFretteInventoryList::ChangeEntry(UFretteInventoryItem* ItemToChange)
 
 	FFretteInventoryListEntry& Entry = Entries[Idx];
 	Entry.Item = ItemToChange;
+	Entry.UpdatedIdx = INDEX_NONE; // clear in case it was set by a remove previously
 	MarkItemDirty(Entry);
 
 	Owner->OnItemChanged.Broadcast(Entry.Item);
@@ -68,7 +69,11 @@ void FFretteInventoryList::RemoveEntry(int32 ItemId)
 		const int32 IdToMove = Entries[LastIdx].Item->Id;
 		IdToIndexMap[IdToMove] = Idx;
 		Entries.Swap(Idx, LastIdx);
-		MarkItemDirty(Entries[Idx]);
+		
+		// notify the client to update the ID -> index map for the swapped item
+		FFretteInventoryListEntry& MovedEntry = Entries[Idx];
+		MovedEntry.UpdatedIdx = Idx;
+		MarkItemDirty(MovedEntry);
 	}
 
 	Owner->RemoveReplicatedSubObject(ItemToRemove);
@@ -126,6 +131,7 @@ void FFretteInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndice
 		IdToIndexMap.Add(Entry.Item->Id, Index);
 		Owner->OnItemAdded.Broadcast(Entry.Item);
 		Owner->K2_OnItemAdded.Broadcast(Entry.Item);
+		FRETTE_LOG(Log, "PostReplicatedAdd: Item ID %d at index %d", Entry.Item->Id, Index);
 	}
 }
 
@@ -135,11 +141,20 @@ void FFretteInventoryList::PostReplicatedChange(const TArrayView<int32> ChangedI
 	
 	for (const int32 Index : ChangedIndices)
 	{
-		const FFretteInventoryListEntry& Entry = Entries[Index];
+		FFretteInventoryListEntry& Entry = Entries[Index];
 		check(IsValidItem(Entry.Item));
-		IdToIndexMap[Entry.Item->Id] = Index;
+		
+		if (Entry.UpdatedIdx != INDEX_NONE)
+		{
+			IdToIndexMap[Entry.Item->Id] = Entry.UpdatedIdx;
+			FRETTE_LOG(Log, "PostReplicatedChange: Item ID %d set to last removed index %d", Entry.Item->Id, Entry.UpdatedIdx);
+			Entry.UpdatedIdx = INDEX_NONE; // update on client, server already updated
+			return;
+		}
+		
 		Owner->OnItemChanged.Broadcast(Entry.Item);
 		Owner->K2_OnItemChanged.Broadcast(Entry.Item);
+		FRETTE_LOG(Log, "PostReplicatedChange: Item ID %d at index %d", Entry.Item->Id, Index);
 	}
 }
 
@@ -154,6 +169,7 @@ void FFretteInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIn
 		IdToIndexMap.Remove(Entry.Item->Id);
 		Owner->OnItemRemoved.Broadcast(Entry.Item);
 		Owner->K2_OnItemRemoved.Broadcast(Entry.Item);
+		FRETTE_LOG(Log, "PreReplicatedRemove: Item ID %d at index %d", Entry.Item->Id, Index);
 	}
 }
 
@@ -201,8 +217,8 @@ void FFretteInventoryList::DumpInventory() const
 		{
 			const FString DataName = IsValid(Entry.Item->Data) ? Entry.Item->Data->GetName() : TEXT("NULL");
 			const FString DisplayName = IsValid(Entry.Item->Data) ? Entry.Item->Data->DisplayName.ToString() : TEXT("N/A");
-			Builder.Appendf(TEXT("  [%d] Item ID: %d | Data: %s (%s) | RepID: %d | RepKey: %d\n"),
-				i, Entry.Item->Id, *DataName, *DisplayName, Entry.ReplicationID, Entry.ReplicationKey);
+			Builder.Appendf(TEXT("  [%d] Item ID: %d | Data: %s (%s) | UpdatedIdx: %d\n"),
+				i, Entry.Item->Id, *DataName, *DisplayName, Entry.UpdatedIdx);
 		}
 		else
 		{
@@ -231,11 +247,11 @@ void FFretteInventoryList::DumpInventory() const
 		{
 			bHasErrors = true;
 			if (!bValidIndex)
-				ErrorBuilder.Appendf(TEXT("    ERROR: Index %d is out of bounds (Num=%d)\n"), MappedIndex, Entries.Num());
+				ErrorBuilder.Appendf(TEXT("    ERROR: ItemID %d -> Index %d is out of bounds (Num=%d)\n"), ItemId, MappedIndex, Entries.Num());
 			else if (!Entries[MappedIndex].Item)
-				ErrorBuilder.Appendf(TEXT("    ERROR: Entry at index %d has NULL item\n"), MappedIndex);
+				ErrorBuilder.Appendf(TEXT("    ERROR: ItemID %d -> Index %d has NULL item\n"), ItemId, MappedIndex);
 			else
-				ErrorBuilder.Appendf(TEXT("    ERROR: Entry at index %d has different ID (%d)\n"), MappedIndex, Entries[MappedIndex].Item->Id);
+				ErrorBuilder.Appendf(TEXT("    ERROR: ItemID %d -> Index %d has different ID (%d)\n"), ItemId, MappedIndex, Entries[MappedIndex].Item->Id);
 		}
 	}
 

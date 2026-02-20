@@ -19,6 +19,9 @@ struct FFretteInventoryListEntry : public FFastArraySerializerItem
 
 	UPROPERTY()
 	UFretteInventoryItem* Item = nullptr;
+	
+	UPROPERTY()
+	int32 UpdatedIdx = INDEX_NONE;
 };
 
 USTRUCT()
@@ -65,9 +68,13 @@ private:
 	UPROPERTY(NotReplicated)
 	int32 NextId = 0;
 
+	// TODO: It looks like the array serializer ALREADY has a lookup map?
+	// However, Lyra doesn't use it and has a TODO comment saying "use an acceleration structure?" so I didn't realise until now
+	// It also doesn't look documented but it might be possible to get rid of all of this lol
+	// Not doing it rn because we don't have time and it doesn't matter as long as our things works so
 	UPROPERTY(NotReplicated)
 	TMap<int32, int32> IdToIndexMap;
-
+	
 	int32 GetIndexById(int32 ItemId) const;
 	bool HasValidOwner() const;
 };
