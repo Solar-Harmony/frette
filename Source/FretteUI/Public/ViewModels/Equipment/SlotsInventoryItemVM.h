@@ -14,6 +14,9 @@ class FRETTEUI_API USlotsInventoryItemVM : public UFretteViewModel
 public:
 	UFUNCTION(BlueprintPure, FieldNotify)
 	FText GetDisplayName() const { return Item->Data->DisplayName; }
+	
+	UFUNCTION(BlueprintPure, FieldNotify)
+	int32 GetId() const { return Item->Id; }
 
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TObjectPtr<UTexture2D> Icon;
