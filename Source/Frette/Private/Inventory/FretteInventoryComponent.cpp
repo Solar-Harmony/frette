@@ -10,6 +10,11 @@ UFretteInventoryComponent::UFretteInventoryComponent()
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
+UFretteInventoryItem* UFretteInventoryComponent::GetItemByIndexEditor(int32 Idx) const
+{
+	return Inventory.GetItemByIndex(Idx);
+}
+
 void UFretteInventoryComponent::SelectItem(int32 ItemId) const
 {
 	const UFretteInventoryItem* ItemToSelect = GetItem(ItemId);

@@ -18,6 +18,12 @@ UFretteInventoryItem* FFretteInventoryList::GetItemById(int32 ItemId) const
 	return nullptr;
 }
 
+UFretteInventoryItem* FFretteInventoryList::GetItemByIndex(int32 Idx) const
+{
+	ensure(Entries.IsValidIndex(Idx));
+	return Entries[Idx].Item;
+}
+
 void FFretteInventoryList::AddEntry(UFretteInventoryItem* ItemToAdd)
 {
 	check(Owner.IsValid());

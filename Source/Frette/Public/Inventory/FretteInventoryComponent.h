@@ -60,6 +60,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
 	UFretteInventoryItem* GetItem(int32 Id) const { return Inventory.GetItemById(Id); }
+	
+	// This is irrelevant except for debugging the inventory.
+	UFUNCTION(BlueprintCallable, Category="Frette|Inventory", meta = (DevelopmentOnly))
+	UFretteInventoryItem* GetItemByIndexEditor(int32 Idx) const;
 
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
 	bool IsItemValid(const UFretteInventoryItem* Item) const { return Inventory.IsValidItem(Item); }
