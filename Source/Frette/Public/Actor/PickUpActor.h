@@ -15,11 +15,6 @@ class FRETTE_API APickUpActor : public AActor
 public:	
 	APickUpActor();
 	
-	UFUNCTION()
-	void PickedUp(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-		bool bFromSweep, const FHitResult& SweepResult);
-	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
 	UStaticMesh* ItemMesh;
 	
@@ -39,6 +34,11 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 private:
+	UFUNCTION()
+	void PickedUp(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
+	
 	float YawAngle = 0.f;
 	
 	const float Item_Size = 40.f /*cm*/;
