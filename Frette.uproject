@@ -70,11 +70,15 @@
       ]
     },
     {
-      "Name": "ModelViewViewModelPreview",
+      "Name": "ModelViewViewModel",
       "Enabled": true
     },
     {
       "Name": "CommonUI",
+      "Enabled": true
+    },
+    {
+      "Name": "ActorLocker",
       "Enabled": true
     }
   ]
