@@ -291,7 +291,7 @@ static void ExecDumpInventory(UWorld* World)
 }
 
 static FAutoConsoleCommandWithWorld FCmdDumpInventory(
-	TEXT("Frette.DumpInventory"),
+	TEXT("Frette.PrintInventory"),
 	TEXT("Dumps the inventory contents of the local player's pawn on both server and client. Usage: Frette.DumpInventory"),
 	FConsoleCommandWithWorldDelegate::CreateStatic(ExecDumpInventory)
 );
