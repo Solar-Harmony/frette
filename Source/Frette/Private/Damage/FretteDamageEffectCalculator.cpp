@@ -22,11 +22,10 @@ void UFretteDamageEffectCalculator::Execute_Implementation(const FGameplayEffect
 		const UFretteBodyPartAttributeSet* AttributeSet = Frette::BodyParts::GetAttributeSetFromTag(TargetASC, Tag);
 		check(IsValid(AttributeSet));
 			
-		FGameplayModifierEvaluatedData OutputModifier(
-			AttributeSet->GetHealthAttribute(),
-			EGameplayModOp::Additive,
+		OutExecutionOutput.AddOutputModifier({
+			AttributeSet->GetHealthAttribute(), 
+			EGameplayModOp::Additive, 
 			DamageMagnitude
-		);
-		OutExecutionOutput.AddOutputModifier(OutputModifier);
+		});
 	}
 }
