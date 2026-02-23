@@ -13,7 +13,7 @@ void UFretteDamageEffectCalculator::Execute_Implementation(const FGameplayEffect
 	const FGameplayTag DamageTag = FGameplayTag::RequestGameplayTag("Frette.GameplayEffect.Damage");
 	const float DamageMagnitude = Spec.GetSetByCallerMagnitude(DamageTag, true, 0.0f);
 	
-	static FGameplayTag BodyPartRootTag = FGameplayTag::RequestGameplayTag(TEXT("Frette.BodyParts"));
+	static FGameplayTag BodyPartRootTag = FGameplayTag::RequestGameplayTag(TEXT("Frette.BodyPart"));
 	static FGameplayTagContainer BodyPartRoot{ BodyPartRootTag };
 	FGameplayTagContainer BodyPartTags = Spec.GetDynamicAssetTags().Filter(BodyPartRoot);
 	
