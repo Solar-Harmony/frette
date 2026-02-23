@@ -2,6 +2,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
 #include "Input/FretteInputComponent.h"
+#include "Player/FrettePlayerState.h"
+
+class AFrettePlayerState;
 
 void AFrettePlayerController::BeginPlay()
 {
@@ -12,6 +15,7 @@ void AFrettePlayerController::BeginPlay()
 
 	check(DefaultInputContext);
 
+	// FIXME: already added in BP
 	if (auto* Input = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Input->AddMappingContext(DefaultInputContext, 0);
@@ -36,6 +40,16 @@ void AFrettePlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
 	if (GetASC())
 		GetASC()->AbilityInputReleased(InputTag);
+}
+
+void AFrettePlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (IsLocalController())
+	{
+		SetupWidgetsAndViewModels();
+	}
 }
 
 UFretteAbilitySystemComponent* AFrettePlayerController::GetASC()

@@ -4,6 +4,7 @@
 #include "AbilitySystemInterface.h"
 
 #include "GameFramework/PlayerState.h"
+#include "Inventory/FretteInventoryComponent.h"
 #include "FrettePlayerState.generated.h"
 
 class UAttributeSet;
@@ -17,7 +18,7 @@ class FRETTE_API AFrettePlayerState : public APlayerState, public IAbilitySystem
 public:
 	AFrettePlayerState();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	UAttributeSet*                   GetAttributeSet() const { return AttributeSet; }
+	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
 protected:
 	UPROPERTY()

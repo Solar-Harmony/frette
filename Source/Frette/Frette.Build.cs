@@ -8,6 +8,8 @@ public class Frette : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core",
@@ -17,7 +19,9 @@ public class Frette : ModuleRules
 			"EnhancedInput",
 			"GameplayAbilities",
 			"GameplayTags",
-			"GameplayTasks"
+			"GameplayTasks",
+			"NetCore",
+			"Boost"
 		});
 
 		PrivateDependencyModuleNames.AddRange([]);
