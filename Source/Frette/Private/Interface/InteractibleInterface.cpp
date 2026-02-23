@@ -48,9 +48,11 @@ void IInteractibleInterface::AlignInteractibleText(UWorld* World, UTextRenderCom
 	APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(World, 0);
 	if (IsValid(CameraManager))
 	{
-		FRotator LookAtRot = (CameraManager->GetCameraLocation() - Text->GetRelativeLocation()).Rotation();
-		Text->SetRelativeRotation(FRotator(0.f, LookAtRot.Yaw, 0.f)); // Only rotate around Yaw
+		FVector CameraLocation = CameraManager->GetCameraLocation();
+		FVector DirectionToCamera = CameraLocation - Text->GetComponentLocation();
+		DirectionToCamera.Z = 0.f;
+
+		FRotator LookAtRot = DirectionToCamera.Rotation();
+		Text->SetRelativeRotation(FRotator(0.f, LookAtRot.Yaw, 0.f)); 
 	}
 }
-
-// Add default functionality here for any IInteractibleInterface functions that are not pure virtual.
