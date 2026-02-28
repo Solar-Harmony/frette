@@ -1,0 +1,30 @@
+﻿using UnrealBuildTool;
+
+public class FretteUI : ModuleRules
+{
+    public FretteUI(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Core", "Frette"
+            }
+        );
+
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "CoreUObject",
+                "Engine",
+                "Slate",
+                "SlateCore", 
+                "UMG",
+                "ModelViewViewModel",
+                "ModelViewViewModelBlueprint",
+                "Frette"
+            }
+        );
+    }
+}
