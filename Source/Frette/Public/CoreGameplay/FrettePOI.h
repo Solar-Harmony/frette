@@ -17,4 +17,10 @@ public:
 	// The name of that point of interest. Will be displayed in clues.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette")
 	FText DisplayName;
+	
+	virtual FName GetCustomIconName() const override
+	{
+		static const FName IconName("LayerBrowser.ExploreLayerContents");
+		return IconName;
+	}
 };

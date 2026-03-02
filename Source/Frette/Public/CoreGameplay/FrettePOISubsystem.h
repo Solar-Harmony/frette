@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Containers/Map.h"
 #include "FrettePOISubsystem.generated.h"
 
 class AFrettePOI;
@@ -23,6 +24,7 @@ public:
 	TSubclassOf<AFrettePOI> GetRandomPOIClass() const;
 	
 private:
-	UPROPERTY(Transient)
+	// uproperty doesn't support multimap
+	// doesn't matter because POIs are added once at start and never removed, so their lifetime = this subsystem's lifetime 
 	TMultiMap<TSubclassOf<AFrettePOI>, AFrettePOI*> ClassToPOIs;
 };
