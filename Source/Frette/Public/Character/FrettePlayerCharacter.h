@@ -41,6 +41,13 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> FPMesh;
 
 	virtual void BeginPlay() override;
+	void SetLookInputScale();
+
+	UPROPERTY(EditAnywhere)
+	float HorizontalSensitivity = 1.f;
+
+	UPROPERTY(EditAnywhere)
+	float VerticalSensitivity = 1.f;
 
 private:
 	virtual void InitAbilityActorInfo() override;

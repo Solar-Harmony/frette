@@ -1,9 +1,11 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
+#include "EnhancedInputComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Equipments/FretteFakeEquipmentComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/FrettePlayerState.h"
 
 class AFrettePlayerState;
@@ -19,12 +21,12 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	FPMesh->SetCollisionProfileName(FName("NoCollision"));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(GetCapsuleComponent());
+	Camera->SetupAttachment(FPMesh, FName("head"));
 	Camera->bUsePawnControlRotation = true;
 	Camera->bEnableFirstPersonFieldOfView = true;
 	Camera->bEnableFirstPersonScale = true;
-	Camera->FirstPersonFieldOfView = 70.0f;
-	Camera->FirstPersonScale = 0.6f;
+	// Camera->FirstPersonFieldOfView = 70.0f;
+	// Camera->FirstPersonScale = 0.6f;
 
 	InventoryComponent = CreateDefaultSubobject<UFakeInventoryComponent>(TEXT("Inventory"));
 }
@@ -53,7 +55,7 @@ void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
 void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 {
 	AddControllerYawInput(LookAxis.X);
-	AddControllerPitchInput(LookAxis.Y);
+	AddControllerPitchInput(LookAxis.Y * 2.5);
 }
 
 void AFrettePlayerCharacter::DoPlayerJump()
@@ -81,4 +83,7 @@ void AFrettePlayerCharacter::BeginPlay()
 
 	//Fixes weird rotation at the beginning of the game
 	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+
 }
+
+void AFrettePlayerCharacter::SetLookInputScale() {}
