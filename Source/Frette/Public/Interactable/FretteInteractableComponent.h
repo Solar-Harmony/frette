@@ -25,7 +25,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnInteract OnInteract;
 	
-	UPROPERTY(EditAnywhere, Category = "Interaction")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	TObjectPtr<UStaticMeshComponent> Mesh;
 	
 	UPROPERTY(EditAnywhere, Category = "Interaction")
