@@ -1,4 +1,4 @@
-#include "Components/FretteInteractableComponent.h"
+#include "Interactable/FretteInteractableComponent.h"
 
 UFretteInteractableComponent::UFretteInteractableComponent() {}
 

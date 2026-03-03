@@ -7,7 +7,7 @@
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "Input/FretteInputConfig.h"
 #include "InputAction.h"
-#include "Components/FretteInteractorComponent.h"
+#include "Interactable/FretteInteractorComponent.h"
 #include "FrettePlayerController.generated.h"
 
 class UCameraComponent;

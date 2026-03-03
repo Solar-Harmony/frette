@@ -1,8 +1,6 @@
 #include "Actor/PickUpActor.h"
 #include "Character/FrettePlayerCharacter.h"
-#include "Components/FretteInteractableComponent.h"
-#include "Components/TextRenderComponent.h"
-#include "Kismet/GameplayStatics.h"
+#include "Interactable/FretteInteractableComponent.h"
 #include "PhysicsEngine/BodySetup.h"
 
 APickUpActor::APickUpActor()

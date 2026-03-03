@@ -1,11 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FrettePostProcessSubsystem.h"
 #include "Components/SphereComponent.h"
-#include "Components/TextRenderComponent.h"
 #include "GameFramework/Actor.h"
-#include "Interface/FretteInteractableInterface.h"
+#include "Interactable/FretteInteractableInterface.h"
 #include "PickUpActor.generated.h"
 
 class UFretteInteractableComponent;

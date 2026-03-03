@@ -1,8 +1,8 @@
-#include "Components/FretteInteractorComponent.h"
+#include "Interactable/FretteInteractorComponent.h"
 
 #include "FrettePostProcessSubsystem.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/FretteInteractableComponent.h"
+#include "Interactable/FretteInteractableComponent.h"
 #include "Components/TextBlock.h"
 #include "Player/FrettePlayerController.h"
 
