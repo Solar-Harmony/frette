@@ -1,5 +1,6 @@
 #include "Actor/PickUpActor.h"
 #include "Character/FrettePlayerCharacter.h"
+#include "Components/FretteInteractableComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/BodySetup.h"
@@ -21,13 +22,12 @@ APickUpActor::APickUpActor()
 	StaticMesh->SetEnableGravity(true);
 	StaticMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
 	
-	InteractibleText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("InteractibleText"));
-	InteractibleText->AddRelativeLocation(FVector(0.f, 0.f, Item_Size * 1.5f) + 5.f);
-	InteractibleText->SetupAttachment(OverlapSphere);
-	InteractibleText->SetText(INVTEXT("Test123"));
-	
-	//SetupOutlineInteractible(StaticMesh);
-	SetupTextInteractible(InteractibleText);
+	Interactable = CreateDefaultSubobject<UFretteInteractableComponent>(TEXT("Interactable"));
+	Interactable->OnInteract.AddDynamic(this, &APickUpActor::Interact);
+	Interactable->Mesh = StaticMesh;
+	Interactable->bShowMessage = true;
+	Interactable->bShowOutline = true;
+	Interactable->OutlineColor = FColor::Blue;
 }
 
 void APickUpActor::OnConstruction(const FTransform& Transform)
@@ -71,32 +71,8 @@ void APickUpActor::PickedUp(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 		Destroy();
 }
 
-void APickUpActor::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void APickUpActor::BeginHover()
-{
-	//BeginHoverOutline(GetWorld(), StaticMesh, FColor::Red, 2.f, 0.7f);
-	BeginHoverText(InteractibleText);
-}
-
-void APickUpActor::EndHover()
-{
-	//EndHoverOutline(StaticMesh);
-	EndHoverText(InteractibleText);
-}
-
 void APickUpActor::Interact()
 {
 	if (bDestroyOnPickUp)
 		Destroy();
-}
-
-void  APickUpActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	AlignInteractibleText(GetWorld(), InteractibleText);
 }

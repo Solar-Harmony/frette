@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "PostProcessSubsystem.generated.h"
+#include "FrettePostProcessSubsystem.generated.h"
 
 UCLASS()
-class FRETTE_API UPostProcessSubsystem : public UGameInstanceSubsystem
+class FRETTE_API UFrettePostProcessSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 

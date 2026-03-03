@@ -1,24 +1,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PostProcessSubsystem.h"
+#include "FrettePostProcessSubsystem.h"
 #include "Components/SphereComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/Actor.h"
-#include "Interface/InteractibleInterface.h"
+#include "Interface/FretteInteractableInterface.h"
 #include "PickUpActor.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickedUp, AActor*, InteractingActor);
 
 UCLASS()
-class FRETTE_API APickUpActor : public AActor, public IInteractibleInterface
+class FRETTE_API APickUpActor : public AActor, public IFretteInteractableInterface
 {
 	GENERATED_BODY()
 	
 public:	
 	APickUpActor();
-	
-	virtual void BeginPlay() override;
 	
 	UFUNCTION()
 	void PickedUp(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -37,20 +35,16 @@ public:
 	UPROPERTY()
 	USphereComponent* OverlapSphere;
 	
+	UPROPERTY()
+	UFretteInteractableComponent* Interactable;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnPickedUp OnPickedUp;
 	
-	UPROPERTY()
-	UPostProcessSubsystem* PostProcess;
+	UFUNCTION()
+	void Interact();
 	
-	UPROPERTY()
-	UTextRenderComponent* InteractibleText;
-	
-	virtual void BeginHover() override;
-	virtual void EndHover() override;
-	virtual void Interact() override;
-	
-	virtual void Tick(float DeltaSeconds) override;
+	virtual UFretteInteractableComponent* GetInteractableComponent() override { return Interactable; }
 	
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
