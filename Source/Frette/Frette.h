@@ -33,6 +33,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 	{ \
 		const FString Caller = Frette::Private::CaptureCaller(); \
 		FRETTE_LOG(Error, "Precondition failed: %s in %s.", #Condition, Caller); \
+		Frette::Private::LogMessageErr(FString::Printf(TEXT("Precondition failed: %s in %s."), TEXT(#Condition), *Caller)); \
 		UE_DEBUG_BREAK(); \
 		return; \
 	}
@@ -42,6 +43,8 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 	{ \
 		const FString Caller = Frette::Private::CaptureCaller(); \
 		FRETTE_LOG(Error, "Precondition failed: %s in %s: %s", #Condition, Caller, Msg); \
+		Frette::Private::LogMessageErr(FString::Printf(TEXT("Precondition failed: %s in %s: %s"), TEXT(#Condition), *Caller, TEXT(Msg))); \
+		UE_DEBUG_BREAK(); \
 		return; \
 	}
 
@@ -50,6 +53,8 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 	{ \
 		const FString Caller = Frette::Private::CaptureCaller(); \
 		FRETTE_LOG(Error, "Precondition failed: %s in %s: " Format, #Condition, Caller, __VA_ARGS__); \
+		Frette::Private::LogMessageErr(FString::Printf(TEXT("Precondition failed: %s in %s: " Format), TEXT(#Condition), *Caller, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__))); \
+		UE_DEBUG_BREAK(); \
 		return; \
 	}
 
@@ -97,5 +102,14 @@ namespace Frette::Private
 		FPlatformStackWalk::ProgramCounterToHumanReadableString(0, Address, Buffer, sizeof(Buffer));
 		
 		return FString(ANSI_TO_TCHAR(Buffer));
+	}
+	
+	FORCEINLINE void LogMessageErr(const FString& Message)
+	{
+#if WITH_EDITOR
+		FMessageLog("Frette Asserts")
+			.Error()
+			->AddToken(FTextToken::Create(FText::FromString(Message)));
+#endif
 	}
 }
