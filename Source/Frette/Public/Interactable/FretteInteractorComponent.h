@@ -40,4 +40,7 @@ public:
 	
 	UPROPERTY()
 	TObjectPtr<APlayerController> PlayerController;
+	
+private:
+	UFretteInteractableComponent* GetInteractableComponentFromHover(TScriptInterface<IFretteInteractableInterface> hover) const;
 };

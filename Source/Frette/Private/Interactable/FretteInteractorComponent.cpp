@@ -11,6 +11,33 @@ UFretteInteractorComponent::UFretteInteractorComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
+UFretteInteractableComponent* UFretteInteractorComponent::GetInteractableComponentFromHover(TScriptInterface<IFretteInteractableInterface> hover) const
+{
+	UFretteInteractableComponent* Interactable = nullptr;
+
+	// GetInterface() is only non-null for C++ implementors; Blueprint implementors return null here.
+	// So we skip the virtual call and go straight to FindComponentByClass for both paths.
+	if (hover.GetInterface())
+	{
+		Interactable = hover->GetInteractableComponent();
+	}
+
+	if (!IsValid(Interactable))
+	{
+		AActor* Actor = Cast<AActor>(hover.GetObject());
+		if (!IsValid(Actor))
+			return nullptr;
+
+		Interactable = Actor->FindComponentByClass<UFretteInteractableComponent>();
+		if (!IsValid(Interactable))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hovered actor %s implements IFretteInteractableInterface but has no valid InteractableComponent"), *Actor->GetName());
+			return nullptr;
+		}
+	}
+	return Interactable;
+}
+
 void UFretteInteractorComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -46,10 +73,13 @@ void UFretteInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickT
 
 void UFretteInteractorComponent::Interact()
 {
-	if (CurrentHoveredActor.GetInterface())
+	if (CurrentHoveredActor.GetObject())
 	{
-		UFretteInteractableComponent* Interactable = CurrentHoveredActor->GetInteractableComponent();
-		Interactable->OnInteract.Broadcast();
+		UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
+		if (IsValid(Interactable))
+		{
+			Interactable->OnInteract.Broadcast();
+		}
 	}
 }
 
@@ -85,49 +115,55 @@ void UFretteInteractorComponent::UpdateInteractableTarget()
 	if (NewHovered.GetObject() == CurrentHoveredActor.GetObject())
 		return;
 
-	if (CurrentHoveredActor.GetInterface())
+	if (CurrentHoveredActor.GetObject())
 	{
-		UFretteInteractableComponent* Interactable = CurrentHoveredActor->GetInteractableComponent();
+		UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
 		
-		if (IsValid(InteractWidgetInstance) && Interactable->bShowMessage)
+		if (IsValid(Interactable))
 		{
-			InteractWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
-		}
+			if (IsValid(InteractWidgetInstance) && Interactable->bShowMessage)
+			{
+				InteractWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+			}
 		
-		if (Interactable->bShowOutline && IsValid(Interactable->Mesh))
-		{
-			Interactable->Mesh->SetRenderCustomDepth(false);
-		}
+			if (Interactable->bShowOutline && IsValid(Interactable->Mesh))
+			{
+				Interactable->Mesh->SetRenderCustomDepth(false);
+			}
 		
-		Interactable->OnEndHover.Broadcast();
+			Interactable->OnEndHover.Broadcast();
+		}
 	}
 
 	CurrentHoveredActor = NewHovered;
 
-	if (CurrentHoveredActor.GetInterface())
+	if (CurrentHoveredActor.GetObject())
 	{
-		UFretteInteractableComponent* Interactable = CurrentHoveredActor->GetInteractableComponent();
+		UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
 		
-		if (IsValid(InteractWidgetInstance) && Interactable->bShowMessage)
+		if (IsValid(Interactable))
 		{
-			InteractWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-			UTextBlock* TextLabel = Cast<UTextBlock>(InteractWidgetInstance->GetWidgetFromName(TEXT("TextBlock_Message")));
-			if (IsValid(TextLabel))
+			if (IsValid(InteractWidgetInstance) && Interactable->bShowMessage)
 			{
-				TextLabel->SetText(Interactable->Message);
+				InteractWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+				UTextBlock* TextLabel = Cast<UTextBlock>(InteractWidgetInstance->GetWidgetFromName(TEXT("TextBlock_Message")));
+				if (IsValid(TextLabel))
+				{
+					TextLabel->SetText(Interactable->Message);
+				}
 			}
-		}
 		
-		if (Interactable->bShowOutline && IsValid(Interactable->Mesh))
-		{
-			GetWorld()->GetGameInstance()
-				 ->GetSubsystem<UFrettePostProcessSubsystem>()
-				 ->SetOutline(Interactable->OutlineColor, Interactable->OutlineThickness, Interactable->OutlineAlpha);
-			Interactable->Mesh->SetCustomDepthStencilValue(2);
-			Interactable->Mesh->SetRenderCustomDepth(true);
-		}
+			if (Interactable->bShowOutline && IsValid(Interactable->Mesh))
+			{
+				GetWorld()->GetGameInstance()
+					->GetSubsystem<UFrettePostProcessSubsystem>()
+					->SetOutline(Interactable->OutlineColor, Interactable->OutlineThickness, Interactable->OutlineAlpha);
+				Interactable->Mesh->SetCustomDepthStencilValue(2);
+				Interactable->Mesh->SetRenderCustomDepth(true);
+			}
 		
-		Interactable->OnBeginHover.Broadcast();
+			Interactable->OnBeginHover.Broadcast();
+		}
 	}
 }
 

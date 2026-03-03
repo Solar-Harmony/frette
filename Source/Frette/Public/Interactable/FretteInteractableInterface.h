@@ -16,5 +16,5 @@ class FRETTE_API IFretteInteractableInterface
 
 public:
 	UFUNCTION()
-	virtual UFretteInteractableComponent* GetInteractableComponent() = 0;
+	virtual UFretteInteractableComponent* GetInteractableComponent() { return nullptr; }
 };
