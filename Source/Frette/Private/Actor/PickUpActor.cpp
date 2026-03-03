@@ -1,24 +1,31 @@
 #include "Actor/PickUpActor.h"
 #include "Character/FrettePlayerCharacter.h"
+#include "Interactable/FretteInteractableComponent.h"
 #include "PhysicsEngine/BodySetup.h"
 
 APickUpActor::APickUpActor()
 {
-	PrimaryActorTick.bCanEverTick = false;
-	
+	PrimaryActorTick.bCanEverTick = true;
+
+	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
+	SetRootComponent(OverlapSphere);
+	OverlapSphere->SetSphereRadius((Item_Size / 2.f) * Sphere_Radius_Ratio);
+	OverlapSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickUpActor::PickedUp);
+
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item"));
-	StaticMesh->SetSimulatePhysics(true);
+	StaticMesh->SetupAttachment(OverlapSphere);
+	StaticMesh->SetSimulatePhysics(false);
 	StaticMesh->SetCollisionProfileName(TEXT("BlockAll"));
 	StaticMesh->SetEnableGravity(true);
 	StaticMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
-	SetRootComponent(StaticMesh);
 	
-	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
-	OverlapSphere->SetSphereRadius((Item_Size / 2.f) * Sphere_Radius_Ratio);
-	StaticMesh->SetSimulatePhysics(false);
-	OverlapSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickUpActor::PickedUp);
-	OverlapSphere->SetupAttachment(StaticMesh);
+	Interactable = CreateDefaultSubobject<UFretteInteractableComponent>(TEXT("Interactable"));
+	Interactable->OnInteract.AddDynamic(this, &APickUpActor::Interact);
+	Interactable->Mesh = StaticMesh;
+	Interactable->bShowMessage = true;
+	Interactable->bShowOutline = true;
+	Interactable->OutlineColor = FColor::Blue;
 }
 
 void APickUpActor::OnConstruction(const FTransform& Transform)
@@ -43,6 +50,7 @@ void APickUpActor::OnConstruction(const FTransform& Transform)
 		const float MaxDim = FMath::Max3(CurrentSize.X, CurrentSize.Y, CurrentSize.Z);
 		const float ScaleFactor = (MaxDim > 0.0f) ? (Item_Size / MaxDim) : 1.0f;
 		StaticMesh->SetRelativeScale3D(FVector(ScaleFactor));
+		StaticMesh->SetRelativeLocation(FVector(0.f, 0.f, Item_Size / 2.f));
 	}
 }
 
@@ -57,6 +65,12 @@ void APickUpActor::PickedUp(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 	
 	OnPickedUp.Broadcast(OtherActor);
 	
+	if (bDestroyOnPickUp)
+		Destroy();
+}
+
+void APickUpActor::Interact()
+{
 	if (bDestroyOnPickUp)
 		Destroy();
 }
