@@ -1,8 +1,10 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Inventory/FretteInventoryComponent.h"
 #include "Player/FrettePlayerState.h"
 
 class AFrettePlayerState;
@@ -12,7 +14,10 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetCapsuleComponent());
 
-	InventoryComponent = CreateDefaultSubobject<UFakeInventoryComponent>(TEXT("Inventory"));
+	PlayerInventory = CreateDefaultSubobject<UFretteInventoryComponent>("Equipment Inventory");
+	PlayerInventory->SetIsReplicated(true);
+	
+	Equipment = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment"));
 }
 
 //Client side
@@ -27,6 +32,7 @@ void AFrettePlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 	InitAbilityActorInfo();
+	Equipment->Initialize(PlayerInventory);
 }
 
 void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
