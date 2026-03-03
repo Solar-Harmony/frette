@@ -35,6 +35,8 @@ void UFretteWeaponInstance::OnEquipped()
 	//Mis en If pour éviter de crash si on run un simulated proxy
 	if (ASC)
 		ASC->GrantAbilitiesFromAbilitySet(AbilitySet, this);
+
+	K2_OnEquipped();
 }
 
 void UFretteWeaponInstance::SpawnEquipmentActor()
@@ -64,6 +66,7 @@ void UFretteWeaponInstance::OnUnequipped()
 	ensure(ASC);
 	ASC->RemoveAbilitiesFromAbilitySet(AbilitySet);
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("Unequipped weapon from ") + GetPawn()->GetName());
+	K2_OnUnequipped();
 }
 
 void UFretteWeaponInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

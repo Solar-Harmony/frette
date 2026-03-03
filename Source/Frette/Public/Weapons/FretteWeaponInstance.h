@@ -40,7 +40,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	APawn* GetPawn() const;
 	//~End of UObject interface
-
+	UFUNCTION()
 	virtual void OnEquipped();
 	virtual void SpawnEquipmentActor();
 	virtual void OnUnequipped();
@@ -54,4 +54,11 @@ public:
 
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	TObjectPtr<AActor> SpawnedActor;
+
+protected:
+	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnEquipped"))
+	void K2_OnEquipped();
+
+	UFUNCTION(BlueprintImplementableEvent, Category=Equipment, meta=(DisplayName="OnUnequipped"))
+	void K2_OnUnequipped();
 };
