@@ -16,6 +16,8 @@ void UFretteInteractorComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	PlayerController = Cast<AFrettePlayerController>(GetOwner());
+	if (!PlayerController->IsLocalPlayerController())
+		return;
 	
 	if (InteractWidgetClass)
 	{

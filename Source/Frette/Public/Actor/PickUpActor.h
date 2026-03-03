@@ -8,6 +8,7 @@
 #include "Interface/FretteInteractableInterface.h"
 #include "PickUpActor.generated.h"
 
+class UFretteInteractableComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickedUp, AActor*, InteractingActor);
 
 UCLASS()
@@ -24,19 +25,19 @@ public:
 					   bool bFromSweep, const FHitResult& SweepResult);
 	
 	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
-	UStaticMesh* ItemMesh;
+	TObjectPtr<UStaticMesh> ItemMesh;
 	
 	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
 	bool bDestroyOnPickUp = false;
 	
-	UPROPERTY()
-	UStaticMeshComponent* StaticMesh;
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UStaticMeshComponent> StaticMesh;
 
-	UPROPERTY()
-	USphereComponent* OverlapSphere;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USphereComponent> OverlapSphere;
 	
-	UPROPERTY()
-	UFretteInteractableComponent* Interactable;
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteInteractableComponent> Interactable;
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnPickedUp OnPickedUp;
