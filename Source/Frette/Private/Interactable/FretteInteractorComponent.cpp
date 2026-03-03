@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Interactable/FretteInteractableComponent.h"
 #include "Components/TextBlock.h"
+#include "Frette/Frette.h"
 #include "Player/FrettePlayerController.h"
 
 UFretteInteractorComponent::UFretteInteractorComponent()
@@ -19,23 +20,12 @@ void UFretteInteractorComponent::BeginPlay()
 	if (!PlayerController->IsLocalPlayerController())
 		return;
 	
-	if (InteractWidgetClass)
-	{
-		InteractWidgetInstance = CreateWidget<UUserWidget>(PlayerController, InteractWidgetClass);
-		if (IsValid(InteractWidgetInstance))
-		{
-			InteractWidgetInstance->AddToViewport();
-			
-			FVector2D ViewportSize;
-			GEngine->GameViewport->GetViewportSize(ViewportSize);
-
-			InteractWidgetInstance->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
-			InteractWidgetInstance->SetPositionInViewport(ViewportSize
-				* FVector2D(0.5f, 0.35f));
-			
-			InteractWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
-		}
-	}
+	require(InteractWidgetClass, "InteractWidgetClass must be set in the InteractorComponent");
+	
+	InteractWidgetInstance = CreateWidget(PlayerController, InteractWidgetClass);
+	check(InteractWidgetInstance);
+	InteractWidgetInstance->AddToViewport();
+	InteractWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UFretteInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -121,8 +111,8 @@ void UFretteInteractorComponent::UpdateInteractableTarget()
 		if (Interactable->bShowOutline && IsValid(Interactable->Mesh))
 		{
 			GetWorld()->GetGameInstance()
-				 ->GetSubsystem<UFrettePostProcessSubsystem>()
-				 ->SetOutline(Interactable->OutlineColor, Interactable->OutlineThickness, Interactable->OutlineAlpha);
+				->GetSubsystem<UFrettePostProcessSubsystem>()
+				->SetOutline(Interactable->OutlineColor, Interactable->OutlineThickness, Interactable->OutlineAlpha);
 			Interactable->Mesh->SetCustomDepthStencilValue(2);
 			Interactable->Mesh->SetRenderCustomDepth(true);
 		}

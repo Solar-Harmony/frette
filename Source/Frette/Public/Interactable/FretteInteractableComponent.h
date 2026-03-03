@@ -8,18 +8,14 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBeginHover);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEndHover);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteract);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Frette), meta=(BlueprintSpawnableComponent) )
 class FRETTE_API UFretteInteractableComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UFretteInteractableComponent();
-
-protected:
 	virtual void BeginPlay() override;
-
-public:	
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnBeginHover OnBeginHover;
 	

@@ -1,7 +1,5 @@
 #include "Interactable/FretteInteractableComponent.h"
 
-UFretteInteractableComponent::UFretteInteractableComponent() {}
-
 void UFretteInteractableComponent::BeginPlay()
 {
 	Super::BeginPlay();

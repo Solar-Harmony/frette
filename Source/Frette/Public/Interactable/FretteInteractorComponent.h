@@ -5,7 +5,7 @@
 #include "Interactable/FretteInteractableInterface.h"
 #include "FretteInteractorComponent.generated.h"
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Frette), meta=(BlueprintSpawnableComponent))
 class UFretteInteractorComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -13,30 +13,25 @@ class UFretteInteractorComponent : public UActorComponent
 public:	
 	UFretteInteractorComponent();
 
-protected:
 	virtual void BeginPlay() override;
-
-public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	void UpdateInteractableTarget();
-	
 	void Interact();
 
-	UPROPERTY(EditDefaultsOnly, Category="Interaction")
+	UPROPERTY(EditDefaultsOnly, Category="Frette")
 	float InteractTraceRange = 500.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="Interaction")
+	UPROPERTY(EditDefaultsOnly, Category="Frette")
 	float InteractTraceRadius = 25.f;
-
-	UPROPERTY()
-	TScriptInterface<IFretteInteractableInterface> CurrentHoveredActor;
 	
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "Frette")
 	TSubclassOf<UUserWidget> InteractWidgetClass;
 
 	UPROPERTY()
 	TObjectPtr<UUserWidget> InteractWidgetInstance;
+	
+	UPROPERTY()
+	TScriptInterface<IFretteInteractableInterface> CurrentHoveredActor;
 	
 	UPROPERTY()
 	TObjectPtr<APlayerController> PlayerController;
