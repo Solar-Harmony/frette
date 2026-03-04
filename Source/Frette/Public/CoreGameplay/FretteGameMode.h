@@ -5,10 +5,10 @@
 #include "FretteGameMode.generated.h"
 
 class AFretteMainObjective;
-class AFrettePOI;
+class AFretteLandmark;
 
 /**
- * Manager for caching the POIs in the level.
+ * The main game loop logic for Frette. Caches the actors used for the clue system.
  */
 UCLASS()
 class AFretteGameMode : public AGameModeBase
@@ -17,11 +17,23 @@ class AFretteGameMode : public AGameModeBase
 	
 public:
 	virtual void BeginPlay() override;
+	
+	UFUNCTION(BlueprintPure)
+	AFretteMainObjective* GetMainObjective() const { return MainObjective; }
+	
+	UFUNCTION(BlueprintPure, meta=(DisplayName="Get Random Landmark Near Main Objective"))
+	AFretteLandmark* GetRandomNearLandmark() const;
+	
+	UFUNCTION(BlueprintPure, meta=(DisplayName="Get Random Landmark Far From Main Objective"))
+	AFretteLandmark* GetRandomFarLandmark() const;
 
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<AFretteMainObjective> MainObjective;
 	
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<AFrettePOI>> LocationsNearObjective;
+	TArray<TObjectPtr<AFretteLandmark>> NearLandmarks;
+	
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<AFretteLandmark>> FarLandmarks;
 };

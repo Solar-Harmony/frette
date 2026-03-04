@@ -2,7 +2,8 @@
 
 #include "EngineUtils.h"
 #include "CoreGameplay/FretteMainObjective.h"
-#include "CoreGameplay/FrettePOI.h"
+#include "CoreGameplay/FretteLandmark.h"
+#include "Frette/Frette.h"
 
 void AFretteGameMode::BeginPlay()
 {
@@ -10,19 +11,40 @@ void AFretteGameMode::BeginPlay()
 	
 	for (TActorIterator<AFretteMainObjective> It(GetWorld()); It; ++It)
 	{
+		require(MainObjective == nullptr, "Multiple main objectives found in the level! There should be only one.");
 		MainObjective = *It;
-		break;
 	}
 	
+	const FVector2D ObjectiveLocation2D(MainObjective->GetActorLocation());
 	const float NearObjectiveRadiusSq = FMath::Square(MainObjective->NearObjectiveRadiusCm);
-	for (TActorIterator<AFrettePOI> It(GetWorld()); It; ++It)
+	
+	for (TActorIterator<AFretteLandmark> It(GetWorld()); It; ++It)
 	{
-		AFrettePOI* POI = *It;
-		const float DistanceToObjectiveSq = FVector::DistSquared(POI->GetActorLocation(), MainObjective->GetActorLocation());
+		AFretteLandmark* Landmark = *It;
+		
+		const FVector2D LandmarkLocation2D(Landmark->GetActorLocation());
+		const float DistanceToObjectiveSq = FVector2D::DistSquared(LandmarkLocation2D, ObjectiveLocation2D);
+		
 		if (DistanceToObjectiveSq <= NearObjectiveRadiusSq)
 		{
-			POI->bIsPrimaryPOI = true;
-			LocationsNearObjective.Add(POI);
+			Landmark->bIsNearMainObjective = true;
+			NearLandmarks.Add(Landmark);
+		}
+		else
+		{
+			FarLandmarks.Add(Landmark);
 		}
 	}
+}
+
+AFretteLandmark* AFretteGameMode::GetRandomNearLandmark() const
+{
+	const int32 Idx = FMath::RandRange(0, NearLandmarks.Num() - 1);
+	return NearLandmarks[Idx];
+}
+
+AFretteLandmark* AFretteGameMode::GetRandomFarLandmark() const
+{
+	const int32 Idx = FMath::RandRange(0, FarLandmarks.Num() - 1);
+	return FarLandmarks[Idx];
 }
