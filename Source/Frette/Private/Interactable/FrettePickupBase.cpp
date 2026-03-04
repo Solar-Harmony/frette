@@ -1,9 +1,8 @@
-#include "Interactable/FrettePickup.h"
-
+#include "Interactable/FrettePickupBase.h"
 #include "Frette/Frette.h"
 #include "Interactable/FretteInteractableComponent.h"
 
-AFrettePickup::AFrettePickup()
+AFrettePickupBase::AFrettePickupBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -15,30 +14,29 @@ AFrettePickup::AFrettePickup()
 	SetRootComponent(StaticMesh);
 	
 	Interactable = CreateDefaultSubobject<UFretteInteractableComponent>(TEXT("Interactable Component"));
-	Interactable->OnInteract.AddDynamic(this, &AFrettePickup::OnInteract_Internal);
+	Interactable->OnInteract.AddDynamic(this, &AFrettePickupBase::OnInteract_Internal);
 	Interactable->Mesh = StaticMesh;
 	Interactable->bShowMessage = true;
 	Interactable->bShowOutline = true;
 	Interactable->OutlineColor = FColor::Blue;
 }
 
-void AFrettePickup::OnInteract_Internal()
+void AFrettePickupBase::OnInteract_Internal()
 {
-	OnInteract();
+	OnPickUp();
 	
 	if (bDestroyOnPickUp)
 		Destroy();
 }
 
-void AFrettePickup::OnConstruction(const FTransform& Transform)
+void AFrettePickupBase::OnConstruction(const FTransform& Transform)
 {
 	require(ItemData, "An item pickup is missing item data.");
 	
-	ItemData->Mesh.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &AFrettePickup::OnItemMeshLoaded));
+	ItemData->Mesh.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &AFrettePickupBase::OnItemMeshLoaded));
 }
 
-// TODO: Cpp: why does rider suggest this can be const?
-void AFrettePickup::OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject)
+void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject)
 {
 	UStaticMesh* Mesh = Cast<UStaticMesh>(LoadedObject);
 	require(IsValid(Mesh), "Failed to load mesh for item '%s'.", GetNameSafe(ItemData))

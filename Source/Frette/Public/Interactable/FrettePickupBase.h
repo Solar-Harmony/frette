@@ -4,17 +4,21 @@
 #include "GameFramework/Actor.h"
 #include "Interactable/FretteInteractableInterface.h"
 #include "Inventory/Items/FretteInventoryItem.h"
-#include "FrettePickup.generated.h"
+#include "FrettePickupBase.generated.h"
 
 class UFretteInteractableComponent;
 
-UCLASS()
-class FRETTE_API AFrettePickup : public AActor, public IFretteInteractableInterface
+/*
+ * An interactible item in the world. 
+ * Does nothing by default, subclass and implement OnPickUp or OnPickUp_Implementation to add functionality.
+ */
+UCLASS(Abstract)
+class FRETTE_API AFrettePickupBase : public AActor, public IFretteInteractableInterface
 {
 	GENERATED_BODY()
 	
 public:	
-	AFrettePickup();
+	AFrettePickupBase();
 	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
 	TObjectPtr<UFretteInventoryItemDataAsset> ItemData;
@@ -29,11 +33,11 @@ public:
 	TObjectPtr<UStaticMeshComponent> StaticMesh;
 	
 	UFUNCTION(BlueprintNativeEvent)
-	void OnInteract();
+	void OnPickUp();
 	
 protected:
 	// overridable native implementation
-	virtual void OnInteract_Implementation() {}
+	virtual void OnPickUp_Implementation() {}
 	
 private:
 	virtual void OnConstruction(const FTransform& Transform) override;

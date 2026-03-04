@@ -4,7 +4,7 @@
 #include "CoreGameplay/FretteLandmark.h"
 #include "Kismet/GameplayStatics.h"
 
-void AFretteClue::OnInteract_Implementation()
+void AFretteClue::OnPickUp_Implementation()
 {
 	AFretteGameMode* GameMode = CastChecked<AFretteGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	FText ClueText;

@@ -1,18 +1,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interactable/FrettePickup.h"
+#include "Interactable/FrettePickupBase.h"
 #include "FretteClue.generated.h"
 
 /**
  * A pickable that provides a hint about a location in the world. 
+ * Needs a base Blueprint so the default properties can be configured.
  * Content is determined upon pickup, and may be one of:
  * - Flavor text with no gameplay information
  * - Knowledge of a landmark far from the main objective that contains useful loot, with directions
  * - Knowledge of a landmark near the main objective that helps narrow its location down
  */
-UCLASS(Abstract, Blueprintable)
-class AFretteClue : public AFrettePickup
+UCLASS(Abstract)
+class AFretteClue : public AFrettePickupBase
 {
 	GENERATED_BODY()
 
@@ -35,7 +36,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette")
 	float Steepness = 10.0f;
 	
-	virtual void OnInteract_Implementation() override;
+	virtual void OnPickUp_Implementation() override;
 	
 private:
 	bool ShouldGivePrimaryClue(int NumCluesFound, int NumCluesTotal) const;
