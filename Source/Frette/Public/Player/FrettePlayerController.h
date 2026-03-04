@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "Input/FretteInputConfig.h"
+#include "InputAction.h"
+#include "Interactable/FretteInteractorComponent.h"
 #include "FrettePlayerController.generated.h"
 
 class UCameraComponent;
@@ -22,8 +24,16 @@ protected:
 	void SetupWidgetsAndViewModels();
 
 private:
+	AFrettePlayerController();
+	
+	virtual void BeginPlay() override;
+	virtual void OnRep_PlayerState() override;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Frette")
 	TObjectPtr<class UInputMappingContext> DefaultInputContext;
+
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	void AbilityInputTagReleased(FGameplayTag InputTag);
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Input")
 	TObjectPtr<UFretteInputConfig> InputConfig;
@@ -34,9 +44,13 @@ private:
 	UFUNCTION(BlueprintPure, Category = "Frette")
 	AFrettePlayerState* GetFrettePlayerState() const { return GetPlayerState<AFrettePlayerState>(); }
 
-	virtual void BeginPlay() override;
-	virtual void OnRep_PlayerState() override;
-	void AbilityInputTagPressed(FGameplayTag InputTag);
-	void AbilityInputTagReleased(FGameplayTag InputTag);
 	UFretteAbilitySystemComponent* GetASC();
+
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputAction> InteractAction;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UFretteInteractorComponent> Interactor;
+
+	void OnInteractPressed();
 };

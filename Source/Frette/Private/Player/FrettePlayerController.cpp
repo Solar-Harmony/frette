@@ -6,6 +6,11 @@
 
 class AFrettePlayerState;
 
+AFrettePlayerController::AFrettePlayerController()
+{
+	Interactor = CreateDefaultSubobject<UFretteInteractorComponent>("Interactor");
+}
+
 void AFrettePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -28,6 +33,12 @@ void AFrettePlayerController::SetupInputComponent()
 	//Le input component est setter a UFretteInputComponent dans les projects settings donc il peut être cast ici
 	UFretteInputComponent* FretteInputComponent = CastChecked<UFretteInputComponent>(InputComponent);
 	FretteInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased);
+	FretteInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ThisClass::OnInteractPressed);
+}
+
+void AFrettePlayerController::OnInteractPressed()
+{
+	Interactor->Interact();
 }
 
 void AFrettePlayerController::AbilityInputTagPressed(FGameplayTag InputTag)

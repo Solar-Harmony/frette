@@ -3,42 +3,52 @@
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
+#include "Interactable/FretteInteractableInterface.h"
 #include "PickUpActor.generated.h"
 
+class UFretteInteractableComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickedUp, AActor*, InteractingActor);
 
 UCLASS()
-class FRETTE_API APickUpActor : public AActor
+class FRETTE_API APickUpActor : public AActor, public IFretteInteractableInterface
 {
 	GENERATED_BODY()
 	
 public:	
 	APickUpActor();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
-	UStaticMesh* ItemMesh;
+	UFUNCTION()
+	void PickedUp(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+					   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+					   bool bFromSweep, const FHitResult& SweepResult);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
+	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
+	TObjectPtr<UStaticMesh> ItemMesh;
+	
+	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
 	bool bDestroyOnPickUp = false;
 	
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* StaticMesh;
+	TObjectPtr<UStaticMeshComponent> StaticMesh;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USphereComponent> OverlapSphere;
+	
 	UPROPERTY(EditDefaultsOnly)
-	USphereComponent* OverlapSphere;
+	TObjectPtr<UFretteInteractableComponent> Interactable;
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnPickedUp OnPickedUp;
+	
+	UFUNCTION()
+	void Interact();
+	
+	virtual UFretteInteractableComponent* GetInteractableComponent() override { return Interactable; }
 	
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 private:
-	UFUNCTION()
-	void PickedUp(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-		bool bFromSweep, const FHitResult& SweepResult);
-	
 	float YawAngle = 0.f;
 	
 	const float Item_Size = 40.f /*cm*/;
