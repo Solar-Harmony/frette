@@ -49,6 +49,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UTexture2D> Icon;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UStaticMesh> Mesh;
 
 	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) 
 		PURE_VIRTUAL(UFretteInventoryItem*, return nullptr;);

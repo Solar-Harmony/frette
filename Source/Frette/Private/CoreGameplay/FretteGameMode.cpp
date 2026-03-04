@@ -1,8 +1,9 @@
 #include "CoreGameplay/FretteGameMode.h"
 
 #include "EngineUtils.h"
-#include "CoreGameplay/FretteMainObjective.h"
+#include "CoreGameplay/FretteClue.h"
 #include "CoreGameplay/FretteLandmark.h"
+#include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
 
 void AFretteGameMode::BeginPlay()
@@ -35,16 +36,18 @@ void AFretteGameMode::BeginPlay()
 			FarLandmarks.Add(Landmark);
 		}
 	}
-}
+	
+	for (TActorIterator<AFretteClue> It(GetWorld()); It; ++It)
+	{
+		++NumInitialClues;
+	}
+} 
 
-AFretteLandmark* AFretteGameMode::GetRandomNearLandmark() const
+AFretteLandmark* AFretteGameMode::GetRandomLandmark(bool bNearObjective)
 {
-	const int32 Idx = FMath::RandRange(0, NearLandmarks.Num() - 1);
-	return NearLandmarks[Idx];
-}
-
-AFretteLandmark* AFretteGameMode::GetRandomFarLandmark() const
-{
-	const int32 Idx = FMath::RandRange(0, FarLandmarks.Num() - 1);
-	return FarLandmarks[Idx];
+	auto& Array = bNearObjective ? NearLandmarks : FarLandmarks;
+	const int32 Idx = FMath::RandRange(0, Array.Num() - 1);
+	AFretteLandmark* Item = Array[Idx];
+	Array.RemoveAtSwap(Idx);
+	return Item; 		
 }

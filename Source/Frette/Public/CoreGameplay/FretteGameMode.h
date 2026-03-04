@@ -7,8 +7,10 @@
 class AFretteMainObjective;
 class AFretteLandmark;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnClueActivated, FText);
+
 /**
- * The main game loop logic for Frette. Caches the actors used for the clue system.
+ * The main game loop logic for Frette. Caches the actors and handles logic for the clue system.
  */
 UCLASS()
 class AFretteGameMode : public AGameModeBase
@@ -16,16 +18,24 @@ class AFretteGameMode : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
-	virtual void BeginPlay() override;
+	FOnClueActivated OnClueActivated;
 	
 	UFUNCTION(BlueprintPure)
 	AFretteMainObjective* GetMainObjective() const { return MainObjective; }
 	
-	UFUNCTION(BlueprintPure, meta=(DisplayName="Get Random Landmark Near Main Objective"))
-	AFretteLandmark* GetRandomNearLandmark() const;
+	UFUNCTION(BlueprintPure)
+	int32 GetNumCluesFound() const { return NumCluesFound; }
 	
-	UFUNCTION(BlueprintPure, meta=(DisplayName="Get Random Landmark Far From Main Objective"))
-	AFretteLandmark* GetRandomFarLandmark() const;
+	UFUNCTION(BlueprintPure)
+	int32 GetNumCluesMax() const { return NumInitialClues; }
+	
+	// Returns a random landmark, which can never be picked again (sampling without replacement).
+	// @param bNearObjective Whether we pick from the landmarks near the treasure (primary, quest hints) or away (secondary, POIs)
+	UFUNCTION(BlueprintPure, meta=(DisplayName="Get Random Landmark"))
+	AFretteLandmark* GetRandomLandmark(bool bNearObjective);
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY(Transient)
@@ -36,4 +46,7 @@ private:
 	
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<AFretteLandmark>> FarLandmarks;
+	
+	int32 NumCluesFound = 0;
+	int32 NumInitialClues = 0;
 };
