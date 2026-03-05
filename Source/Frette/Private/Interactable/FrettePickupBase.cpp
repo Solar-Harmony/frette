@@ -1,6 +1,9 @@
 #include "Interactable/FrettePickupBase.h"
+
+#include "Character/FrettePlayerCharacter.h"
 #include "Frette/Frette.h"
 #include "Interactable/FretteInteractableComponent.h"
+#include "Inventory/FretteInventoryComponent.h"
 
 AFrettePickupBase::AFrettePickupBase()
 {
@@ -27,6 +30,9 @@ void AFrettePickupBase::OnInteract_Internal(AFrettePlayerCharacter* Interactor)
 	require(HasAuthority(), "Pickup interact must happen on server.");
 		
 	OnPickUp(Interactor);
+	
+	UFretteInventoryComponent* Inventory = Interactor->GetPlayerInventory();
+	Inventory->AddItem(this->ItemData);
 	
 	if (bDestroyOnPickUp)
 	{
