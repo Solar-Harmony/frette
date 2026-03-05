@@ -23,7 +23,8 @@ public class FretteEditor : ModuleRules
 				"Slate",
 				"SlateCore",
 				"UnrealEd",
-				"SourceControl"
+				"SourceControl",
+				"MessageLog"
 			}
 		);
 	}
