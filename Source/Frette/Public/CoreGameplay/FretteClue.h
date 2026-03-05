@@ -23,21 +23,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette")
 	float DudClueChance = 0.1f;
 	
-	// Parameter for the probability of getting a primary clue depending on the number of clues gotten so far.
-	// A lower value means it takes fewer clues before that probability increases by a lot. 
-	// A higher value means it takes more clues before we see a steep increase in probability.
-	// Controls the horizontal shift of the S-curve (normalized sigmoid function).
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette")
-	float Midpoint = 0.5f;
-	
-	// Parameter for the probability of getting a primary clue depending on the number of clues gotten so far.
-	// A lower value means that probability increases more gradually with the number of clues.
-	// A higher value means that probability increases more suddenly around the midpoint.
-	// Controls the smoothness of the S-curve (normalized sigmoid function).
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette")
-	float Steepness = 10.0f;
-	
-	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem) override;
 	
 private:

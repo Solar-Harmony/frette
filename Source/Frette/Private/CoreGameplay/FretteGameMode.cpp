@@ -6,7 +6,7 @@
 #include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
 
-FText AFretteGameMode::GenerateClue(AFrettePlayerCharacter* Interactor, float DudClueChance, float Steepness, float Midpoint)
+FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, float DudClueChance)
 {
 	FText ClueText;
 	
@@ -16,8 +16,14 @@ FText AFretteGameMode::GenerateClue(AFrettePlayerCharacter* Interactor, float Du
 	}
 	else
 	{
-		const bool bIsPrimaryClue = ShouldPickPrimaryClue(Steepness, Midpoint);
+		const bool bIsPrimaryClue = ShouldPickPrimaryClue();
 		const AFretteLandmark* POI = GetRandomLandmark(bIsPrimaryClue);
+		if (POI == nullptr)
+		{
+			ClueText = INVTEXT("This is some fascinating lore.");
+			UE_LOG(LogFrette, Warning, TEXT("Failed to generate clue: no more landmarks available!"));
+			return ClueText;
+		}
 		
 		if (bIsPrimaryClue)
 		{
@@ -25,10 +31,15 @@ FText AFretteGameMode::GenerateClue(AFrettePlayerCharacter* Interactor, float Du
 		}
 		else
 		{
-			ClueText = FText::Format(INVTEXT("An interesting point of interest with loot is near a {0}."), POI->DisplayName);
+			const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
+			const FText Cardinal = FText::FromString(DirVectorToCardinal(Direction));
+			ClueText = FText::Format(INVTEXT("An interesting point of interest with loot {0} of a {1}."), Cardinal, POI->DisplayName);
 		}
+		
+		UE_LOG(LogFrette, Log, TEXT("Clue generated. Leads to landmark: %s, is near objective: %d"), *POI->GetName(), bIsPrimaryClue);
 	}
 	
+	NumCluesDiscovered++;
 	return ClueText;
 }
 
@@ -67,34 +78,61 @@ void AFretteGameMode::BeginPlay()
 	
 	for (TActorIterator<AFretteClue> It(GetWorld()); It; ++It)
 	{
-		++NumInitialClues;
+		++NumCluesGenerated;
 	}
+	
+	NumNearCluesGenerated = NearLandmarks.Num();
 }
 
-bool AFretteGameMode::ShouldPickPrimaryClue(float Steepness, float Midpoint) const
+bool AFretteGameMode::ShouldPickPrimaryClue() const
 {
-	const float NormalizedClueCount = static_cast<float>(NumCluesFound) / NumInitialClues;
+	check(NumCluesDiscovered <= NumCluesGenerated);
 	
-	auto Sigmoid = [Steepness, Midpoint](float N) 
-	{
-		return 1.0f / (1.0f + FMath::Exp(-Steepness * (N - Midpoint)));
-	};
+	// it must be impossible to find all clues and not get all the primary clues.
+	const float ClueRatio = static_cast<float>(NumCluesDiscovered) / (NumCluesGenerated - NumNearCluesGenerated);
+	if (ClueRatio >= 1.0f)
+		return true;
 	
-	// sigmoid gives an asymptotic S-curve but we want exact an exact [0,1] domain so we normalize
-	static const float MinCurveVal = Sigmoid(0.0f);
-	static const float MaxCurveVal = Sigmoid(1.0f);
-	const float CurveVal = Sigmoid(NormalizedClueCount);
-	const float Probability = (CurveVal - MinCurveVal) / (MaxCurveVal - MinCurveVal);
+	// simple linear function with min clamped so first clues can never be good
+	// this should be good enough, i think lol
+	const float Probability = FMath::Clamp(ClueRatio, 0.1f, 1.0f);
+	UE_LOG(LogFrette, Log, TEXT("Found clue %d of %d. Probability to pick primary clue: %f."), NumCluesDiscovered, NumCluesGenerated, Probability);
 	
 	return FMath::FRand() < Probability;
 }
 
 AFretteLandmark* AFretteGameMode::GetRandomLandmark(bool bNearObjective)
 {
-	// TODO: Need to handle when no more clues!
 	auto& Array = bNearObjective ? NearLandmarks : FarLandmarks;
+	if (Array.IsEmpty())
+		return nullptr;
+	
 	const int32 Idx = FMath::RandRange(0, Array.Num() - 1);
 	AFretteLandmark* Item = Array[Idx];
 	Array.RemoveAtSwap(Idx);
 	return Item; 		
+}
+
+FString AFretteGameMode::DirVectorToCardinal(const FVector2D& Dir)
+{
+	check(!Dir.IsNearlyZero());
+	
+	const float Angle = FMath::Atan2(Dir.Y, Dir.X); // get vector angle between -180 and 180 deg
+	constexpr float SectorSize = PI / 4; // divide circle in 8 sectors, 45 deg each
+	const int Sector = FMath::RoundToInt(Angle / SectorSize); // round to nearest sector -> [-4, 4]
+	const int SectorIdx = (Sector % 8 + 8) % 8; // remap to [0, 7]
+	
+	static const char* Names[8] =
+	{
+		"east",
+		"north-east",
+		"north",
+		"north-west",
+		"west",
+		"south-west",
+		"south",
+		"south-east"
+	};
+
+	return Names[SectorIdx];
 }

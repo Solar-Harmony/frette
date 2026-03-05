@@ -22,23 +22,25 @@ public:
 	AFretteMainObjective* GetMainObjective() const { return MainObjective; }
 	
 	UFUNCTION(BlueprintPure)
-	int32 GetNumCluesFound() const { return NumCluesFound; }
+	int32 GetNumCluesFound() const { return NumCluesDiscovered; }
 	
 	UFUNCTION(BlueprintPure)
-	int32 GetNumCluesMax() const { return NumInitialClues; }
+	int32 GetNumCluesMax() const { return NumCluesGenerated; }
 	
 	// Picks a clue, notifies clients
-	FText GenerateClue(AFrettePlayerCharacter* Interactor, float DudClueChance, float Steepness, float Midpoint);
+	FText GenerateClue(const AFrettePlayerCharacter* Interactor, float DudClueChance);
 	
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	bool ShouldPickPrimaryClue(float Steepness, float Midpoint) const;
+	bool ShouldPickPrimaryClue() const;
 	
 	// Returns a random landmark, which can never be picked again (sampling without replacement).
 	// @param bNearObjective Whether we pick from the landmarks near the treasure (primary, quest hints) or away (secondary, POIs)
 	AFretteLandmark* GetRandomLandmark(bool bNearObjective);
+
+	static FString DirVectorToCardinal(const FVector2D& Dir);
 	
 	UPROPERTY(Transient)
 	TObjectPtr<AFretteMainObjective> MainObjective;
@@ -49,6 +51,7 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<AFretteLandmark>> FarLandmarks;
 	
-	int32 NumCluesFound = 0;
-	int32 NumInitialClues = 0;
+	int32 NumCluesDiscovered = 0;
+	int32 NumNearCluesGenerated = 0;
+	int32 NumCluesGenerated = 0;
 };
