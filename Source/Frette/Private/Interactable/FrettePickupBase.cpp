@@ -18,25 +18,28 @@ AFrettePickupBase::AFrettePickupBase()
 	SetRootComponent(StaticMesh);
 	
 	Interactable = CreateDefaultSubobject<UFretteInteractableComponent>(TEXT("Interactable Component"));
-	Interactable->OnInteract.AddDynamic(this, &AFrettePickupBase::OnInteract_Internal);
 	Interactable->Mesh = StaticMesh;
 	Interactable->bShowMessage = true;
 	Interactable->bShowOutline = true;
 	Interactable->OutlineColor = FColor::Blue;
 }
 
-void AFrettePickupBase::OnInteract_Internal(AFrettePlayerCharacter* Interactor)
+void AFrettePickupBase::BeginPlay()
 {
-	require(HasAuthority(), "Pickup interact must happen on server.");
-		
-	OnPickUp(Interactor);
-	
+	Super::BeginPlay();
+	Interactable->OnInteract.AddDynamic(this, &AFrettePickupBase::OnInteractDelegate);
+}
+
+void AFrettePickupBase::Server_OnInteract_Implementation(AFrettePlayerCharacter* Interactor)
+{
 	UFretteInventoryComponent* Inventory = Interactor->GetPlayerInventory();
-	Inventory->AddItem(this->ItemData);
+	Inventory->AddItem_Implementation(this->ItemData);
+	UFretteInventoryItem* AddedItem = Inventory->GetItem(Inventory->GetNumItems() - 1);
+	
+	OnPickUp(Interactor, AddedItem);
 	
 	if (bDestroyOnPickUp)
 	{
-		Interactable->OnEndHover.Broadcast();
 		Destroy();
 	}
 }
@@ -52,7 +55,21 @@ void AFrettePickupBase::OnConstruction(const FTransform& Transform)
 	ItemData->Mesh.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &AFrettePickupBase::OnItemMeshLoaded));
 }
 
-void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject)
+void AFrettePickupBase::OnInteractDelegate(AFrettePlayerCharacter* Interactor)
+{
+	Server_OnInteract(Interactor);
+	Client_OnInteract(Interactor);
+}
+
+void AFrettePickupBase::Client_OnInteract_Implementation(AFrettePlayerCharacter* Interactor)
+{
+	if (bDestroyOnPickUp)
+	{
+		Interactable->OnEndHover.Broadcast();
+	}
+}
+
+void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject) const
 {
 	UStaticMesh* Mesh = Cast<UStaticMesh>(LoadedObject);
 	require(IsValid(Mesh), "Failed to load mesh for item '%s'.", GetNameSafe(ItemData))

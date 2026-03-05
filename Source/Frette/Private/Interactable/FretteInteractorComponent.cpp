@@ -91,7 +91,7 @@ void UFretteInteractorComponent::Server_Interact_Implementation(AActor* Interact
 	require(IsValid(Interactable));
 	
 	const UFretteInteractableComponent* InteractableComponent = Interactable->GetComponentByClass<UFretteInteractableComponent>();
-	require(IsValid(Interactable))
+	require(IsValid(InteractableComponent))
 	
 	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
 	require(IsValid(Interactor));

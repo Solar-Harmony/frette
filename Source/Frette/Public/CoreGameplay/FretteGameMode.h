@@ -28,7 +28,7 @@ public:
 	int32 GetNumCluesMax() const { return NumInitialClues; }
 	
 	// Picks a clue, notifies clients
-	void GenerateClue(AFrettePlayerCharacter* Interactor, float DudClueChance, float Steepness, float Midpoint);
+	FText GenerateClue(AFrettePlayerCharacter* Interactor, float DudClueChance, float Steepness, float Midpoint);
 	
 protected:
 	virtual void BeginPlay() override;

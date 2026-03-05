@@ -34,17 +34,24 @@ public:
 	TObjectPtr<UStaticMeshComponent> StaticMesh;
 	
 	UFUNCTION(BlueprintNativeEvent)
-	void OnPickUp(AFrettePlayerCharacter* Interactor);
+	void OnPickUp(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem);
 	
 protected:
-	// overridable native implementation
-	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor) {}
-	
-private:
+	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 	
-	UFUNCTION()
-	void OnInteract_Internal(AFrettePlayerCharacter* Interactor);
+	// overridable native implementation
+	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem) {}
 	
-	void OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject);
+private:
+	UFUNCTION()
+	void OnInteractDelegate(AFrettePlayerCharacter* Interactor);
+	
+	UFUNCTION(Client, Reliable)
+	void Client_OnInteract(AFrettePlayerCharacter* Interactor);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_OnInteract(AFrettePlayerCharacter* Interactor);
+	
+	void OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject) const;
 };

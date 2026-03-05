@@ -1,14 +1,12 @@
 #include "CoreGameplay/FretteGameMode.h"
 
 #include "EngineUtils.h"
-#include "Character/FrettePlayerCharacter.h"
 #include "CoreGameplay/FretteClue.h"
 #include "CoreGameplay/FretteLandmark.h"
 #include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
-#include "Player/FrettePlayerController.h"
 
-void AFretteGameMode::GenerateClue(AFrettePlayerCharacter* Interactor, float DudClueChance, float Steepness, float Midpoint)
+FText AFretteGameMode::GenerateClue(AFrettePlayerCharacter* Interactor, float DudClueChance, float Steepness, float Midpoint)
 {
 	FText ClueText;
 	
@@ -31,11 +29,7 @@ void AFretteGameMode::GenerateClue(AFrettePlayerCharacter* Interactor, float Dud
 		}
 	}
 	
-	// TODO: Need to route the information back to the owning client, so we use the controller, but this is pretty hacky
-	// We could store the new clue in player state and use OnRep to notify the client and fire an event for the viewmodel?
-	AFrettePlayerController* Controller = Interactor->GetController<AFrettePlayerController>();
-	require(IsValid(Controller));
-	Controller->Client_OnClueGenerated(ClueText);
+	return ClueText;
 }
 
 void AFretteGameMode::BeginPlay()

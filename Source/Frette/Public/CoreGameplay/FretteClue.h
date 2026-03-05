@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Interactable/FrettePickupBase.h"
+#include "Inventory/Items/Impl/FretteClueItem.h"
 #include "FretteClue.generated.h"
 
 /**
@@ -36,5 +37,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette")
 	float Steepness = 10.0f;
 	
-	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor) override;
+	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem) override;
+	
+private:
+	FText GeneratedClueText;
 };

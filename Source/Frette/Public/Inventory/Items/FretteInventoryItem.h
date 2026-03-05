@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "FretteInventoryItem.generated.h"
 
+class UFretteInventoryComponent;
 class UFretteInventoryItemDataAsset;
 
 inline const FPrimaryAssetType GInventoryItemPrimaryAssetType("FretteInventoryItem");
@@ -22,6 +23,13 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	UFretteInventoryItemDataAsset* Data = nullptr;
+	
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Use();
+	
+	virtual void Use_Implementation() {}
+	
+	UFretteInventoryComponent* GetOwningInventory() const;
 
 	bool HasValidID() const { return Id != InvalidID; }
 

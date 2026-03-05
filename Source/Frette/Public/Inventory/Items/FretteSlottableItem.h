@@ -17,9 +17,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	int32 SlotIndex = -1;
 
-	UFUNCTION(BlueprintCallable)
-	virtual void Use() {}
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -28,7 +25,7 @@ public:
 };
 
 UCLASS(BlueprintType, Category = "Frette|Inventory")
-class UFretteGearItemDataAsset : public UFretteInventoryItemDataAsset
+class UFretteSlottableDataAsset : public UFretteInventoryItemDataAsset
 {
 	GENERATED_BODY()
 
