@@ -2,12 +2,12 @@
 
 #include "FretteInventoryItem.h"
 #include "GameplayTagContainer.h"
-#include "FretteGearItem.generated.h"
+#include "FretteSlottableItem.generated.h"
 
 // An equippable item that supports arbitrary positioning, with no stacking support.
 // Use for unique items that require per-item data like durability, ammo count, etc.
 UCLASS(BlueprintType)
-class UFretteGearItem : public UFretteInventoryItem
+class UFretteSlottableItem : public UFretteInventoryItem
 {
 	GENERATED_BODY()
 
@@ -39,7 +39,7 @@ public:
 
 	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
 	{
-		auto* Item = NewObject<UFretteGearItem>(Outer);
+		auto* Item = NewObject<UFretteSlottableItem>(Outer);
 		Item->Data = this;
 		return Item;
 	}
