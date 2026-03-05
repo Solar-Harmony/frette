@@ -14,14 +14,18 @@ class AFretteMainObjective : public AActor
 
 public:
 	AFretteMainObjective();
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette", meta=(DisplayName = "Radius to consider Near Objective", Units="cm"))
+		
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Frette", meta=(DisplayName = "Radius to consider Near Objective", Units="cm"))
 	float NearObjectiveRadiusCm = 1000.0f;
 	
-	virtual void BeginPlay() override;
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UStaticMeshComponent> Mesh;
 	
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	TObjectPtr<UDrawSphereComponent> DebugSphere;
 #endif
+	
+protected:
+	virtual void OnConstruction(const FTransform& Transform) override;
 };

@@ -29,7 +29,7 @@ public:
 	UPROPERTY(EditInstanceOnly)
 	TObjectPtr<UFretteInteractableComponent> Interactable;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	TObjectPtr<UStaticMeshComponent> StaticMesh;
 	
 	UFUNCTION(BlueprintNativeEvent)

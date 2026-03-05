@@ -11,6 +11,9 @@ class FRETTEUI_API UFretteViewModel : public UMVVMViewModelBase
 	GENERATED_BODY()
 
 protected:
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "Bind View Model"))
+	void K2_Bind();
+	
 	virtual void Bind() {}
 
 	UPROPERTY()
@@ -22,6 +25,7 @@ protected:
 		UFretteViewModel* ViewModel = NewObject<UFretteViewModel>(Outer, ViewModelClass);
 		ViewModel->PlayerCharacter = InPlayerCharacter;
 		ViewModel->Bind();
+		ViewModel->K2_Bind();
 		return ViewModel;
 	}
 };

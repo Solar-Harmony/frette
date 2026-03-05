@@ -31,9 +31,6 @@ void AFretteClue::OnPickUp_Implementation()
 	GameMode->OnClueActivated.Broadcast(ClueText);
 }
 
-// create gamemode
-// create clue base blueprint
-// test item with mesh
 bool AFretteClue::ShouldGivePrimaryClue(int NumCluesFound, int NumCluesTotal) const
 {
 	const float NormalizedClueCount = static_cast<float>(NumCluesFound) / NumCluesTotal;
