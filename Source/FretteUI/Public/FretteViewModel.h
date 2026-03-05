@@ -16,7 +16,7 @@ protected:
 	
 	virtual void Bind() {}
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFrettePlayerCharacter> PlayerCharacter;
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|UI", meta = (DisplayName = "Create Frette View Model", DefaultToSelf = "Outer", DeterminesOutputType = "ViewModelClass"))

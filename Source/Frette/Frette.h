@@ -32,8 +32,8 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 	if (UNLIKELY(!(Condition))) \
 	{ \
 		const FString Caller = Frette::Private::CaptureCaller(); \
-		FRETTE_LOG(Error, "Precondition failed: %s in %s.", #Condition, Caller); \
-		Frette::Private::LogMessageErr(FString::Printf(TEXT("Precondition failed: %s in %s."), TEXT(#Condition), *Caller)); \
+		FRETTE_LOG(Error, "Precondition failed: %s\nLocation: %s.", #Condition, Caller); \
+		Frette::Private::LogMessageErr(FString::Printf(TEXT("Precondition failed: %s\nLocation: %s."), TEXT(#Condition), *Caller)); \
 		UE_DEBUG_BREAK(); \
 		return; \
 	}
@@ -42,8 +42,8 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 	if (UNLIKELY(!(Condition))) \
 	{ \
 		const FString Caller = Frette::Private::CaptureCaller(); \
-		FRETTE_LOG(Error, "Precondition failed: %s in %s: %s", #Condition, Caller, Msg); \
-		Frette::Private::LogMessageErr(FString::Printf(TEXT("Precondition failed: %s in %s: %s"), TEXT(#Condition), *Caller, TEXT(Msg))); \
+		FRETTE_LOG(Error, "Precondition failed: %s\nLocation: %s\nReason: %s", #Condition, Caller, Msg); \
+		Frette::Private::LogMessageErr(FString::Printf(TEXT("Precondition failed: %s\nLocation: %s\nReason: %s"), TEXT(#Condition), *Caller, TEXT(Msg))); \
 		UE_DEBUG_BREAK(); \
 		return; \
 	}
@@ -52,8 +52,8 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 	if (UNLIKELY(!(Condition))) \
 	{ \
 		const FString Caller = Frette::Private::CaptureCaller(); \
-		FRETTE_LOG(Error, "Precondition failed: %s in %s: " Format, #Condition, Caller, __VA_ARGS__); \
-		Frette::Private::LogMessageErr(FString::Printf(TEXT("Precondition failed: %s in %s: " Format), TEXT(#Condition), *Caller, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__))); \
+		FRETTE_LOG(Error, "Precondition failed: %s\nLocation: %s\nReason: " Format, #Condition, Caller, __VA_ARGS__); \
+		Frette::Private::LogMessageErr(FString::Printf(TEXT("Precondition failed: %s\nLocation: %s\nReason: " Format), TEXT(#Condition), *Caller, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__))); \
 		UE_DEBUG_BREAK(); \
 		return; \
 	}
@@ -107,9 +107,10 @@ namespace Frette::Private
 	FORCEINLINE void LogMessageErr(const FString& Message)
 	{
 #if WITH_EDITOR
-		FMessageLog("Frette Asserts")
-			.Error()
-			->AddToken(FTextToken::Create(FText::FromString(Message)));
+		static FMessageLog Log("FretteAssert");
+		Log.SuppressLoggingToOutputLog(true);
+		Log.Error(FText::FromString(Message));
+		Log.Open();
 #endif
 	}
 }

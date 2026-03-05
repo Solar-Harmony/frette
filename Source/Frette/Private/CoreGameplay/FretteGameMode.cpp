@@ -1,10 +1,42 @@
 #include "CoreGameplay/FretteGameMode.h"
 
 #include "EngineUtils.h"
+#include "Character/FrettePlayerCharacter.h"
 #include "CoreGameplay/FretteClue.h"
 #include "CoreGameplay/FretteLandmark.h"
 #include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
+#include "Player/FrettePlayerController.h"
+
+void AFretteGameMode::GenerateClue(AFrettePlayerCharacter* Interactor, float DudClueChance, float Steepness, float Midpoint)
+{
+	FText ClueText;
+	
+	if (FMath::FRand() < DudClueChance)
+	{
+		ClueText = INVTEXT("This is some fascinating lore.");
+	}
+	else
+	{
+		const bool bIsPrimaryClue = ShouldPickPrimaryClue(Steepness, Midpoint);
+		const AFretteLandmark* POI = GetRandomLandmark(bIsPrimaryClue);
+		
+		if (bIsPrimaryClue)
+		{
+			ClueText = FText::Format(INVTEXT("The main objective is near a {0}."), POI->DisplayName);
+		}
+		else
+		{
+			ClueText = FText::Format(INVTEXT("An interesting point of interest with loot is near a {0}."), POI->DisplayName);
+		}
+	}
+	
+	// TODO: Need to route the information back to the owning client, so we use the controller, but this is pretty hacky
+	// We could store the new clue in player state and use OnRep to notify the client and fire an event for the viewmodel?
+	AFrettePlayerController* Controller = Interactor->GetController<AFrettePlayerController>();
+	require(IsValid(Controller));
+	Controller->Client_OnClueGenerated(ClueText);
+}
 
 void AFretteGameMode::BeginPlay()
 {
@@ -41,10 +73,29 @@ void AFretteGameMode::BeginPlay()
 	{
 		++NumInitialClues;
 	}
-} 
+}
+
+bool AFretteGameMode::ShouldPickPrimaryClue(float Steepness, float Midpoint) const
+{
+	const float NormalizedClueCount = static_cast<float>(NumCluesFound) / NumInitialClues;
+	
+	auto Sigmoid = [Steepness, Midpoint](float N) 
+	{
+		return 1.0f / (1.0f + FMath::Exp(-Steepness * (N - Midpoint)));
+	};
+	
+	// sigmoid gives an asymptotic S-curve but we want exact an exact [0,1] domain so we normalize
+	static const float MinCurveVal = Sigmoid(0.0f);
+	static const float MaxCurveVal = Sigmoid(1.0f);
+	const float CurveVal = Sigmoid(NormalizedClueCount);
+	const float Probability = (CurveVal - MinCurveVal) / (MaxCurveVal - MinCurveVal);
+	
+	return FMath::FRand() < Probability;
+}
 
 AFretteLandmark* AFretteGameMode::GetRandomLandmark(bool bNearObjective)
 {
+	// TODO: Need to handle when no more clues!
 	auto& Array = bNearObjective ? NearLandmarks : FarLandmarks;
 	const int32 Idx = FMath::RandRange(0, Array.Num() - 1);
 	AFretteLandmark* Item = Array[Idx];

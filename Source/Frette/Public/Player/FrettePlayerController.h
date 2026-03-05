@@ -12,10 +12,19 @@
 
 class UCameraComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClientReceiveNewClue, const FText&, ClueText);
+
 UCLASS()
 class FRETTE_API AFrettePlayerController : public APlayerController
 {
 	GENERATED_BODY()
+	
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnClientReceiveNewClue OnClientReceiveNewClue;
+	
+	UFUNCTION(Client, Reliable)
+	void Client_OnClueGenerated(const FText& ClueText);
 
 protected:
 	virtual void SetupInputComponent() override;

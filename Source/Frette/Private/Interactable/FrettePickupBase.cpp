@@ -21,9 +21,9 @@ AFrettePickupBase::AFrettePickupBase()
 	Interactable->OutlineColor = FColor::Blue;
 }
 
-void AFrettePickupBase::OnInteract_Internal()
+void AFrettePickupBase::OnInteract_Internal(AFrettePlayerCharacter* Interactor)
 {
-	OnPickUp();
+	OnPickUp(Interactor);
 	
 	if (bDestroyOnPickUp)
 		Destroy();
@@ -31,8 +31,12 @@ void AFrettePickupBase::OnInteract_Internal()
 
 void AFrettePickupBase::OnConstruction(const FTransform& Transform)
 {
-	require(ItemData, "An item pickup is missing item data.");
+	if (!IsValid(ItemData))
+		return;
 	
+	require(!ItemData->Mesh.IsNull(), "Pickup actor '%s' has no mesh specified, so it will be invisible during play!", *GetName())
+	
+	// TODO: I've heard that LoadAsync has caveats but dont remember, should recheck when have time
 	ItemData->Mesh.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &AFrettePickupBase::OnItemMeshLoaded));
 }
 

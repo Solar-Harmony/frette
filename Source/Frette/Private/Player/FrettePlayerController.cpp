@@ -27,6 +27,11 @@ void AFrettePlayerController::BeginPlay()
 	}
 }
 
+void AFrettePlayerController::Client_OnClueGenerated_Implementation(const FText& ClueText)
+{
+	OnClientReceiveNewClue.Broadcast(ClueText);
+}
+
 void AFrettePlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();

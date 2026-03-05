@@ -5,6 +5,7 @@
 #include "Interactable/FretteInteractableInterface.h"
 #include "FretteInteractorComponent.generated.h"
 
+class UFretteInteractableComponent;
 UCLASS(ClassGroup=(Frette), meta=(BlueprintSpawnableComponent))
 class UFretteInteractorComponent : public UActorComponent
 {
@@ -16,7 +17,10 @@ public:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void UpdateInteractableTarget();
-	void Interact();
+	void Interact() const;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Interact(AActor* Actor) const;
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette")
 	float InteractTraceRange = 500.f;

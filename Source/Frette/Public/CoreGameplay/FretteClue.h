@@ -36,8 +36,5 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette")
 	float Steepness = 10.0f;
 	
-	virtual void OnPickUp_Implementation() override;
-	
-private:
-	bool ShouldGivePrimaryClue(int NumCluesFound, int NumCluesTotal) const;
+	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor) override;
 };

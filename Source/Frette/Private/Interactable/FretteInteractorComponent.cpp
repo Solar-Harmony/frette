@@ -2,8 +2,10 @@
 
 #include "FrettePostProcessSubsystem.h"
 #include "Blueprint/UserWidget.h"
+#include "Character/FrettePlayerCharacter.h"
 #include "Interactable/FretteInteractableComponent.h"
 #include "Components/TextBlock.h"
+#include "Frette/Frette.h"
 #include "Player/FrettePlayerController.h"
 
 UFretteInteractorComponent::UFretteInteractorComponent()
@@ -71,16 +73,29 @@ void UFretteInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	UpdateInteractableTarget();
 }
 
-void UFretteInteractorComponent::Interact()
+void UFretteInteractorComponent::Interact() const
 {
 	if (CurrentHoveredActor.GetObject())
 	{
-		UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
+		const UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
 		if (IsValid(Interactable))
 		{
-			Interactable->OnInteract.Broadcast();
+			Server_Interact(Interactable->GetOwner()); // TODO: Suboptimal
 		}
 	}
+}
+
+void UFretteInteractorComponent::Server_Interact_Implementation(AActor* Interactable) const
+{
+	// TODO: the server should validate by raycasting again, to prevent cheating
+	require(IsValid(Interactable));
+	
+	const UFretteInteractableComponent* InteractableComponent = Interactable->GetComponentByClass<UFretteInteractableComponent>();
+	require(IsValid(Interactable))
+	
+	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
+	require(IsValid(Interactor));
+	InteractableComponent->OnInteract.Broadcast(Interactor);
 }
 
 void UFretteInteractorComponent::UpdateInteractableTarget()

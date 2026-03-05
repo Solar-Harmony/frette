@@ -6,6 +6,7 @@
 #include "Inventory/Items/FretteInventoryItem.h"
 #include "FrettePickupBase.generated.h"
 
+class AFrettePlayerCharacter;
 class UFretteInteractableComponent;
 
 /*
@@ -33,17 +34,17 @@ public:
 	TObjectPtr<UStaticMeshComponent> StaticMesh;
 	
 	UFUNCTION(BlueprintNativeEvent)
-	void OnPickUp();
+	void OnPickUp(AFrettePlayerCharacter* Interactor);
 	
 protected:
 	// overridable native implementation
-	virtual void OnPickUp_Implementation() {}
+	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor) {}
 	
 private:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	
 	UFUNCTION()
-	void OnInteract_Internal();
+	void OnInteract_Internal(AFrettePlayerCharacter* Interactor);
 	
 	void OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject);
 };
