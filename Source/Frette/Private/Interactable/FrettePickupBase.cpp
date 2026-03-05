@@ -5,6 +5,7 @@
 AFrettePickupBase::AFrettePickupBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item"));
 	StaticMesh->SetSimulatePhysics(false);
@@ -23,10 +24,15 @@ AFrettePickupBase::AFrettePickupBase()
 
 void AFrettePickupBase::OnInteract_Internal(AFrettePlayerCharacter* Interactor)
 {
+	require(HasAuthority(), "Pickup interact must happen on server.");
+		
 	OnPickUp(Interactor);
 	
 	if (bDestroyOnPickUp)
+	{
+		Interactable->OnEndHover.Broadcast();
 		Destroy();
+	}
 }
 
 void AFrettePickupBase::OnConstruction(const FTransform& Transform)

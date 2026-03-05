@@ -127,26 +127,29 @@ void UFretteInteractorComponent::UpdateInteractableTarget()
 		}
 	}
 
-	if (NewHovered.GetObject() == CurrentHoveredActor.GetObject())
+	const bool bCurrentValid = IsValid(CurrentHoveredActor.GetObject());
+
+	if (bCurrentValid && NewHovered.GetObject() == CurrentHoveredActor.GetObject())
 		return;
 
 	if (CurrentHoveredActor.GetObject())
 	{
-		UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
-		
-		if (IsValid(Interactable))
+		if (IsValid(InteractWidgetInstance))
 		{
-			if (IsValid(InteractWidgetInstance) && Interactable->bShowMessage)
+			InteractWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+		if (bCurrentValid)
+		{
+			UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
+			if (IsValid(Interactable))
 			{
-				InteractWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+				if (Interactable->bShowOutline && IsValid(Interactable->Mesh))
+				{
+					Interactable->Mesh->SetRenderCustomDepth(false);
+				}
+				Interactable->OnEndHover.Broadcast();
 			}
-		
-			if (Interactable->bShowOutline && IsValid(Interactable->Mesh))
-			{
-				Interactable->Mesh->SetRenderCustomDepth(false);
-			}
-		
-			Interactable->OnEndHover.Broadcast();
 		}
 	}
 

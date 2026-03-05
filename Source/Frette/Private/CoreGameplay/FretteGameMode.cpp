@@ -48,6 +48,8 @@ void AFretteGameMode::BeginPlay()
 		MainObjective = *It;
 	}
 	
+	require(IsValid(MainObjective), "No main objective found in the level! Make sure to place one in the level.");
+	
 	const FVector2D ObjectiveLocation2D(MainObjective->GetActorLocation());
 	const float NearObjectiveRadiusSq = FMath::Square(MainObjective->NearObjectiveRadiusCm);
 	
