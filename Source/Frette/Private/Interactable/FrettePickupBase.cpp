@@ -18,7 +18,6 @@ AFrettePickupBase::AFrettePickupBase()
 	SetRootComponent(StaticMesh);
 	
 	Interactable = CreateDefaultSubobject<UFretteInteractableComponent>(TEXT("Interactable Component"));
-	Interactable->Mesh = StaticMesh;
 	Interactable->bShowMessage = true;
 	Interactable->bShowOutline = true;
 	Interactable->OutlineColor = FColor::Blue;

@@ -21,12 +21,6 @@ public:
 	UFUNCTION(BlueprintPure)
 	AFretteMainObjective* GetMainObjective() const { return MainObjective; }
 	
-	UFUNCTION(BlueprintPure)
-	int32 GetNumCluesFound() const { return NumCluesDiscovered; }
-	
-	UFUNCTION(BlueprintPure)
-	int32 GetNumCluesMax() const { return NumCluesGenerated; }
-	
 	// Picks a clue, notifies clients
 	FText GenerateClue(const AFrettePlayerCharacter* Interactor, float DudClueChance);
 	
@@ -51,7 +45,10 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<AFretteLandmark>> FarLandmarks;
 	
-	int32 NumCluesDiscovered = 0;
-	int32 NumNearCluesGenerated = 0;
-	int32 NumCluesGenerated = 0;
+	int32 NumCluesPlaced = 0;
+	int32 NumCluesFound = 0;
+	int32 NumPrimaryCluesFound = 0;
+	const float PrimaryCluesRatioTarget = 0.3f; // max % of clues that should be primary
+	// PrimaryCluesRatioTarget starts at 0.0f, this is steepness of exponent curve to raise it
+	const float PrimaryCluesRatioTargetRampSteepness = 0.25f;
 };

@@ -45,13 +45,19 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 		return; \
 	}
 
-#define FRETTE_PRIVATE_ENSURE_3(Condition, Format, ...) \
+#define FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, ...) \
 	if (UNLIKELY(!(Condition))) \
 	{ \
 		Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString::Printf(TEXT(Format), FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__))); \
 		UE_DEBUG_BREAK(); \
 		return; \
 	}
+
+#define FRETTE_PRIVATE_ENSURE_3(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_ENSURE_4(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_ENSURE_5(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_ENSURE_6(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_ENSURE_7(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
 
 
 namespace Frette::Private

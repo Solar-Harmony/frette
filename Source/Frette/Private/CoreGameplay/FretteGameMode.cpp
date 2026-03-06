@@ -28,6 +28,7 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, fl
 		if (bIsPrimaryClue)
 		{
 			ClueText = FText::Format(INVTEXT("The main objective is near a {0}."), POI->DisplayName);
+			NumPrimaryCluesFound++;
 		}
 		else
 		{
@@ -39,7 +40,7 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, fl
 		UE_LOG(LogFrette, Log, TEXT("Clue generated. Leads to landmark: %s, is near objective: %d"), *POI->GetName(), bIsPrimaryClue);
 	}
 	
-	NumCluesDiscovered++;
+	NumCluesFound++;
 	return ClueText;
 }
 
@@ -78,25 +79,31 @@ void AFretteGameMode::BeginPlay()
 	
 	for (TActorIterator<AFretteClue> It(GetWorld()); It; ++It)
 	{
-		++NumCluesGenerated;
+		NumCluesPlaced++;
 	}
 	
-	NumNearCluesGenerated = NearLandmarks.Num();
+	require(NearLandmarks.Num() > 0, "No landmarks placed within the objective's radius. Primary clues won't be possible.");
+	require(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.");
+	
+	const int32 TotalLandmarks = NearLandmarks.Num() + FarLandmarks.Num();
+	require(NumCluesPlaced <= TotalLandmarks, "%d clues placed but only %d total landmarks exist.", NumCluesPlaced, TotalLandmarks);
 }
 
 bool AFretteGameMode::ShouldPickPrimaryClue() const
 {
-	check(NumCluesDiscovered <= NumCluesGenerated);
+	if (NumPrimaryCluesFound >= NearLandmarks.Num())
+	{
+		UE_LOG(LogFrette, Log, TEXT("All primary clues found, must pick secondary clue."));
+		return false;
+	}
 	
-	// it must be impossible to find all clues and not get all the primary clues.
-	const float ClueRatio = static_cast<float>(NumCluesDiscovered) / (NumCluesGenerated - NumNearCluesGenerated);
-	if (ClueRatio >= 1.0f)
-		return true;
+	const float PrimaryClueExpectation = PrimaryCluesRatioTarget * (NumCluesFound + 1);
+	const float Deficit = PrimaryClueExpectation - NumPrimaryCluesFound;
+	const float BaseProbability = FMath::Clamp(Deficit, 0.0f, 1.0f);
+	const float Ramp = 1.0f - FMath::Exp(-NumCluesFound * PrimaryCluesRatioTargetRampSteepness);
+	const float Probability = FMath::Clamp(BaseProbability * Ramp, 0.0f, 1.0f);
 	
-	// simple linear function with min clamped so first clues can never be good
-	// this should be good enough, i think lol
-	const float Probability = FMath::Clamp(ClueRatio, 0.1f, 1.0f);
-	UE_LOG(LogFrette, Log, TEXT("Found clue %d of %d. Probability to pick primary clue: %f."), NumCluesDiscovered, NumCluesGenerated, Probability);
+	UE_LOG(LogFrette, Log, TEXT("Probability of clue %d/%d being primary: %f (expectation: %f, deficit: %f, base: %f, ramp: %f)"), NumCluesFound + 1, NumCluesPlaced, Probability, PrimaryClueExpectation, Deficit, BaseProbability, Ramp);
 	
 	return FMath::FRand() < Probability;
 }
@@ -110,7 +117,7 @@ AFretteLandmark* AFretteGameMode::GetRandomLandmark(bool bNearObjective)
 	const int32 Idx = FMath::RandRange(0, Array.Num() - 1);
 	AFretteLandmark* Item = Array[Idx];
 	Array.RemoveAtSwap(Idx);
-	return Item; 		
+	return Item;
 }
 
 FString AFretteGameMode::DirVectorToCardinal(const FVector2D& Dir)
@@ -124,14 +131,14 @@ FString AFretteGameMode::DirVectorToCardinal(const FVector2D& Dir)
 	
 	static const char* Names[8] =
 	{
-		"east",
-		"north-east",
 		"north",
-		"north-west",
-		"west",
-		"south-west",
+		"north-east",
+		"east",
+		"south-east",
 		"south",
-		"south-east"
+		"south-west",
+		"west",
+		"north-west"
 	};
 
 	return Names[SectorIdx];
