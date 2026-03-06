@@ -21,6 +21,10 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UStaticMeshComponent> Mesh;
 	
+	// Name used in clues.
+	UPROPERTY(EditDefaultsOnly)
+	FText DisplayName;
+	
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()
 	TObjectPtr<UDrawSphereComponent> DebugSphere;

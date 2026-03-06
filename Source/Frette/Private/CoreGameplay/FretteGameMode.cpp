@@ -2,46 +2,47 @@
 
 #include "EngineUtils.h"
 #include "CoreGameplay/FretteClue.h"
+#include "CoreGameplay/FretteClueTemplateSet.h"
 #include "CoreGameplay/FretteLandmark.h"
 #include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
 
-FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, float DudClueChance)
+FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template, float DudClueChance)
 {
-	FText ClueText;
+	FFretteClueInfo Info;
+	
+	Info.ObjectiveName = MainObjective->DisplayName;
 	
 	if (FMath::FRand() < DudClueChance)
 	{
-		ClueText = INVTEXT("This is some fascinating lore.");
-	}
-	else
-	{
-		const bool bIsPrimaryClue = ShouldPickPrimaryClue();
-		const AFretteLandmark* POI = GetRandomLandmark(bIsPrimaryClue);
-		if (POI == nullptr)
-		{
-			ClueText = INVTEXT("This is some fascinating lore.");
-			UE_LOG(LogFrette, Warning, TEXT("Failed to generate clue: no more landmarks available!"));
-			return ClueText;
-		}
-		
-		if (bIsPrimaryClue)
-		{
-			ClueText = FText::Format(INVTEXT("The main objective is near a {0}."), POI->DisplayName);
-			NumPrimaryCluesFound++;
-		}
-		else
-		{
-			const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
-			const FText Cardinal = FText::FromString(DirVectorToCardinal(Direction));
-			ClueText = FText::Format(INVTEXT("An interesting point of interest with loot {0} of a {1}."), Cardinal, POI->DisplayName);
-		}
-		
-		UE_LOG(LogFrette, Log, TEXT("Clue generated. Leads to landmark: %s, is near objective: %d"), *POI->GetName(), bIsPrimaryClue);
+		Info.Type = EClueType::Dud;
+		return Template->GenerateClueText(Info);
 	}
 	
+	const bool bIsPrimaryClue = ShouldPickPrimaryClue();
+	const AFretteLandmark* POI = GetRandomLandmark(bIsPrimaryClue);
+	if (POI == nullptr)
+	{
+		UE_LOG(LogFrette, Warning, TEXT("Failed to generate clue: no more landmarks available!"));
+		return Template->GenerateClueText(Info);
+	}
+	
+	Info.Type = bIsPrimaryClue ? EClueType::MainObjective : EClueType::PointOfInterest;
+	Info.LandmarkName = POI->DisplayName;
+	Info.LandmarkDescription = POI->Description;
+	Info.LandmarkLoot = POI->ThingOfInterest;
+		
+	const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
+	Info.CardinalDirection = FText::FromString(DirVectorToCardinal(Direction));
+	
+	if (bIsPrimaryClue)
+	{
+		NumPrimaryCluesFound++;
+	}
 	NumCluesFound++;
-	return ClueText;
+		
+	UE_LOG(LogFrette, Log, TEXT("Clue generated. Leads to landmark: %s, is near objective: %d"), *POI->GetName(), bIsPrimaryClue);
+	return Template->GenerateClueText(Info);
 }
 
 void AFretteGameMode::BeginPlay()
@@ -131,14 +132,14 @@ FString AFretteGameMode::DirVectorToCardinal(const FVector2D& Dir)
 	
 	static const char* Names[8] =
 	{
-		"north",
-		"north-east",
-		"east",
-		"south-east",
-		"south",
-		"south-west",
-		"west",
-		"north-west"
+		"nord",
+		"nord-est",
+		"est",
+		"sud-est",
+		"sud",
+		"sud-ouest",
+		"ouest",
+		"nord-ouest"
 	};
 
 	return Names[SectorIdx];

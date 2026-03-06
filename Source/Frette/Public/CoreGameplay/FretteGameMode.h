@@ -4,6 +4,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "FretteGameMode.generated.h"
 
+class UFretteClueTemplateSet;
 class AFrettePlayerCharacter;
 class AFretteMainObjective;
 class AFretteLandmark;
@@ -22,7 +23,7 @@ public:
 	AFretteMainObjective* GetMainObjective() const { return MainObjective; }
 	
 	// Picks a clue, notifies clients
-	FText GenerateClue(const AFrettePlayerCharacter* Interactor, float DudClueChance);
+	FText GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template, float DudClueChance);
 	
 protected:
 	virtual void BeginPlay() override;

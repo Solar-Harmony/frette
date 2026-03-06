@@ -5,6 +5,7 @@
 #include "Inventory/Items/Impl/FretteClueItem.h"
 #include "FretteClue.generated.h"
 
+class UFretteClueTemplateSet;
 /**
  * A pickable that provides a hint about a location in the world. 
  * Needs a base Blueprint so the default properties can be configured.
@@ -23,8 +24,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette")
 	float DudClueChance = 0.1f;
 	
-	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem) override;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Frette")
+	TObjectPtr<UFretteClueTemplateSet> ClueTemplate;
 	
-private:
-	FText GeneratedClueText;
+	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem) override;
 };
