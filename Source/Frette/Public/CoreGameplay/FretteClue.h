@@ -20,10 +20,6 @@ class AFretteClue : public AFrettePickupBase
 	GENERATED_BODY()
 
 protected:
-	// Gating probability of a clue being a flavor-only, lore text. 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Frette")
-	float DudClueChance = 0.1f;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Frette")
 	TObjectPtr<UFretteClueTemplateSet> ClueTemplate;
 	

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FretteClueTemplateSet.h"
+#include "CoreGameplay/FretteClue.h"
 #include "GameFramework/GameModeBase.h"
 #include "FretteGameMode.generated.h"
 
@@ -23,13 +25,13 @@ public:
 	AFretteMainObjective* GetMainObjective() const { return MainObjective; }
 	
 	// Picks a clue, notifies clients
-	FText GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template, float DudClueChance);
+	FText GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template);
 	
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	bool ShouldPickPrimaryClue() const;
+	EClueType PickNextClueType() const;
 	
 	// Returns a random landmark, which can never be picked again (sampling without replacement).
 	// @param bNearObjective Whether we pick from the landmarks near the treasure (primary, quest hints) or away (secondary, POIs)
@@ -49,7 +51,9 @@ private:
 	int32 NumCluesPlaced = 0;
 	int32 NumCluesFound = 0;
 	int32 NumPrimaryCluesFound = 0;
-	const float PrimaryCluesRatioTarget = 0.3f; // max % of clues that should be primary
-	// PrimaryCluesRatioTarget starts at 0.0f, this is steepness of exponent curve to raise it
-	const float PrimaryCluesRatioTargetRampSteepness = 0.25f;
+	int32 NumDudCluesFound = 0;
+	const float PrimaryCluesRatioTarget = 0.3f;
+	const float DudClueRatioTarget = 0.1f;
+	// Both ratio targets start at 0.0, this is the steepness of the exponent curve ramping them up
+	const float ClueRatioRampSteepness = 0.25f;
 };

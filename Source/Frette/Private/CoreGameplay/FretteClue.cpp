@@ -12,7 +12,7 @@ void AFretteClue::OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UF
 	require(IsValid(ClueTemplate));
 
 	AFretteGameMode* GameMode = CastChecked<AFretteGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	const FText ClueText = GameMode->GenerateClue(Interactor, ClueTemplate, DudClueChance);
+	const FText ClueText = GameMode->GenerateClue(Interactor, ClueTemplate);
 	UFretteClueItem* ClueItem = CastChecked<UFretteClueItem>(AddedItem);
 	ClueItem->ClueText = ClueText;
 	ClueItem->GetOwningInventory()->ChangeItem_Implementation(ClueItem);

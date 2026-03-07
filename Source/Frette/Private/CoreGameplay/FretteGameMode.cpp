@@ -7,19 +7,23 @@
 #include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
 
-FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template, float DudClueChance)
+FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template)
 {
 	FFretteClueInfo Info;
 	
 	Info.ObjectiveName = MainObjective->DisplayName;
 	
-	if (FMath::FRand() < DudClueChance)
+	const EClueType PickedType = PickNextClueType();
+	
+	if (PickedType == EClueType::Dud)
 	{
 		Info.Type = EClueType::Dud;
+		NumDudCluesFound++;
+		NumCluesFound++;
 		return Template->GenerateClueText(Info);
 	}
 	
-	const bool bIsPrimaryClue = ShouldPickPrimaryClue();
+	const bool bIsPrimaryClue = PickedType == EClueType::MainObjective;
 	const AFretteLandmark* POI = GetRandomLandmark(bIsPrimaryClue);
 	if (POI == nullptr)
 	{
@@ -90,24 +94,43 @@ void AFretteGameMode::BeginPlay()
 	require(NumCluesPlaced <= TotalLandmarks, "%d clues placed but only %d total landmarks exist.", NumCluesPlaced, TotalLandmarks);
 }
 
-bool AFretteGameMode::ShouldPickPrimaryClue() const
+EClueType AFretteGameMode::PickNextClueType() const
 {
-	const int32 RemainingPrimary = NearLandmarks.Num();
-	if (RemainingPrimary <= 0)
+	// this exists to suppress the chance of getting a primary clue early-game
+	const float Ramp = 1.0f - FMath::Exp(-NumCluesFound * ClueRatioRampSteepness);
+
+	const float DudExpectation = DudClueRatioTarget * Ramp * (NumCluesFound + 1);
+	const float DudDeficit = DudExpectation - NumDudCluesFound;
+	const float DudProbability = FMath::Clamp(DudDeficit, 0.0f, 1.0f);
+
+	if (FMath::FRand() < DudProbability)
 	{
-		UE_LOG(LogFrette, Log, TEXT("All primary clues exhausted, must pick secondary clue."));
-		return false;
+		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Dud (P_dud=%f, ramp=%f, deficit=%f)"), NumCluesFound + 1, NumCluesPlaced, DudProbability, Ramp, DudDeficit);
+		return EClueType::Dud;
 	}
 
-	const float PrimaryClueExpectation = PrimaryCluesRatioTarget * (NumCluesFound + 1);
-	const float Deficit = PrimaryClueExpectation - NumPrimaryCluesFound;
-	const float BaseProbability = FMath::Clamp(Deficit, 0.0f, 1.0f);
-	const float Ramp = 1.0f - FMath::Exp(-NumCluesFound * PrimaryCluesRatioTargetRampSteepness);
-	const float Probability = FMath::Clamp(BaseProbability * Ramp, 0.0f, 1.0f);
-	
-	UE_LOG(LogFrette, Log, TEXT("Probability of clue %d/%d being primary: %f (expectation: %f, deficit: %f, base: %f, ramp: %f)"), NumCluesFound + 1, NumCluesPlaced, Probability, PrimaryClueExpectation, Deficit, BaseProbability, Ramp);
-	
-	return FMath::FRand() < Probability;
+	if (NearLandmarks.IsEmpty())
+	{
+		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Secondary (all primary landmarks exhausted)"), NumCluesFound + 1, NumCluesPlaced);
+		return EClueType::PointOfInterest;
+	}
+
+	if (FarLandmarks.IsEmpty())
+	{
+		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Primary (all secondary landmarks exhausted)"), NumCluesFound + 1, NumCluesPlaced);
+		return EClueType::MainObjective;
+	}
+
+	const float PrimaryExpectation = PrimaryCluesRatioTarget * Ramp * (NumCluesFound + 1);
+	const float PrimaryDeficit = PrimaryExpectation - NumPrimaryCluesFound;
+	const float RemainingProbability = 1.0f - DudProbability;
+	const float PrimaryProbability = RemainingProbability > 0.0f
+		? FMath::Clamp(PrimaryDeficit / RemainingProbability, 0.0f, 1.0f)
+		: 0.0f;
+
+	UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> P_primary=%f, P_dud=%f (ramp=%f)"), NumCluesFound + 1, NumCluesPlaced, PrimaryProbability, DudProbability, Ramp);
+
+	return FMath::FRand() < PrimaryProbability ? EClueType::MainObjective : EClueType::PointOfInterest;
 }
 
 AFretteLandmark* AFretteGameMode::GetRandomLandmark(bool bNearObjective)
