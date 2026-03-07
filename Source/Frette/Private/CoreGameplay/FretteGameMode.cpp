@@ -92,12 +92,20 @@ void AFretteGameMode::BeginPlay()
 
 bool AFretteGameMode::ShouldPickPrimaryClue() const
 {
-	if (NumPrimaryCluesFound >= NearLandmarks.Num())
+	const int32 RemainingPrimary = NearLandmarks.Num();
+	if (RemainingPrimary <= 0)
 	{
-		UE_LOG(LogFrette, Log, TEXT("All primary clues found, must pick secondary clue."));
+		UE_LOG(LogFrette, Log, TEXT("All primary clues exhausted, must pick secondary clue."));
 		return false;
 	}
-	
+
+	const int32 RemainingClues = NumCluesPlaced - NumCluesFound;
+	if (RemainingClues <= RemainingPrimary)
+	{
+		UE_LOG(LogFrette, Log, TEXT("Forcing primary clue: %d remaining clues, %d primary landmarks left."), RemainingClues, RemainingPrimary);
+		return true;
+	}
+
 	const float PrimaryClueExpectation = PrimaryCluesRatioTarget * (NumCluesFound + 1);
 	const float Deficit = PrimaryClueExpectation - NumPrimaryCluesFound;
 	const float BaseProbability = FMath::Clamp(Deficit, 0.0f, 1.0f);
