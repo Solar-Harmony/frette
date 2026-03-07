@@ -99,13 +99,6 @@ bool AFretteGameMode::ShouldPickPrimaryClue() const
 		return false;
 	}
 
-	const int32 RemainingClues = NumCluesPlaced - NumCluesFound;
-	if (RemainingClues <= RemainingPrimary)
-	{
-		UE_LOG(LogFrette, Log, TEXT("Forcing primary clue: %d remaining clues, %d primary landmarks left."), RemainingClues, RemainingPrimary);
-		return true;
-	}
-
 	const float PrimaryClueExpectation = PrimaryCluesRatioTarget * (NumCluesFound + 1);
 	const float Deficit = PrimaryClueExpectation - NumPrimaryCluesFound;
 	const float BaseProbability = FMath::Clamp(Deficit, 0.0f, 1.0f);
