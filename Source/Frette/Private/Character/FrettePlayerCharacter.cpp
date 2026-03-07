@@ -1,6 +1,7 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "Player/FrettePlayerState.h"
@@ -13,6 +14,8 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	Camera->SetupAttachment(GetCapsuleComponent());
 
 	InventoryComponent = CreateDefaultSubobject<UFakeInventoryComponent>(TEXT("Inventory"));
+
+	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
 }
 
 //Client side

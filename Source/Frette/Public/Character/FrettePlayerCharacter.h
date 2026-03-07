@@ -4,6 +4,7 @@
 #include "FakeInventoryComponent.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
 
 #include "FrettePlayerCharacter.generated.h"
 
@@ -28,6 +29,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
