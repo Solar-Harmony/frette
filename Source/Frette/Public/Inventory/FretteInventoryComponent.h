@@ -29,9 +29,9 @@ class FRETTE_API UFretteInventoryComponent : public UActorComponent
 public:
 	UFretteInventoryComponent();
 
-	FORCEINLINE void SubToItemAdded(const FOnItemAdded::FDelegate& Delegate)
+	FORCEINLINE FDelegateHandle SubToItemAdded(const FOnItemAdded::FDelegate& Delegate)
 	{
-		OnItemAdded.Add(Delegate);
+		return OnItemAdded.Add(Delegate);
 	}
 
 	FORCEINLINE void SubToItemChanged(const FOnItemChanged::FDelegate& Delegate)
@@ -69,7 +69,7 @@ public:
 	bool IsItemValid(const UFretteInventoryItem* Item) const { return Inventory.IsValidItem(Item); }
 
 	UFUNCTION(BlueprintCallable, Category="Frette|Inventory")
-	void SelectItem(int32 ItemId) const;
+	void SelectItem(int32 ItemId);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
 	void AddItem(UFretteInventoryItemDataAsset* ItemData);

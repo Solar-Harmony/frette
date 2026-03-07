@@ -1,7 +1,7 @@
 #include "Equipment/FretteEquipmentComponent.h"
 #include "Frette/Frette.h"
 #include "Inventory/FretteInventoryComponent.h"
-#include "Inventory/Items/FretteGearItem.h"
+#include "Inventory/Items/FretteSlottableItem.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_EquipmentSlot_Head, "Frette.EquipmentSlot.Head");
 UE_DEFINE_GAMEPLAY_TAG(TAG_EquipmentSlot_Chest, "Frette.EquipmentSlot.Chest");
@@ -17,7 +17,7 @@ void UFretteEquipmentComponent::Initialize(UFretteInventoryComponent* Inventory)
 
 void UFretteEquipmentComponent::OnInventoryItemSelected(const UFretteInventoryItem* Item)
 {
-	if (Item->IsA<UFretteGearItem>())
+	if (Item->IsA<UFretteSlottableItem>())
 	{
 		UE_LOG(LogFrette, Log, TEXT("Equipment: Received new item '%s'."), *Item->Data->DisplayName.ToString());
 	}

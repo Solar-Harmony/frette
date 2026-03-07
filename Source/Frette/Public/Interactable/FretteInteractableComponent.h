@@ -6,7 +6,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBeginHover);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEndHover);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteract);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AFrettePlayerCharacter*, Instigator);
 
 UCLASS(ClassGroup=(Frette), meta=(BlueprintSpawnableComponent) )
 class FRETTE_API UFretteInteractableComponent : public UActorComponent

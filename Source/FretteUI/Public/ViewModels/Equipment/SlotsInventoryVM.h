@@ -4,7 +4,7 @@
 #include "FretteViewModel.h"
 #include "SlotsInventoryItemVM.h"
 #include "Inventory/FretteInventoryComponent.h"
-#include "Inventory/Items/FretteGearItem.h"
+#include "Inventory/Items/FretteSlottableItem.h"
 #include "Player/FrettePlayerState.h"
 #include "SlotsInventoryVM.generated.h"
 
@@ -27,7 +27,7 @@ private:
 
 	void AddItem(const UFretteInventoryItem* NewItem)
 	{
-		if (!NewItem->IsA<UFretteGearItem>())
+		if (!NewItem->IsA<UFretteSlottableItem>())
 			return;
 
 		auto* SubViewModel = NewObject<USlotsInventoryItemVM>(this);
@@ -39,7 +39,7 @@ private:
 
 	void RemoveItem(const UFretteInventoryItem* RemovedItem)
 	{
-		if (!RemovedItem->IsA<UFretteGearItem>())
+		if (!RemovedItem->IsA<UFretteSlottableItem>())
 			return;
 
 		Items.RemoveAll([RemovedItem](const USlotsInventoryItemVM* ItemVM) {

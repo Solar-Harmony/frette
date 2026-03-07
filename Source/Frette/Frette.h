@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "boost/preprocessor.hpp"
+#include "Logging/MessageLog.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 
@@ -31,8 +32,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 #define FRETTE_PRIVATE_ENSURE_1(Condition) \
 	if (UNLIKELY(!(Condition))) \
 	{ \
-		const FString Caller = Frette::Private::CaptureCaller(); \
-		FRETTE_LOG(Error, "Precondition failed: %s in %s.", #Condition, Caller); \
+		Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString()); \
 		UE_DEBUG_BREAK(); \
 		return; \
 	}
@@ -40,18 +40,24 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 #define FRETTE_PRIVATE_ENSURE_2(Condition, Msg) \
 	if (UNLIKELY(!(Condition))) \
 	{ \
-		const FString Caller = Frette::Private::CaptureCaller(); \
-		FRETTE_LOG(Error, "Precondition failed: %s in %s: %s", #Condition, Caller, Msg); \
+		Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString(TEXT(Msg))); \
+		UE_DEBUG_BREAK(); \
 		return; \
 	}
 
-#define FRETTE_PRIVATE_ENSURE_3(Condition, Format, ...) \
+#define FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, ...) \
 	if (UNLIKELY(!(Condition))) \
 	{ \
-		const FString Caller = Frette::Private::CaptureCaller(); \
-		FRETTE_LOG(Error, "Precondition failed: %s in %s: " Format, #Condition, Caller, __VA_ARGS__); \
+		Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString::Printf(TEXT(Format), FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__))); \
+		UE_DEBUG_BREAK(); \
 		return; \
 	}
+
+#define FRETTE_PRIVATE_ENSURE_3(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_ENSURE_4(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_ENSURE_5(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_ENSURE_6(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_ENSURE_7(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
 
 
 namespace Frette::Private
@@ -87,15 +93,45 @@ namespace Frette::Private
 	{
 		return Value;
 	}
-	
+
 	FORCEINLINE FString CaptureCaller()
 	{
-		uint64 Address = 0;
-		FPlatformStackWalk::CaptureStackBackTrace(&Address, 1);
+		// Frame 0 = CaptureStackBackTrace (OS), Frame 1 = CaptureCaller (inlined away),
+		// Frame 2 = the require() expansion site (the actual caller we want).
+		static constexpr int32 NumFrames = 4;
+		static constexpr int32 CallerFrameIndex = 2;
+		uint64 Addresses[NumFrames] = {};
+		FPlatformStackWalk::CaptureStackBackTrace(Addresses, NumFrames);
 
-		ANSICHAR Buffer[1024];
-		FPlatformStackWalk::ProgramCounterToHumanReadableString(0, Address, Buffer, sizeof(Buffer));
-		
-		return FString(ANSI_TO_TCHAR(Buffer));
+		ANSICHAR Buffer[1024] = {};
+		FPlatformStackWalk::ProgramCounterToHumanReadableString(CallerFrameIndex, Addresses[CallerFrameIndex], Buffer, sizeof(Buffer));
+		FString Raw(ANSI_TO_TCHAR(Buffer));
+		return Raw;
+	}
+
+	FORCEINLINE void LogMessageErr(const FString& Message)
+	{
+#if WITH_EDITOR
+		FMessageLog Log("FretteAssert");
+		Log.SuppressLoggingToOutputLog(true);
+		Log.Error(FText::FromString(Message));
+		Log.Open();
+#endif
+	}
+
+	FORCEINLINE void ReportPreconditionFailure(const TCHAR* ConditionStr, const FString& Reason)
+	{
+		const FString Location = CaptureCaller();
+		FString FullMessage;
+		if (Reason.IsEmpty())
+		{
+			FullMessage = FString::Printf(TEXT("Precondition failed: %s\nLocation: %s"), ConditionStr, *Location);
+		}
+		else
+		{
+			FullMessage = FString::Printf(TEXT("Precondition failed: %s\nLocation: %s\nReason: %s"), ConditionStr, *Location, *Reason);
+		}
+		UE_LOG(LogFrette, Error, TEXT("%s"), *FullMessage);
+		LogMessageErr(FullMessage);
 	}
 }
