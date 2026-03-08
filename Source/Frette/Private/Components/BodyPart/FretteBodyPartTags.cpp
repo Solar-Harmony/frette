@@ -1,4 +1,4 @@
-#include "Damage/FretteBodyPartTags.h"
+#include "Components/BodyPart/FretteBodyPartTags.h"
 // #include "NativeGameplayTags.h"
 //
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Head, "Frette.BodyPart.Head");

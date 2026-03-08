@@ -11,11 +11,11 @@ void UFretteBodyPartComponent::BeginPlay()
 
 	if (GetOwnerRole() == ROLE_Authority)
 	{
-		BodyParts = DefaultBodyParts;
-
-		for (FBodyPartHealthData& BodyPart : BodyParts)
+		for (const auto& Data : BodyPartData)
 		{
-			BodyPart.CurrentHealth = BodyPart.MaxHealth;
+			UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
+			Instance->Initialize(Data, Cast<AFretteBaseCharacter>(GetOwner()));
+			BodyPartInstances.Add(Instance);
 		}
 	}
 }
@@ -23,15 +23,15 @@ void UFretteBodyPartComponent::BeginPlay()
 void UFretteBodyPartComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UFretteBodyPartComponent, BodyParts);
+	DOREPLIFETIME(UFretteBodyPartComponent, BodyPartInstances);
 
 }
 
-void UFretteBodyPartComponent::ServerApplyDamage_Implementation(FGameplayTag BodyPartTag, float Damage)
+void UFretteBodyPartComponent::ServerApplyDamage_Implementation(FGameplayTag BodyPartTag, float Damage, FGameplayTag DamageType)
 {
-	if (FBodyPartHealthData* BodyPart = FindBodyPart(BodyPartTag))
+	if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
 	{
-		BodyPart->CurrentHealth = FMath::Max(0.f, BodyPart->CurrentHealth - Damage);
+		BodyPart->ApplyDamage(Damage, DamageType);
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,
 			FString::Printf(TEXT("received damage for body part %s: %.1f"), *BodyPartTag.ToString(), Damage));
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green,
@@ -39,14 +39,14 @@ void UFretteBodyPartComponent::ServerApplyDamage_Implementation(FGameplayTag Bod
 	}
 }
 
-void UFretteBodyPartComponent::ApplyDamageFromHit(const FName BoneName, float Damage)
+void UFretteBodyPartComponent::ApplyDamageFromHit(const FName BoneName, float Damage, FGameplayTag DamageType)
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
 		FGameplayTag BodyPartTag = GetBodyPartFromBoneName(BoneName);
 		if (BodyPartTag.IsValid())
 		{
-			ServerApplyDamage(BodyPartTag, Damage);
+			ServerApplyDamage(BodyPartTag, Damage, DamageType);
 		}
 	}
 }
@@ -62,16 +62,16 @@ FGameplayTag UFretteBodyPartComponent::GetBodyPartFromBoneName(const FName BoneN
 
 float UFretteBodyPartComponent::GetBodyPartHealth(const FGameplayTag BodyPartTag)
 {
-	const FBodyPartHealthData* BodyPart = FindBodyPart(BodyPartTag);
+	const UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag);
 	return BodyPart ? BodyPart->CurrentHealth : 0.f;
 }
 
-FBodyPartHealthData* UFretteBodyPartComponent::FindBodyPart(const FGameplayTag BodyPartTag)
+UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayTag BodyPartTag)
 {
-	for (FBodyPartHealthData& BodyPart : BodyParts)
+	for (TObjectPtr BodyPart : BodyPartInstances)
 	{
-		if (BodyPart.BodyPartTag.MatchesTagExact(BodyPartTag))
-			return &BodyPart;
+		if (BodyPart->GetAssociatedTag().MatchesTagExact(BodyPartTag))
+			return BodyPart;
 	}
 
 	UE_LOG(LogTemp, Error, TEXT("Body part with tag %s not found!"), *BodyPartTag.ToString());
