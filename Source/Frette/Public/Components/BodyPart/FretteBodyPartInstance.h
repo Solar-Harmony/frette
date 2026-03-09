@@ -23,8 +23,11 @@ public:
 	bool IsTriggered(const FBodyPartEffectRule& Rule, float Damage, FGameplayTag DamageType) const;
 	void ApplyEffect(const FBodyPartEffectRule& Rule) const;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth, BlueprintReadOnly)
 	float CurrentHealth;
+
+	UFUNCTION()
+	void OnRep_CurrentHealth();
 
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FGameplayTag, float> AccumulatedDamageByType;

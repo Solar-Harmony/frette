@@ -6,11 +6,12 @@
 #include "FretteBodyPartData.generated.h"
 
 class UGameplayEffect;
-
+//Pas l'impression qu'on va avoir assez de regle différente pour justifier cela mais les regles
 //Pourrais peut-être être des object a pars entiere qui détermine une regle de trigger
 //Quand quelque chose ce produit dans un bodypart on envoi le data du bodypart et le type de dammage 
 //a chacune de ces regle pour voir si elle doit être trigger ou pas
 //Pourrais permettre des regle spécifique plutot qu'un amas de regles dans un seul struct
+
 USTRUCT(BlueprintType)
 struct FBodyPartEffectRule
 {
