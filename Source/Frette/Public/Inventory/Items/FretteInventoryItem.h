@@ -11,7 +11,7 @@ class UFretteInventoryItemDataAsset;
 inline const FPrimaryAssetType GInventoryItemPrimaryAssetType("FretteInventoryItem");
 
 UCLASS(Abstract, BlueprintType, Blueprintable)
-class UFretteInventoryItem : public UObject
+class FRETTE_API UFretteInventoryItem : public UObject
 {
 	GENERATED_BODY()
 

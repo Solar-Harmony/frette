@@ -14,13 +14,13 @@ class UFretteSlottableItem : public UFretteInventoryItem
 public:
 	// Index of the visual inventory slot the item is in, -1 if unassigned. 
 	// This is managed by the UI widget and may differ from the item's index in the replicated inventory array.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
-	int32 SlotIndex = -1;
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	int32 SlotID = -1;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-		DOREPLIFETIME(ThisClass, SlotIndex);
+		DOREPLIFETIME(ThisClass, SlotID);
 	}
 };
 
