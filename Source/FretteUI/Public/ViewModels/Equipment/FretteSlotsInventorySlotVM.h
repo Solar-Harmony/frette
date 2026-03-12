@@ -56,7 +56,6 @@ public:
 	UFUNCTION(BlueprintPure, FieldNotify)
 	FText GetCompatibleSlotName() const { return FText::FromName(CompatibleSlotType.GetTagLeafName()); }
 
-protected:
 	UPROPERTY()
 	UFretteSlotsInventoryItemVM* ItemVM = nullptr;
 };

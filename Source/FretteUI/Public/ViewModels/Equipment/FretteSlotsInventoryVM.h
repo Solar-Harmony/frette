@@ -29,7 +29,7 @@ protected:
 		if (!SlotVM->ContainsItem())
 			return;
 
-		UFretteSlotsInventoryItemVM* ItemVM = SlotVM->GetItemVM();
+		UFretteSlotsInventoryItemVM* ItemVM = SlotVM->ItemVM;
 		const int32 NewSlotIdx = FindFirstFreeSlot(ItemVM, SlotVM->IsCompatibleWithAnything());
 		if (NewSlotIdx == INDEX_NONE)
 		{
@@ -39,7 +39,7 @@ protected:
 		
 		// swap the 2 items
 		UFretteSlotsInventorySlotVM* NewSlotVM = Slots[NewSlotIdx];
-		SlotVM->SetItemVM(NewSlotVM->GetItemVM());
+		SlotVM->SetItemVM(NewSlotVM->ItemVM);
 		NewSlotVM->SetItemVM(ItemVM);
 	}
 	
