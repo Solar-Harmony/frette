@@ -2,22 +2,21 @@
 
 #include "MVVMSubsystem.h"
 #include "Blueprint/WidgetTree.h"
-#include "Frette/Frette.h"
 #include "View/MVVMView.h"
 #include "Widgets/FretteInventorySlotWidget.h"
 
-void UFretteInventoryWidget::NativeConstruct()
+// how many slots there are is dictated by the designer-placed slot widgets
+// so we must build the slot viewmodels array from the inventory widget
+// TODO: There might be a way to generate the slots from a count in the inventory viewmodel,
+// then request them to be bound by the designer in the widget. Like BindWidget uproperty but dynamic?
+void UFretteInventoryWidget::InitializeSlotViewmodels() const
 {
 	TArray<UWidget*> Widgets;
 	WidgetTree->GetAllWidgets(Widgets);
 	
-	int32 SlotIdx = 0;
-	
-	check(SlotsVM);
-	
 	for (UWidget* Widget : Widgets)
 	{
-		UFretteInventorySlotWidget* SlotWidget = Cast<UFretteInventorySlotWidget>(Widget);
+		const auto* SlotWidget = Cast<UFretteInventorySlotWidget>(Widget);
 		if (SlotWidget == nullptr)
 			continue;
 		
@@ -28,8 +27,17 @@ void UFretteInventoryWidget::NativeConstruct()
 		auto* SlotVM = Cast<UFretteSlotsInventorySlotVM>(View->GetViewModel(NAME_SlotVM).GetObject());
 		check(SlotVM)
 		
-		SlotWidget->SlotID = SlotIdx++;
 		SlotVM->ParentVM = SlotsVM;
-		SlotsVM->SlotIDToItemMap.Add(SlotWidget->SlotID, SlotVM);
+		SlotVM->SetCompatibleTag(SlotWidget->CompatibleSlotType);
+		SlotsVM->Slots.Add(SlotVM);
 	}
+}
+
+void UFretteInventoryWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	check(SlotsVM);
+	
+	InitializeSlotViewmodels();
 }

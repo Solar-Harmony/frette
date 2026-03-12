@@ -5,6 +5,8 @@
 #include "ViewModels/Equipment/FretteSlotsInventoryVM.h"
 #include "FretteInventoryWidget.generated.h"
 
+class UFretteInventorySlotWidget;
+
 UCLASS()
 class FRETTEUI_API UFretteInventoryWidget : public UUserWidget
 {
@@ -16,4 +18,6 @@ protected:
 	
 private:
 	virtual void NativeConstruct() override;
+	
+	void InitializeSlotViewmodels() const;
 };

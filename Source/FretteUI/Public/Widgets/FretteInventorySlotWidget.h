@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Blueprint/UserWidget.h"
 #include "FretteInventorySlotWidget.generated.h"
 
@@ -12,9 +13,6 @@ class FRETTEUI_API UFretteInventorySlotWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadOnly, Category="Frette")
-	int32 SlotID;
-
-private:
-	virtual void NativeConstruct() override;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Categories = "Frette.Inventory.SlotType"))
+	FGameplayTag CompatibleSlotType;
 };

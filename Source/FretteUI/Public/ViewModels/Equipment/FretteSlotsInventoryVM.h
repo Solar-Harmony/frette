@@ -6,7 +6,6 @@
 #include "FretteViewModel.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Inventory/Items/FretteSlottableItem.h"
-#include "Widgets/FretteInventorySlotWidget.h"
 #include "FretteSlotsInventoryVM.generated.h"
 
 UCLASS()
@@ -14,16 +13,35 @@ class FRETTEUI_API UFretteSlotsInventoryVM : public UFretteViewModel
 {
 	GENERATED_BODY()
 	
-public:
-	UPROPERTY()
-	TObjectPtr<UFretteSlotsInventorySlotVM> HeldItem = nullptr;
-	
-	UPROPERTY(FieldNotify)
-	TMap<int32, TObjectPtr<UFretteSlotsInventorySlotVM>> SlotIDToItemMap;
-	
+	friend class UFretteInventoryWidget;
+
 protected:
+	// fixed list of slots, populated by the widget
+	UPROPERTY()
+	TArray<TObjectPtr<UFretteSlotsInventorySlotVM>> Slots;
+	
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TArray<TObjectPtr<UFretteSlotsInventoryItemVM>> Items;
+	
+	UFUNCTION(BlueprintCallable)
+	void SelectSlot(UFretteSlotsInventorySlotVM* SlotVM)
+	{
+		if (!SlotVM->ContainsItem())
+			return;
+
+		UFretteSlotsInventoryItemVM* ItemVM = SlotVM->GetItemVM();
+		const int32 NewSlotIdx = FindFirstFreeSlot(ItemVM, SlotVM->IsCompatibleWithAnything());
+		if (NewSlotIdx == INDEX_NONE)
+		{
+			// couldn't find a slot to move the item in
+			return;
+		}
+		
+		// swap the 2 items
+		UFretteSlotsInventorySlotVM* NewSlotVM = Slots[NewSlotIdx];
+		SlotVM->SetItemVM(NewSlotVM->GetItemVM());
+		NewSlotVM->SetItemVM(ItemVM);
+	}
 	
 private:
 	virtual void Bind() override
@@ -32,32 +50,29 @@ private:
 		Inventory->SubToItemAdded(FOnItemAdded::FDelegate::CreateUObject(this, &UFretteSlotsInventoryVM::AddItem));
 		Inventory->SubToItemRemoved(FOnItemRemoved::FDelegate::CreateUObject(this, &UFretteSlotsInventoryVM::RemoveItem));
 	}
-
-	static void UpdateItemSlot(const UFretteSlotsInventoryItemVM* ItemVM, int32 SlotID)
-	{
-		const UFretteSlottableItem* GearItem = Cast<UFretteSlottableItem>(ItemVM->Ptr);
-		// todo: temp const cast lol
-		UFretteSlottableItem* MutableGearItem = const_cast<UFretteSlottableItem*>(GearItem);
-		MutableGearItem->SlotID = SlotID;
-
-		UFretteInventoryComponent* Inventory = ItemVM->OwningInventory;
-		Inventory->ChangeItem(MutableGearItem);
-	}
 	
 	void AddItem(const UFretteInventoryItem* NewItem)
 	{
 		if (!NewItem->IsA<UFretteSlottableItem>())
 			return;
 
-		auto* SubViewModel = NewObject<UFretteSlotsInventoryItemVM>(this);
-		SubViewModel->SetFromModel(NewItem);
-		Items.Add(SubViewModel);
+		UFretteSlotsInventoryItemVM* ItemVM = NewObject<UFretteSlotsInventoryItemVM>(this);
+		ItemVM->SetFromModel(NewItem);
+		Items.Add(ItemVM);
 		
-		const int32 FreeSlot = FindFirstFreeSlot();
-		SlotIDToItemMap[FreeSlot]->SetItemVM(SubViewModel);
-		UpdateItemSlot(SubViewModel, FreeSlot);
+		const int32 FreeSlotIdx = FindFirstFreeSlot(ItemVM, false);
+		if (FreeSlotIdx == INDEX_NONE)
+		{
+			// FIXME: We need to refuse adding item ON THE SERVER if there are no more slots!!!
+			// This is why the slot system should be on the server but i'm a Dumbass and did it 
+			// in the viewmodel and we don't have time do think of better. For now just notify
+			ensure(false);
+			return;
+		}
 		
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(SlotIDToItemMap);
+		Slots[FreeSlotIdx]->SetItemVM(ItemVM);
+		UpdateItemSlot(ItemVM, FreeSlotIdx);
+		
 		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Items);
 	}
 
@@ -66,38 +81,43 @@ private:
 		const auto* SlotItem = Cast<UFretteSlottableItem>(RemovedItem);
 		check(SlotItem);
 
-		SlotIDToItemMap[SlotItem->SlotID]->SetItemVM(nullptr);
+		Slots[SlotItem->SlotID]->SetItemVM(nullptr);
 		Items.RemoveAll([RemovedItem](const UFretteSlotsInventoryItemVM* ItemVM) {
 			return ItemVM->ItemID == RemovedItem->Id;
 		});
 		
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(SlotIDToItemMap);
 		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Items);
 	}
 	
-	int32 FindFirstFreeSlot()
+	int32 FindFirstFreeSlot(const UFretteSlotsInventoryItemVM* ItemVM, bool bNeedExplicitCompatibility)
 	{
-		for (const auto& Pair : SlotIDToItemMap)
+		for (int Idx = 0; Idx < Slots.Num(); ++Idx)
 		{
-			check(Pair.Value != nullptr);
+			const UFretteSlotsInventorySlotVM* Slot = Slots[Idx];
+			check(Slot != nullptr);
 			
-			if (Pair.Value->ItemVM == nullptr)
-			{
-				return Pair.Key;
-			}
+			if (Slot->ContainsItem())
+				continue;
+			
+			const bool bCompatible = bNeedExplicitCompatibility
+				? Slot->CompatibleSlotType == ItemVM->SlotType
+				: Slot->IsCompatibleWithAnything();
+			
+			if (bCompatible) 
+				return Idx;
 		}
 		
-		checkNoEntry();
-		return -1;
+		return INDEX_NONE;
 	}
-
-	UFUNCTION(BlueprintCallable)
-	void OnItemSelectionChange(UObject* Item, bool bIsSelected) const
+	
+	// FIXME: We are client authoritative. This is bad and a hack for the demo to work
+	// Have to rework the slot system into server
+	static void UpdateItemSlot(const UFretteSlotsInventoryItemVM* ItemVM, int32 SlotID)
 	{
-		if (bIsSelected)
-		{
-			const auto* ItemVM = Cast<UFretteSlotsInventoryItemVM>(Item);
-			PlayerCharacter->GetPlayerInventory()->SelectItem(ItemVM->ItemID);
-		}
+		UFretteSlottableItem* GearItem = Cast<UFretteSlottableItem>(ItemVM->Ptr);
+		GearItem->SlotID = SlotID;
+
+		UFretteInventoryComponent* Inventory = ItemVM->OwningInventory;
+		Inventory->ChangeItem(GearItem);
 	}
 };

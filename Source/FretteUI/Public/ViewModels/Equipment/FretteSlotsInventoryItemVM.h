@@ -4,8 +4,10 @@
 #include "FretteViewModel.h"
 #include "MVVMViewModelBase.h"
 #include "Inventory/FretteInventoryComponent.h"
+#include "Inventory/Items/FretteSlottableItem.h"
 #include "FretteSlotsInventoryItemVM.generated.h"
 
+class UFretteSlottableItem;
 UCLASS()
 class FRETTEUI_API UFretteSlotsInventoryItemVM : public UFretteViewModel
 {
@@ -21,15 +23,21 @@ public:
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TObjectPtr<UTexture2D> Icon;
 	
+	UPROPERTY(BlueprintReadOnly, meta = (Categories = "Frette.Inventory.SlotType"))
+	FGameplayTag SlotType;
+	
 	UPROPERTY()
 	TObjectPtr<UFretteInventoryComponent> OwningInventory;
 
 	void SetFromModel(const UFretteInventoryItem* Item)
 	{
+		const auto* ItemData = CastChecked<UFretteSlottableDataAsset>(Item->Data);
+		
 		UE_MVVM_SET_PROPERTY_VALUE(ItemID, Item->Id);
 		UE_MVVM_SET_PROPERTY_VALUE(DisplayName, Item->Data->DisplayName);
 		UE_MVVM_SET_PROPERTY_VALUE(Icon, Item->Data->Icon.LoadSynchronous()); // TODO: Use async load.
 		OwningInventory = Item->GetOwningInventory();
+		SlotType = ItemData->ItemSlotTag;
 		Ptr = const_cast<UFretteInventoryItem*>(Item);
 	}
 	

@@ -30,9 +30,8 @@ class UFretteSlottableDataAsset : public UFretteInventoryItemDataAsset
 	GENERATED_BODY()
 
 public:
-	// Tag to restrict which inventory slots the item can be placed in.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Categories = "Frette.EquipmentSlot"))
-	FGameplayTag SlotTag = FGameplayTag();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Categories = "Frette.Inventory.SlotType"))
+	FGameplayTag ItemSlotTag;
 
 	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
 	{
