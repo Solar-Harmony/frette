@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
+#include "Camera/CameraComponent.h"
+#include "Equipments/FretteFakeEquipmentComponent.h"
+
 #include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
@@ -26,17 +29,29 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
-	
+
 	UFUNCTION(BlueprintCallable)
-    UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
+	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USkeletalMeshComponent> FPMesh;
+
+	virtual void BeginPlay() override;
+	void SetLookInputScale();
+
+	UPROPERTY(EditAnywhere)
+	float HorizontalSensitivity = 1.f;
+
+	UPROPERTY(EditAnywhere)
+	float VerticalSensitivity = 1.f;
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteEquipmentComponent> Equipment;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
 
