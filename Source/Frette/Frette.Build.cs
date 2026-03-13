@@ -17,7 +17,10 @@ public class Frette : ModuleRules
 			"EnhancedInput",
 			"GameplayAbilities",
 			"GameplayTags",
-			"GameplayTasks"
+			"GameplayTasks",
+			"UMG",
+			"NetCore",
+			"Boost"
 		});
 
 		PrivateDependencyModuleNames.AddRange(["StateTreeModule"]);

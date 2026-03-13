@@ -1,12 +1,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FakeInventoryComponent.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Equipments/FretteFakeEquipmentComponent.h"
 
+#include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
+
+class UCameraComponent;
+class UInventoryComponent;
 
 UCLASS()
 class AFrettePlayerCharacter : public AFretteBaseCharacter
@@ -27,14 +30,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
-
-	UPROPERTY(BlueprintReadWrite)
-	FTransform AimedGunTransform;
+	UFUNCTION(BlueprintCallable)
+	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
 
 	UPROPERTY(EditAnywhere)
@@ -48,6 +48,12 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float VerticalSensitivity = 1.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteEquipmentComponent> Equipment;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
 
 private:
 	virtual void InitAbilityActorInfo() override;
