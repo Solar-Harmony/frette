@@ -11,7 +11,7 @@ class FRETTE_API UFretteGameplayAbility : public UGameplayAbility
 
 public:
 	UFretteGameplayAbility();
-
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	//Les GameplayAbilities ont un InputPressed et InputRelease mais ça fonctionne seulement pour l'ancien input system
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Frette|Ability|Input")
 	void OnInputReleased();
@@ -22,4 +22,6 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Frette|Ability")
 	AActor* GetAvatarActor() const { return CurrentActorInfo ? CurrentActorInfo->AvatarActor.Get() : nullptr; }
+
+	//Ajouter un additionnal cost
 };

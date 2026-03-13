@@ -3,7 +3,7 @@
 
 void UFretteAbilitySystemComponent::AbilityInputPressed(const FGameplayTag& InputTag)
 {
-	if (!InputTag.IsValid())
+	if (!InputTag.IsValid() || !InputAbilityMap.Find(InputTag))
 		return;
 
 	if (const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(InputTag); Handle->IsValid())
@@ -21,7 +21,7 @@ void UFretteAbilitySystemComponent::AbilityInputPressed(const FGameplayTag& Inpu
 
 void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& InputTag)
 {
-	if (!InputTag.IsValid())
+	if (!InputTag.IsValid() || !InputAbilityMap.Find(InputTag))
 		return;
 
 	if (const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(InputTag); Handle->IsValid())
@@ -47,7 +47,7 @@ void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& Inp
 	}
 }
 
-void UFretteAbilitySystemComponent::GrantAbilitiesFromLoadout(UAbilitySetDataAsset* Loadout)
+void UFretteAbilitySystemComponent::GrantAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout, UObject* SourceObject)
 {
 	if (Loadout == nullptr)
 		return;
@@ -55,9 +55,32 @@ void UFretteAbilitySystemComponent::GrantAbilitiesFromLoadout(UAbilitySetDataAss
 	for (const FAbilityTagMapping& Mapping : Loadout->AbilityMappings)
 	{
 		FGameplayAbilitySpec Spec(Mapping.Ability, Mapping.AbilityLevel);
+		Spec.SourceObject = SourceObject;
 		Spec.GetDynamicSpecSourceTags().AddTag(Mapping.InputTag);
 
-		FGameplayAbilitySpecHandle Handle = GiveAbility(Spec);
-		InputAbilityMap.Add(Mapping.InputTag, Handle);
+		GiveAbility(Spec);
+	}
+}
+
+void UFretteAbilitySystemComponent::OnGiveAbility(FGameplayAbilitySpec& AbilitySpec)
+{
+	Super::OnGiveAbility(AbilitySpec);
+
+	const FGameplayTagContainer& SourceTags = AbilitySpec.GetDynamicSpecSourceTags();
+
+	for (const FGameplayTag& Tag : SourceTags)
+	{
+		InputAbilityMap.Add(Tag, AbilitySpec.Handle);
+	}
+}
+
+void UFretteAbilitySystemComponent::RemoveAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout)
+{
+	if (Loadout == nullptr)
+		return;
+
+	for (const FAbilityTagMapping& Mapping : Loadout->AbilityMappings)
+	{
+		InputAbilityMap.Remove(Mapping.InputTag);
 	}
 }

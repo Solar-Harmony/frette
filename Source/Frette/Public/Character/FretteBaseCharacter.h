@@ -2,8 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "Equipments/FretteEquipmentDataAsset.h"
+#include "Equipments/FretteFakeEquipmentComponent.h"
 #include "GameFramework/Character.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
+#include "Weapons/FretteRangedWeaponInstance.h"
 #include "FretteBaseCharacter.generated.h"
 
 class UAttributeSet;
@@ -15,13 +18,12 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 	GENERATED_BODY()
 
 protected:
+	AFretteBaseCharacter();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
-
-	void ApplyStartupEffects() const;
+	void ApplyStartupEffects();
 	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
 	void ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
-
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> AbilitySystemComponent;
 
@@ -34,7 +36,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Frette|AbilitySystem")
 	TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
 
-	UPROPERTY(EditDefaultsOnly, Category="Frette|Archetype")
+	UPROPERTY(EditDefaultsOnly, Category= "Frette|Archetype")
 	TObjectPtr<UAbilitySetDataAsset> ArchetypeLoadout;
 
 	UPROPERTY(EditAnywhere)
@@ -45,5 +47,16 @@ protected:
 	void SubToAttributeChanges();
 
 	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
+
+	//For testing purposes
+	//@TODO:Inventaire | Faudrait le changer pour faire un vrai equiment manager system ou wtv
+	UPROPERTY(EditAnywhere, Category="Frette|Equipment")
+	TObjectPtr<UFretteEquipmentDataAsset> EquippedItem;
+
+	UPROPERTY()
+	TObjectPtr<UFretteWeaponInstance> CurrentWeaponInstance = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UFretteFakeEquipmentComponent> EquipmentComponent;
 
 };

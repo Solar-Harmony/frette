@@ -23,6 +23,6 @@ public class Frette : ModuleRules
 			"Boost"
 		});
 
-		PrivateDependencyModuleNames.AddRange([]);
+		PrivateDependencyModuleNames.AddRange(["StateTreeModule"]);
 	}
 }
