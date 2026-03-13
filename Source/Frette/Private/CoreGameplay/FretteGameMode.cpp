@@ -99,11 +99,13 @@ EClueType AFretteGameMode::PickNextClueType() const
 	// this exists to suppress the chance of getting a primary clue early-game
 	const float Ramp = 1.0f - FMath::Exp(-NumCluesFound * ClueRatioRampSteepness);
 
-	const float DudExpectation = DudClueRatioTarget * Ramp * (NumCluesFound + 1);
-	const float DudDeficit = DudExpectation - NumDudCluesFound;
-	const float DudProbability = FMath::Clamp(DudDeficit, 0.0f, 1.0f);
+	const float DudExpectation = DudClueRatioTarget * (NumCluesFound + 1);
+	const float DudDeficit = fmax(0.0f, DudExpectation - NumDudCluesFound);
+	const float DudProbability = DudDeficit / (NumCluesFound + 1);
 
-	if (FMath::FRand() < DudProbability)
+	float Choice = FMath::FRand();
+
+	if (Choice < DudProbability)
 	{
 		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Dud (P_dud=%f, ramp=%f, deficit=%f)"), NumCluesFound + 1, NumCluesPlaced, DudProbability, Ramp, DudDeficit);
 		return EClueType::Dud;
@@ -121,16 +123,23 @@ EClueType AFretteGameMode::PickNextClueType() const
 		return EClueType::MainObjective;
 	}
 
-	const float PrimaryExpectation = PrimaryCluesRatioTarget * Ramp * (NumCluesFound + 1);
-	const float PrimaryDeficit = PrimaryExpectation - NumPrimaryCluesFound;
-	const float RemainingProbability = 1.0f - DudProbability;
-	const float PrimaryProbability = RemainingProbability > 0.0f
-		? FMath::Clamp(PrimaryDeficit / RemainingProbability, 0.0f, 1.0f)
-		: 0.0f;
+	const float PrimaryExpectation = PrimaryCluesRatioTarget * (NumCluesFound + 1) * Ramp;
+	const float PrimaryDeficit = fmax(0.0f, PrimaryExpectation - NumPrimaryCluesFound);
+	const float PrimaryProbability = PrimaryDeficit / (NumCluesFound + 1);
 
-	UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> P_primary=%f, P_dud=%f (ramp=%f)"), NumCluesFound + 1, NumCluesPlaced, PrimaryProbability, DudProbability, Ramp);
+	// This is done implicitly by the checks, but needed for logs
+	const float SecondaryProbability = 1.0f - DudProbability - PrimaryProbability;
 
-	return FMath::FRand() < PrimaryProbability ? EClueType::MainObjective : EClueType::PointOfInterest;
+	Choice -= DudProbability;
+
+	if (Choice < PrimaryProbability)
+	{
+		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Primary (P_primary=%f, P_dud=%f, P_Secondary=%f, ramp=%f)"), NumCluesFound + 1, NumCluesPlaced, PrimaryProbability, DudProbability, SecondaryProbability, Ramp);
+		return EClueType::MainObjective;
+	}
+	
+	UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Secondary (P_primary=%f, P_dud=%f, P_Secondary=%f, ramp=%f)"), NumCluesFound + 1, NumCluesPlaced, PrimaryProbability, DudProbability, SecondaryProbability, Ramp);
+	return EClueType::PointOfInterest;
 }
 
 AFretteLandmark* AFretteGameMode::GetRandomLandmark(bool bNearObjective)
