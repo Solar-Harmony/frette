@@ -1,6 +1,7 @@
 #include "CoreGameplay/FretteGameMode.h"
 
 #include "EngineUtils.h"
+#include "Components/FretteGameplayStatics.h"
 #include "CoreGameplay/FretteClue.h"
 #include "CoreGameplay/FretteClueTemplateSet.h"
 #include "CoreGameplay/FretteLandmark.h"
@@ -37,7 +38,22 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	Info.LandmarkLoot = POI->ThingOfInterest;
 		
 	const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
-	Info.CardinalDirection = FText::FromString(DirVectorToCardinal(Direction));
+	const ECardinalDirection CardinalDirection = UFretteGameplayStatics::DirVectorToCardinal(Direction);
+	
+	// temporary of course
+	static const FText Names[] =
+	{
+		INVTEXT("nord"),
+		INVTEXT("nord-est"),
+		INVTEXT("est"),
+		INVTEXT("sud-est"),
+		INVTEXT("sud"),
+		INVTEXT("sud-ouest"),
+		INVTEXT("ouest"),
+		INVTEXT("nord-ouest")
+	};
+
+	Info.CardinalDirection = Names[static_cast<uint8>(CardinalDirection)];
 	
 	if (bIsPrimaryClue)
 	{
@@ -152,28 +168,4 @@ AFretteLandmark* AFretteGameMode::GetRandomLandmark(bool bNearObjective)
 	AFretteLandmark* Item = Array[Idx];
 	Array.RemoveAtSwap(Idx);
 	return Item;
-}
-
-FString AFretteGameMode::DirVectorToCardinal(const FVector2D& Dir)
-{
-	check(!Dir.IsNearlyZero());
-	
-	const float Angle = FMath::Atan2(Dir.Y, Dir.X); // get vector angle between -180 and 180 deg
-	constexpr float SectorSize = PI / 4; // divide circle in 8 sectors, 45 deg each
-	const int Sector = FMath::RoundToInt(Angle / SectorSize); // round to nearest sector -> [-4, 4]
-	const int SectorIdx = (Sector % 8 + 8) % 8; // remap to [0, 7]
-	
-	static const char* Names[8] =
-	{
-		"nord",
-		"nord-est",
-		"est",
-		"sud-est",
-		"sud",
-		"sud-ouest",
-		"ouest",
-		"nord-ouest"
-	};
-
-	return Names[SectorIdx];
 }
