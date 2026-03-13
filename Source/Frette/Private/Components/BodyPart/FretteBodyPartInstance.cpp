@@ -1,6 +1,7 @@
 #include "Components/BodyPart/FretteBodyPartInstance.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Components/BodyPart/FretteBodyPartContext.h"
+#include "Components/BodyPart/EffectRules/FretteSingleDamageInstanceRule.h"
 #include "Net/UnrealNetwork.h"
 
 void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner)
@@ -8,59 +9,127 @@ void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFre
 	SourceData = InSourceData;
 	CurrentHealth = SourceData->MaxHealth;
 	OwnerCharacter = Owner;
+	BuildRuleLookup();
+
+	SetMinDamageThresholdForInstantEffect();
 }
 
-void UFretteBodyPartInstance::ApplyDamage(const float Damage, const FGameplayTag DamageType)
+//Pour essayer de réduire les lookup inutiles
+void UFretteBodyPartInstance::SetMinDamageThresholdForInstantEffect()
+{
+	for (auto InstantDamageRule : *GetRulesForEvent(EBodyPartEventType::InstantDamage))
+	{
+		int CurrentRuleDamageThreshold = Cast<UFretteSingleDamageInstanceRule>(InstantDamageRule.Rule)->DamageThreshold;
+
+		if (CurrentRuleDamageThreshold < MinDamageForInstantDamageEffect)
+			MinDamageForInstantDamageEffect = CurrentRuleDamageThreshold;
+	}
+}
+
+void UFretteBodyPartInstance::ApplyDamage(const float Damage)
 {
 	CurrentHealth -= Damage;
-	AccumulatedDamageByType.FindOrAdd(DamageType) += Damage;
 
-	for (auto Rule : SourceData->EffectRules)
+	FFretteBodyPartContext Context = FFretteBodyPartContext();
+
+	if (Damage >= MinDamageForInstantDamageEffect)
 	{
-		if (IsTriggered(Rule, Damage, DamageType))
+		Context.InstantDamage = Damage;
+		CheckAndApplyRules(EBodyPartEventType::InstantDamage, Context);
+	}
+
+	Context.RemainingHealth = CurrentHealth;
+
+	CheckAndApplyRules(EBodyPartEventType::RemainingHealth, Context);
+}
+
+//Ajout de stack temperature (le cold retire des stacks et la chaleur augmente les stacks)
+void UFretteBodyPartInstance::AddStatusEffectStack(const int StackAmount, const FGameplayTag EffectTag)
+{
+	FFretteBodyPartContext Context = FFretteBodyPartContext();
+
+	AccumulatedEffectStackByType.FindOrAdd(EffectTag) += StackAmount;
+
+	Context.StackAmount = AccumulatedEffectStackByType[EffectTag];
+
+	//TODO:Devrais faire le check des regle selon le EffectType aussi donc on va juste regarder les regle qui sont affecter par la temperature
+	//TODO:Devrais retirer les gameplay effects pour les éffets qui ne sont plus activer car les stacks on changer
+	CheckAndApplyRules(EBodyPartEventType::StatusEffect, Context);
+}
+
+void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventType, const FFretteBodyPartContext& Context) const
+{
+	const TArray<FFretteEffectRuleEntry>* Rules = GetRulesForEvent(EventType);
+
+	if (!Rules)
+		return;
+
+	for (const FFretteEffectRuleEntry& RuleEntry : *Rules)
+	{
+		if (!RuleEntry.Rule || !RuleEntry.Rule->CheckIfTriggers(Context))
+			continue;
+
+		for (const auto& Effect : RuleEntry.Effects)
 		{
-			Rule.bHasTriggered = true;
-			ApplyEffect(Rule);
+			ApplyGameplayEffect(Effect);
 		}
 	}
+
 }
 
 //TODO: Ajouter le soin de parties du corps, retirer les éffets qui on été ajouté et reset les infos (hasTriggered, accumulatedDamageByType)
 
-bool UFretteBodyPartInstance::IsTriggered(const FBodyPartEffectRule& Rule, const float Damage, const FGameplayTag DamageType) const
-{
-	if (Rule.bHasTriggered)
-		return false;
-
-	if (DamageType == Rule.DamageType
-		&& (Damage >= Rule.InstantDamageThreshold || AccumulatedDamageByType.FindRef(DamageType) >= Rule.CumulativeDamageThreshold)
-		|| Rule.TriggerOnDeath && CurrentHealth <= 0.f)
-		return true;
-
-	return false;
-}
-
-void UFretteBodyPartInstance::ApplyEffect(const FBodyPartEffectRule& Rule) const
+void UFretteBodyPartInstance::ApplyGameplayEffect(const TSubclassOf<UGameplayEffect> GameplayEffect) const
 {
 	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
 	FGameplayEffectContextHandle EffectContext = OwnerASC->MakeEffectContext();
 	EffectContext.AddSourceObject(this);
 
-	const FGameplayEffectSpecHandle NewHandle = OwnerASC->MakeOutgoingSpec(Rule.GameplayEffect, 1, EffectContext);
+	//On pourrais utiliser le niveau ici pour l'intensité de l'éffet selon le nombre de stack
+	const FGameplayEffectSpecHandle NewHandle = OwnerASC->MakeOutgoingSpec(GameplayEffect, 1, EffectContext);
 
 	OwnerASC->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Applied effect %s to body part %s"), *Rule.GameplayEffect->GetName(), *SourceData->BodyPartTag.ToString()));
-}
-
-void UFretteBodyPartInstance::OnRep_CurrentHealth()
-{
-	UE_LOG(LogTemp, Log, TEXT("MyValue changed to %f"), CurrentHealth);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Applied effect %s to body part %s"), *GameplayEffect->GetName(), *SourceData->BodyPartTag.ToString()));
 }
 
 void UFretteBodyPartInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UFretteBodyPartInstance, CurrentHealth);
+}
+
+void UFretteBodyPartInstance::BuildRuleLookup()
+{
+	EventTypeToRulesMap.Empty();
+	AllRuleInstances.Empty();
+
+	for (const FFretteEffectRuleEntry& RuleEntry : SourceData->EffectRules)
+	{
+		if (!RuleEntry.Rule)
+			continue;
+
+		UFretteBodyPartEffectRule* RuleInstance = DuplicateObject<UFretteBodyPartEffectRule>(RuleEntry.Rule, this);
+		if (!RuleInstance)
+			continue;
+
+		AllRuleInstances.Add(RuleInstance); 
+
+		FFretteEffectRuleEntry InstancedEntry;
+		InstancedEntry.Rule = RuleInstance;
+		InstancedEntry.Effects = RuleEntry.Effects;
+
+		EventTypeToRulesMap.FindOrAdd(RuleInstance->GetRelatedEvent()).Add(InstancedEntry);
+	}
+}
+
+const TArray<FFretteEffectRuleEntry>* UFretteBodyPartInstance::GetRulesForEvent(const EBodyPartEventType EventType) const
+{
+	return EventTypeToRulesMap.Find(EventType);
+}
+
+void UFretteBodyPartInstance::OnRep_CurrentHealth() const
+{
+	UE_LOG(LogTemp, Log, TEXT("MyValue changed to %f"), CurrentHealth);
 }

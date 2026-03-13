@@ -19,17 +19,20 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintCallable)
-	void ApplyDamageFromHit(const FName BoneName, float Damage, FGameplayTag DamageType);
+	void ApplyDamageFromHit(const FName BoneName, float Damage);
+	void ApplyDamageFromHit(FGameplayTag BodyPartTag, float Damage);
+	void AddStatusEffectStackFromHit(FGameplayTag BodyPartTag, int StackAmount, FGameplayTag EffectTag);
 
 	UFUNCTION(BlueprintPure)
 	float GetBodyPartHealth(FGameplayTag BodyPartTag);
 	UFretteBodyPartInstance* FindBodyPart(FGameplayTag BodyPartTag);
+	void AddStatusEffectStackToAllParts(int StackAmount, FGameplayTag EffectTag);
 
 	UFUNCTION()
 	void OnRep_BodyParts();
 
 	UFUNCTION(Server, Reliable)
-	void ServerApplyDamage(FGameplayTag BodyPartTag, float Damage, FGameplayTag DamageType);
+	void ServerApplyDamage(FGameplayTag BodyPartTag, float Damage);
 
 	FGameplayTag GetBodyPartFromBoneName(FName BoneName) const;
 

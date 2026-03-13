@@ -1,6 +1,7 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/FretteTemperatureComponent.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
@@ -16,6 +17,7 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	InventoryComponent = CreateDefaultSubobject<UFakeInventoryComponent>(TEXT("Inventory"));
 
 	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
+	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
 }
 
 //Client side

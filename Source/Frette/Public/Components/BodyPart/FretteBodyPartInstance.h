@@ -2,15 +2,18 @@
 
 #include "CoreMinimal.h"
 #include "FretteBodyPartData.h"
+#include "FretteBodyPartEffectRule.h"
 #include "Character/FretteBaseCharacter.h"
 #include "UObject/Object.h"
 #include "FretteBodyPartInstance.generated.h"
 
 struct FGameplayTag;
 class UFretteBodyPartData;
-/**
- * 
- */
+
+//Pas un fan des context objects mais c'Est le plus simple que j'ai trouver pour send l'info aux regles
+//Sans juste donner acces a l'instance du body part
+//Pourrais peut-être juste cast la regle au type précis de la regle vu que chaque regle est associé a un event spécifique
+
 UCLASS()
 class FRETTE_API UFretteBodyPartInstance : public UObject
 {
@@ -19,23 +22,40 @@ class FRETTE_API UFretteBodyPartInstance : public UObject
 public:
 	FGameplayTag GetAssociatedTag() const { return SourceData->BodyPartTag; }
 	void Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner);
-	void ApplyDamage(float Damage, FGameplayTag DamageType);
-	bool IsTriggered(const FBodyPartEffectRule& Rule, float Damage, FGameplayTag DamageType) const;
-	void ApplyEffect(const FBodyPartEffectRule& Rule) const;
+	void ApplyDamage(float Damage);
+	void AddStatusEffectStack(int StackAmount, FGameplayTag EffectTag);
+	void CheckAndApplyRules(EBodyPartEventType EventType, const FFretteBodyPartContext& Context) const;
 
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth, BlueprintReadOnly)
 	float CurrentHealth;
 
 	UFUNCTION()
-	void OnRep_CurrentHealth();
+	void OnRep_CurrentHealth() const;
 
 	UPROPERTY(BlueprintReadOnly)
-	TMap<FGameplayTag, float> AccumulatedDamageByType;
+	TMap<FGameplayTag, int> AccumulatedEffectStackByType;
 
 private:
+	void ApplyGameplayEffect(TSubclassOf<UGameplayEffect> GameplayEffect) const;
+	void BuildRuleLookup();
+	void SetMinDamageThresholdForInstantEffect();
+	const TArray<FFretteEffectRuleEntry>* GetRulesForEvent(const EBodyPartEventType EventType) const;
+
 	UPROPERTY()
 	TObjectPtr<UFretteBodyPartData> SourceData;
 
 	UPROPERTY()
 	TObjectPtr<AFretteBaseCharacter> OwnerCharacter;
+
+	int MinDamageForInstantDamageEffect = 9999;
+
+	// Nécéssaire pour garder les regles instancier en vie sinon ils se font garbage collect
+	// et ça fait des crash quand on essaye d'y accéder
+	UPROPERTY()
+	TArray<TObjectPtr<UFretteBodyPartEffectRule>> AllRuleInstances;
+
+	//Je suis aller avec le TMap de event types car j'avais peur d'avoir des éffet qui applique des dégat
+	//ou des stack de statusEffect de manière fréquente (Cold stacks) et je voullais pas avoir a passer a travers
+	//tous les regles de déclanchement a chaque fois
+	TMap<EBodyPartEventType, TArray<FFretteEffectRuleEntry>> EventTypeToRulesMap;
 };

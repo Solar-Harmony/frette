@@ -1,6 +1,5 @@
 #include "Components/BodyPart/FretteBodyPartTags.h"
-// #include "NativeGameplayTags.h"
-//
+
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Head, "Frette.BodyPart.Head");
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Torso, "Frette.BodyPart.Torso");
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_LeftArm, "Frette.BodyPart.LeftArm");
@@ -11,9 +10,3 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_LeftLeg, "Frette.BodyPart.LeftLeg");
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_RightLeg, "Frette.BodyPart.RightLeg");
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_LeftFoot, "Frette.BodyPart.LeftFoot");
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_RightFoot, "Frette.BodyPart.RightFoot");
-//
-// namespace Frette::BodyParts
-// {
-// 	FTagToAttributeSetMap BodyParts::TagToAttributeSetMap;
-// }
-//

@@ -8,6 +8,8 @@
 
 #include "FrettePlayerCharacter.generated.h"
 
+class UFretteTemperatureComponent;
+
 UCLASS()
 class AFrettePlayerCharacter : public AFretteBaseCharacter
 {
@@ -32,6 +34,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

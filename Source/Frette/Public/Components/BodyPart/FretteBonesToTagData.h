@@ -14,6 +14,6 @@ class FRETTE_API UFretteBonesToTagData : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Frette.BodyPart"))
 	TMap<FName, FGameplayTag> BoneToBodyPartTag;
 };
