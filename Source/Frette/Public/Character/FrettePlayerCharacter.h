@@ -30,6 +30,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
 
+	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) override;
+
 	UFUNCTION(BlueprintCallable)
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
 
@@ -48,6 +50,12 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float VerticalSensitivity = 1.f;
+
+	UPROPERTY(BlueprintReadOnly)
+	FRotator SmoothedControlRotation;
+
+	UPROPERTY(EditDefaultsOnly)
+	float LookSmoothingSpeed = 20.f;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteEquipmentComponent> Equipment;
