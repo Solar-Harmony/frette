@@ -115,5 +115,3 @@ void AFrettePlayerCharacter::BeginPlay()
 	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 
 }
-
-void AFrettePlayerCharacter::SetLookInputScale() {}

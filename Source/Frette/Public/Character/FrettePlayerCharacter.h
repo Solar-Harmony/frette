@@ -43,18 +43,11 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> FPMesh;
 
 	virtual void BeginPlay() override;
-	void SetLookInputScale();
-
-	UPROPERTY(EditAnywhere)
-	float HorizontalSensitivity = 1.f;
-
-	UPROPERTY(EditAnywhere)
-	float VerticalSensitivity = 1.f;
 
 	UPROPERTY(BlueprintReadOnly)
 	FRotator SmoothedControlRotation;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
 	float LookSmoothingSpeed = 20.f;
 
 	UPROPERTY(EditDefaultsOnly)
