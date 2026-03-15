@@ -25,12 +25,6 @@ UCLASS(BlueprintType, Category = "Frette|Inventory")
 class UFretteStackableItemDataAsset : public UFretteInventoryItemDataAsset
 {
 	GENERATED_BODY()
-
-public:
-	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
-	{
-		auto* Item = NewObject<UFretteStackableItem>(Outer);
-		Item->Data = this;
-		return Item;
-	}
+	
+	virtual const UClass* GetRuntimeItemClass() const override { return UFretteStackableItem::StaticClass(); }
 };

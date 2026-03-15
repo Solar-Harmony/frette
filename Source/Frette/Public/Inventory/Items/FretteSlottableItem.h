@@ -32,11 +32,6 @@ class UFretteSlottableDataAsset : public UFretteInventoryItemDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Categories = "Frette.Inventory.SlotType"))
 	FGameplayTag ItemSlotTag;
-
-	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
-	{
-		auto* Item = NewObject<UFretteSlottableItem>(Outer);
-		Item->Data = this;
-		return Item;
-	}
+	
+	virtual const UClass* GetRuntimeItemClass() const override { return UFretteSlottableItem::StaticClass(); }
 };

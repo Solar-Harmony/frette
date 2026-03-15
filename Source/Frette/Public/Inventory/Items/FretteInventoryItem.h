@@ -61,11 +61,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UStaticMesh> Mesh;
 
-	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) 
-		PURE_VIRTUAL(UFretteInventoryItem*, return nullptr;);
+	UFretteInventoryItem* CreateRuntimeItem(UObject* OuterInventory)
+	{
+		UFretteInventoryItem* Item = NewObject<UFretteInventoryItem>(OuterInventory, GetRuntimeItemClass());
+		Item->Data = this;
+		InitializeItem(Item);
+		return Item;
+	}
+	
+	virtual const UClass* GetRuntimeItemClass() const PURE_VIRTUAL(GetRuntimeItemClass, return nullptr;);
 
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId(GInventoryItemPrimaryAssetType, GetFName());
 	}
+	
+protected:
+	virtual void InitializeItem(UFretteInventoryItem* Item) {}
 };

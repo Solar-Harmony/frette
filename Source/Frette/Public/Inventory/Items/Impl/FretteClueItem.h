@@ -38,12 +38,6 @@ UCLASS()
 class UFretteClueItemDataAsset : public UFretteSlottableDataAsset
 {
 	GENERATED_BODY()
-
-public:
-	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
-	{
-		UFretteClueItem* Item = NewObject<UFretteClueItem>(Outer);
-		Item->Data = this;
-		return Item;
-	}
+	
+	virtual const UClass* GetRuntimeItemClass() const override { return UFretteClueItem::StaticClass(); }
 };
