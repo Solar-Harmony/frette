@@ -84,3 +84,18 @@ void UFretteAbilitySystemComponent::RemoveAbilitiesFromAbilitySet(UAbilitySetDat
 		InputAbilityMap.Remove(Mapping.InputTag);
 	}
 }
+
+FActiveGameplayEffectHandle UFretteAbilitySystemComponent::ApplyEffect(const FFretteGameplayEffectConfig& Config, const UObject* SourceObject)
+{
+	FGameplayEffectContextHandle Context = MakeEffectContext();
+	Context.AddSourceObject(SourceObject);
+	
+	const FGameplayEffectSpecHandle Spec = MakeOutgoingSpec(Config.EffectClass, Config.Level, Context);
+	
+	for (const TPair<FGameplayTag, float>& Magnitude : Config.Magnitudes)
+	{
+		Spec.Data.Get()->SetSetByCallerMagnitude(Magnitude.Key, Magnitude.Value);
+	}
+	
+	return ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+}

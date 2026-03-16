@@ -1,0 +1,47 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Inventory/Items/FretteSlottableItem.h"
+#include "UObject/Object.h"
+#include "FretteWeaponItem.generated.h"
+
+class UFretteWeaponDataAsset;
+
+UCLASS(Abstract, BlueprintType)
+class UFretteWeaponItem : public UFretteSlottableItem
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION()
+	virtual void OnEquipped() override;
+	
+protected:
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	TObjectPtr<AActor> SpawnedActor;
+	
+	virtual void SpawnEquipmentActor(const UFretteWeaponDataAsset* ItemData);
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
+	{
+		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+		DOREPLIFETIME(ThisClass, SpawnedActor);
+	}
+};
+
+UCLASS(BlueprintType, Category = "Frette|Inventory")
+class UFretteWeaponDataAsset : public UFretteSlottableDataAsset
+{
+	GENERATED_BODY()
+	
+public:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> ActorToSpawn;
+
+	UPROPERTY(EditAnywhere)
+	FName AttachSocket;
+
+	UPROPERTY(EditAnywhere)
+	FTransform AttachTransform;
+	
+	virtual const UClass* GetRuntimeItemClass() const override { return UFretteWeaponItem::StaticClass(); }
+};

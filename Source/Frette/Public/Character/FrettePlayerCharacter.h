@@ -32,6 +32,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
+	
+	UFUNCTION(BlueprintCallable)
+	UFretteEquipmentComponent* GetEquipmentComponent() const { return Equipment; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

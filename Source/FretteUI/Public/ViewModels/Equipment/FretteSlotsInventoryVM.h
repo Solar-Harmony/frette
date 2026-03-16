@@ -41,6 +41,17 @@ protected:
 		UFretteSlotsInventorySlotVM* NewSlotVM = Slots[NewSlotIdx];
 		SlotVM->SetItemVM(NewSlotVM->ItemVM);
 		NewSlotVM->SetItemVM(ItemVM);
+
+		const UFretteEquipmentComponent* EquipmentComponent = PlayerCharacter->GetEquipmentComponent();
+		UFretteSlottableItem* Item = Cast<UFretteSlottableItem>(ItemVM->Ptr);
+		if (NewSlotVM->CompatibleSlotType == FGameplayTag::EmptyTag)
+		{
+			EquipmentComponent->UnequipItem(Item);
+		}
+		else
+		{
+			EquipmentComponent->EquipItem(Item);
+		}		
 	}
 	
 private:

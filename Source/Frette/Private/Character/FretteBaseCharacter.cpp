@@ -3,12 +3,13 @@
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
 #include "Components/FallDamageComponent.h"
+#include "Equipment/FretteEquipmentComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
 AFretteBaseCharacter::AFretteBaseCharacter()
 {
-	EquipmentComponent = CreateDefaultSubobject<UFretteFakeEquipmentComponent>(TEXT("Equipments"));
+	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipments"));
 	//@TODO: retirer le component ajouter sur le blueprint quand le character est pas locked
 	//CreateDefaultSubobject<UFallDamageComponent>(TEXT("FallDamageComponent"));
 }
@@ -31,13 +32,6 @@ void AFretteBaseCharacter::ApplyStartupEffects()
 	ApplyDefaultAttributeEffect(EffectContext);
 	ApplyDefaultStartupEffect(EffectContext);
 	AbilitySystemComponent->GrantAbilitiesFromAbilitySet(ArchetypeLoadout, this);
-
-	//@TODO: Remplacer avec l'inventaire
-	if (!EquippedItem)
-		return;
-
-	CurrentWeaponInstance = NewObject<UFretteWeaponInstance>(this, EquippedItem->InstanceType);
-	EquipmentComponent->Equip(CurrentWeaponInstance);
 }
 
 void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const
