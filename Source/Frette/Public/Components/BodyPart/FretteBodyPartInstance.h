@@ -23,7 +23,7 @@ public:
 	FGameplayTag GetAssociatedTag() const { return SourceData->BodyPartTag; }
 	void Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner);
 	void ApplyDamage(float Damage);
-	void AddStatusEffectStack(int StackAmount, FGameplayTag EffectTag);
+	void AddValueByTag(int Value, FGameplayTag Tag);
 	void CheckAndApplyRules(EBodyPartEventType EventType, const FFretteBodyPartContext& Context) const;
 
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth, BlueprintReadOnly)
@@ -36,7 +36,8 @@ public:
 	TMap<FGameplayTag, int> AccumulatedEffectStackByType;
 
 private:
-	void ApplyGameplayEffect(TSubclassOf<UGameplayEffect> GameplayEffect) const;
+	void ApplyGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const;
+	void RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const;
 	void BuildRuleLookup();
 	void SetMinDamageThresholdForInstantEffect();
 	const TArray<FFretteEffectRuleEntry>* GetRulesForEvent(const EBodyPartEventType EventType) const;

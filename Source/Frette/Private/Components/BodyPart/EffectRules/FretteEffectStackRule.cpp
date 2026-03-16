@@ -2,7 +2,7 @@
 
 bool UFretteEffectStackRule::CheckCondition(FFretteBodyPartContext Context)
 {
-	const int32 CurrentStacks = Context.StackAmount;
+	const int32 CurrentStacks = Context.CumulativeValue;
 
 	switch (Comparison)
 	{

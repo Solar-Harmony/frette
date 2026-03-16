@@ -7,9 +7,9 @@ bool UFretteBodyPartEffectRule::CheckIfTriggers(const FFretteBodyPartContext& Co
 
 	if (CheckCondition(Context))
 	{
-		//Check si l'éffet peut être déclancher plusieurs fois ou pas, si pas 
-		//alors on set bHasTriggered à true pour pas qu'il puisse être déclancher à nouveau
-		bHasTriggered = true;
+		if (TriggerBehaviour == ETriggerBehaviour::TriggerOnce)
+			bHasTriggered = true;
+
 		return true;
 	}
 

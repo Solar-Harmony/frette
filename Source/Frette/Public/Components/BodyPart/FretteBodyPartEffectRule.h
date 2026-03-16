@@ -14,6 +14,14 @@ enum class EBodyPartEventType : uint8
 	StatusEffect
 };
 
+//Cooldown? repeat avec un cooldown sur l'éffet lui même
+UENUM(BlueprintType)
+enum class ETriggerBehaviour : uint8
+{
+	TriggerOnce,
+	Repeat,
+};
+
 UCLASS(Abstract, EditInlineNew, DefaultToInstanced)
 class FRETTE_API UFretteBodyPartEffectRule : public UObject
 {
@@ -21,6 +29,9 @@ class FRETTE_API UFretteBodyPartEffectRule : public UObject
 
 public:
 	bool bHasTriggered = false;
+
+	UPROPERTY(EditAnywhere)
+	ETriggerBehaviour TriggerBehaviour = ETriggerBehaviour::TriggerOnce;
 
 	virtual EBodyPartEventType GetRelatedEvent() const { return {}; }
 

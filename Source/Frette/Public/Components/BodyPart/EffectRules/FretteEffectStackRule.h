@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Components/BodyPart/FretteBodyPartEffectRule.h"
 #include "FretteEffectStackRule.generated.h"
 
@@ -27,6 +28,9 @@ public:
 	//ou des éffet de chaleur au dessus de 20
 	UPROPERTY(EditDefaultsOnly)
 	EStackThresholdComparison Comparison = EStackThresholdComparison::GreaterThanOrEqual;
+
+	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Frette"))
+	FGameplayTag TagType;
 
 protected:
 	virtual bool CheckCondition(FFretteBodyPartContext Context) override;

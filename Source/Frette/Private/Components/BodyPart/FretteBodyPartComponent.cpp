@@ -71,7 +71,7 @@ void UFretteBodyPartComponent::AddStatusEffectStackFromHit(const FGameplayTag Bo
 		{
 			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
 			{
-				BodyPart->AddStatusEffectStack(StackAmount, EffectTag);
+				BodyPart->AddValueByTag(StackAmount, EffectTag);
 			}
 		}
 	}
@@ -110,7 +110,7 @@ void UFretteBodyPartComponent::AddStatusEffectStackToAllParts(int StackAmount, F
 	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{
 		if (Instance)
-			Instance->AddStatusEffectStack(StackAmount, EffectTag);
+			Instance->AddValueByTag(StackAmount, EffectTag);
 	}
 }
 

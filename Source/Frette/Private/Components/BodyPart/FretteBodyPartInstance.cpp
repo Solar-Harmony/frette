@@ -44,13 +44,14 @@ void UFretteBodyPartInstance::ApplyDamage(const float Damage)
 }
 
 //Ajout de stack temperature (le cold retire des stacks et la chaleur augmente les stacks)
-void UFretteBodyPartInstance::AddStatusEffectStack(const int StackAmount, const FGameplayTag EffectTag)
+void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag Tag)
 {
 	FFretteBodyPartContext Context = FFretteBodyPartContext();
 
-	AccumulatedEffectStackByType.FindOrAdd(EffectTag) += StackAmount;
+	AccumulatedEffectStackByType.FindOrAdd(Tag) += Value;
 
-	Context.StackAmount = AccumulatedEffectStackByType[EffectTag];
+	Context.CumulativeValue = AccumulatedEffectStackByType[Tag];
+	Context.EffectType = Tag;
 
 	//TODO:Devrais faire le check des regle selon le EffectType aussi donc on va juste regarder les regle qui sont affecter par la temperature
 	//TODO:Devrais retirer les gameplay effects pour les éffets qui ne sont plus activer car les stacks on changer
@@ -66,32 +67,52 @@ void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventT
 
 	for (const FFretteEffectRuleEntry& RuleEntry : *Rules)
 	{
-		if (!RuleEntry.Rule || !RuleEntry.Rule->CheckIfTriggers(Context))
+		if (!RuleEntry.Rule || RuleEntry.Effects.Num() == 0)
 			continue;
 
-		for (const auto& Effect : RuleEntry.Effects)
+		if (RuleEntry.Rule->CheckIfTriggers(Context))
 		{
-			ApplyGameplayEffect(Effect);
+			ApplyGameplayEffects(RuleEntry.Effects);
 		}
-	}
+		else
+		{
+			//Retire les éffet qui on été appliquer et qui ne respectent plus la regle qui l'a appliquer
+			if (RuleEntry.Rule->bHasTriggered)
+				RemoveGameplayEffects(RuleEntry.Effects);
+		}
 
+	}
+}
+
+void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const
+{
+	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
+
+	for (TSubclassOf Effect : Effects)
+	{
+		OwnerASC->RemoveActiveGameplayEffectBySourceEffect(Effect, OwnerASC, 1);
+	}
 }
 
 //TODO: Ajouter le soin de parties du corps, retirer les éffets qui on été ajouté et reset les infos (hasTriggered, accumulatedDamageByType)
 
-void UFretteBodyPartInstance::ApplyGameplayEffect(const TSubclassOf<UGameplayEffect> GameplayEffect) const
+void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGameplayEffect>> Effects) const
 {
-	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
+	for (const auto& Effect : Effects)
+	{
+		UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
-	FGameplayEffectContextHandle EffectContext = OwnerASC->MakeEffectContext();
-	EffectContext.AddSourceObject(this);
+		FGameplayEffectContextHandle EffectContext = OwnerASC->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
 
-	//On pourrais utiliser le niveau ici pour l'intensité de l'éffet selon le nombre de stack
-	const FGameplayEffectSpecHandle NewHandle = OwnerASC->MakeOutgoingSpec(GameplayEffect, 1, EffectContext);
+		//On pourrais utiliser le niveau ici pour l'intensité de l'éffet selon le nombre de stack
+		const FGameplayEffectSpecHandle NewHandle = OwnerASC->MakeOutgoingSpec(Effect, 1, EffectContext);
 
-	OwnerASC->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
+		OwnerASC->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Applied effect %s to body part %s"), *GameplayEffect->GetName(), *SourceData->BodyPartTag.ToString()));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Applied effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
+
+	}
 }
 
 void UFretteBodyPartInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -114,7 +135,7 @@ void UFretteBodyPartInstance::BuildRuleLookup()
 		if (!RuleInstance)
 			continue;
 
-		AllRuleInstances.Add(RuleInstance); 
+		AllRuleInstances.Add(RuleInstance);
 
 		FFretteEffectRuleEntry InstancedEntry;
 		InstancedEntry.Rule = RuleInstance;
