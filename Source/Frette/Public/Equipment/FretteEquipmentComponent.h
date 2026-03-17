@@ -5,11 +5,11 @@
 #include "Inventory/Items/FretteSlottableItem.h"
 #include "FretteEquipmentComponent.generated.h"
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_EquipmentSlot_Head);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_EquipmentSlot_Chest);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_EquipmentSlot_Legs);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_EquipmentSlot_Feet);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_EquipmentSlot_Hand);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Head);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Chest);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Legs);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Feet);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Hand);
 
 class AFrettePlayerState;
 
