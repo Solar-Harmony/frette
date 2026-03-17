@@ -32,7 +32,7 @@ public:
 	void OnRep_CurrentHealth() const;
 
 	UPROPERTY(BlueprintReadOnly)
-	TMap<FGameplayTag, int> AccumulatedEffectStackByType;
+	TMap<FGameplayTag, int> AccumulatedValuesByType;
 
 private:
 	void ApplyGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const;

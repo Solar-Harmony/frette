@@ -21,6 +21,24 @@ struct FFretteEffectRuleEntry
 	TArray<TSubclassOf<UGameplayEffect>> Effects;
 };
 
+USTRUCT(BlueprintType)
+struct FFretteValueData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Meta = (Categories = "Frette.BodyPartValues"))
+	FGameplayTag Type;
+
+	UPROPERTY(EditAnywhere)
+	float MaxValue = 100.f;
+
+	UPROPERTY(EditAnywhere)
+	float MinValue = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float StartValue = 100.f;
+};
+
 UCLASS()
 class UFretteBodyPartData : public UDataAsset
 {
@@ -31,9 +49,40 @@ public:
 	FGameplayTag BodyPartTag;
 
 	UPROPERTY(EditAnywhere)
-	float MaxHealth = 100.f;
+	TArray<FFretteValueData> ValueDatas;
 
 	UPROPERTY(EditAnywhere)
 	TArray<FFretteEffectRuleEntry> EffectRules;
+
+	float GetMaxValueForType(FGameplayTag Type) const
+	{
+		for (const FFretteValueData& ValueData : ValueDatas)
+		{
+			if (Type == ValueData.Type)
+				return ValueData.MaxValue;
+		}
+		return 100.f;
+	};
+
+	float GetMinValueForType(FGameplayTag Type) const
+	{
+		for (const FFretteValueData& ValueData : ValueDatas)
+		{
+			if (Type == ValueData.Type)
+				return ValueData.MinValue;
+		}
+
+		return 0.f;
+	};
+
+	float GetStartValueForType(FGameplayTag Type) const
+	{
+		for (const FFretteValueData& ValueData : ValueDatas)
+		{
+			if (Type == ValueData.Type)
+				return ValueData.StartValue;
+		}
+		return 100.f;
+	};
 
 };

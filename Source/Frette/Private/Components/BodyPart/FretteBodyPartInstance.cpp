@@ -7,10 +7,14 @@
 void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner)
 {
 	SourceData = InSourceData;
-	CurrentHealth = SourceData->MaxHealth;
+
+	for (auto Data : SourceData->ValueDatas)
+	{
+		AccumulatedValuesByType.FindOrAdd(Data.Type) = Data.StartValue;
+	}
+
 	OwnerCharacter = Owner;
 	BuildRuleLookup();
-
 	SetMinDeltaValueThreshold();
 }
 
@@ -31,7 +35,11 @@ void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag 
 {
 	FFretteBodyPartContext Context = FFretteBodyPartContext();
 
-	AccumulatedEffectStackByType.FindOrAdd(Tag) += Value;
+	float NewValue = AccumulatedValuesByType.FindOrAdd(Tag) + Value;
+	const float Min = SourceData->GetMinValueForType(Tag);
+	const float Max = SourceData->GetMaxValueForType(Tag);
+
+	AccumulatedValuesByType.FindOrAdd(Tag) += NewValue;
 
 	if (Value >= MinDamageForInstantDamageEffect)
 	{
@@ -39,7 +47,7 @@ void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag 
 		CheckAndApplyRules(EBodyPartEventType::DeltaValue, Tag, Context);
 	}
 
-	Context.AccumulatedValue = AccumulatedEffectStackByType[Tag];
+	Context.AccumulatedValue = AccumulatedValuesByType[Tag];
 	Context.EffectType = Tag;
 
 	CheckAndApplyRules(EBodyPartEventType::AccumulatedValue, Tag, Context);
@@ -96,7 +104,6 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 		OwnerASC->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
 
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("Applied effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
-
 	}
 }
 
