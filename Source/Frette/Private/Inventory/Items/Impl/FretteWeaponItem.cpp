@@ -7,11 +7,11 @@
 void UFretteWeaponItem::OnEquipped()
 {
 	Super::OnEquipped();
-	const UFretteWeaponDataAsset* ItemData = Cast<UFretteWeaponDataAsset>(Data);
+	const UFretteWeaponItemDataAsset* ItemData = Cast<UFretteWeaponItemDataAsset>(Data);
 	SpawnEquipmentActor(ItemData);
 }
 
-void UFretteWeaponItem::SpawnEquipmentActor(const UFretteWeaponDataAsset* ItemData)
+void UFretteWeaponItem::SpawnEquipmentActor(const UFretteWeaponItemDataAsset* ItemData)
 {
 	APawn* OwningPawn = Cast<APawn>(GetOwningInventory()->GetOwner());
 

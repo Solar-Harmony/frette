@@ -11,6 +11,8 @@ class UFretteStackableItem final : public UFretteInventoryItem
 	GENERATED_BODY()
 
 public:
+	FRETTE_ITEM_DATA_GETTER(UFretteStackableItemDataAsset)
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	int32 Quantity = 1;
 

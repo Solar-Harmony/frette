@@ -7,7 +7,7 @@ void UFretteSlottableItem::OnEquipped()
 {
 	AFretteBaseCharacter* Character = Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
 	UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character); 
-	const UFretteSlottableDataAsset* ItemData = Cast<UFretteSlottableDataAsset>(Data);
+	const UFretteSlottableItemDataAsset* ItemData = Cast<UFretteSlottableItemDataAsset>(Data);
 	
 	if (ASC)
 	{
@@ -24,7 +24,7 @@ void UFretteSlottableItem::OnUnequipped()
 {
 	AFretteBaseCharacter* Character = Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
 	UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character); 
-	const UFretteSlottableDataAsset* ItemData = Cast<UFretteSlottableDataAsset>(Data);
+	const UFretteSlottableItemDataAsset* ItemData = Cast<UFretteSlottableItemDataAsset>(Data);
 	
 	if (ASC)
 	{

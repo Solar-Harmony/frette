@@ -5,8 +5,8 @@
 #include "Net/UnrealNetwork.h"
 #include "FretteInventoryItem.generated.h"
 
+class AFretteBaseCharacter;
 class UFretteInventoryComponent;
-class UFretteInventoryItemDataAsset;
 
 inline const FPrimaryAssetType GInventoryItemPrimaryAssetType("FretteInventoryItem");
 
@@ -14,22 +14,24 @@ UCLASS(Abstract, BlueprintType)
 class FRETTE_API UFretteInventoryItem : public UObject
 {
 	GENERATED_BODY()
+	
+	friend class UFretteInventoryItemDataAsset;
 
 public:
 	constexpr static int32 InvalidID = -1;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	int32 Id = InvalidID;
-
-	UPROPERTY(BlueprintReadOnly, Replicated)
-	UFretteInventoryItemDataAsset* Data = nullptr;
 	
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Use();
 	
+	UFretteInventoryItemDataAsset* GetUntypedData() const { return Data; }
+	
 	virtual void Use_Implementation() {}
 	
 	UFretteInventoryComponent* GetOwningInventory() const;
+	AFretteBaseCharacter* GetOwningPlayer() const;
 
 	bool HasValidID() const { return Id != InvalidID; }
 
@@ -41,6 +43,10 @@ public:
 		DOREPLIFETIME(ThisClass, Data);
 		DOREPLIFETIME(ThisClass, Id);
 	}
+	
+private:
+	UPROPERTY(Replicated)
+	UFretteInventoryItemDataAsset* Data = nullptr;	
 };
 
 UCLASS(Abstract, BlueprintType)
@@ -79,3 +85,7 @@ public:
 protected:
 	virtual void InitializeItem(UFretteInventoryItem* Item) {}
 };
+
+#define FRETTE_ITEM_DATA_GETTER(DataClass) \
+	template<typename T = DataClass> \
+	FORCEINLINE T* GetData() const { return CastChecked<T>(GetUntypedData()); }

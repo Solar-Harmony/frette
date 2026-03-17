@@ -31,7 +31,7 @@ public:
 
 	void SetFromModel(const UFretteInventoryItem* Item)
 	{
-		const auto* ItemData = CastChecked<UFretteSlottableDataAsset>(Item->Data);
+		const auto* ItemData = CastChecked<UFretteSlottableItemDataAsset>(Item->Data);
 		
 		UE_MVVM_SET_PROPERTY_VALUE(ItemID, Item->Id);
 		UE_MVVM_SET_PROPERTY_VALUE(DisplayName, Item->Data->DisplayName);

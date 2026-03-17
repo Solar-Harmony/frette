@@ -1,6 +1,7 @@
 #include "GameplayAbilitySystem/FretteGA_RangedWeapon.h"
 
-#include "GameFramework/Character.h"
+#include "Character/FretteBaseCharacter.h"
+#include "Inventory/FretteInventoryComponent.h"
 #include "Weapons/FretteProjectile.h"
 
 //TODO: Faire que tout les équipements ont un Use ability qui peut être associer 
@@ -18,7 +19,7 @@ void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* Weap
 	MuzzleLocation += AimRotation.Vector() * 100.f;
 
 	FActorSpawnParameters SpawnParams;
-	SpawnParams.Instigator = WeaponInstance->GetPawn();
+	SpawnParams.Instigator = WeaponInstance->GetOwningPlayer();
 	SpawnParams.Owner = SpawnParams.Instigator;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 

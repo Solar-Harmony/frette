@@ -5,12 +5,13 @@
 #include "UObject/Object.h"
 #include "FretteWeaponItem.generated.h"
 
-class UFretteWeaponDataAsset;
+class UFretteWeaponItemDataAsset;
 
 UCLASS(Abstract, BlueprintType)
 class UFretteWeaponItem : public UFretteSlottableItem
 {
 	GENERATED_BODY()
+	FRETTE_ITEM_DATA_GETTER(UFretteWeaponItemDataAsset)
 
 public:
 	UFUNCTION()
@@ -20,7 +21,7 @@ protected:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	TObjectPtr<AActor> SpawnedActor;
 	
-	virtual void SpawnEquipmentActor(const UFretteWeaponDataAsset* ItemData);
+	virtual void SpawnEquipmentActor(const UFretteWeaponItemDataAsset* ItemData);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -28,8 +29,8 @@ protected:
 	}
 };
 
-UCLASS(BlueprintType, Category = "Frette|Inventory")
-class UFretteWeaponDataAsset : public UFretteSlottableDataAsset
+UCLASS(Abstract, BlueprintType)
+class UFretteWeaponItemDataAsset : public UFretteSlottableItemDataAsset
 {
 	GENERATED_BODY()
 	

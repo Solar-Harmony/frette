@@ -1,13 +1,12 @@
 ﻿#pragma once
 
-#include "AbilitySystemBlueprintLibrary.h"
 #include "FretteInventoryItem.h"
-#include "GameplayEffect.h"
 #include "GameplayTagContainer.h"
 #include "GameplayAbilitySystem/AbilitySetDataAsset.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "FretteSlottableItem.generated.h"
 
+class UFretteSlottableItemDataAsset;
 
 UCLASS(BlueprintType)
 class UFretteSlottableItem : public UFretteInventoryItem
@@ -15,6 +14,8 @@ class UFretteSlottableItem : public UFretteInventoryItem
 	GENERATED_BODY()
 
 public:
+	FRETTE_ITEM_DATA_GETTER(UFretteSlottableItemDataAsset)
+	
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	int32 SlotID = -1;
 	
@@ -30,7 +31,7 @@ protected:
 };
 
 UCLASS(BlueprintType, Category = "Frette|Inventory")
-class UFretteSlottableDataAsset : public UFretteInventoryItemDataAsset
+class UFretteSlottableItemDataAsset : public UFretteInventoryItemDataAsset
 {
 	GENERATED_BODY()
 

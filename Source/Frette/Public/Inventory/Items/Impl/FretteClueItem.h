@@ -8,10 +8,13 @@
 #include "Player/FrettePlayerController.h"
 #include "FretteClueItem.generated.h"
 
+class UFretteClueItemDataAsset;
+
 UCLASS(BlueprintType)
 class UFretteClueItem : public UFretteSlottableItem
 {
 	GENERATED_BODY()
+	FRETTE_ITEM_DATA_GETTER(UFretteClueItemDataAsset)
 
 public:
 	virtual void Use_Implementation() override
@@ -35,7 +38,7 @@ public:
 };
 
 UCLASS()
-class UFretteClueItemDataAsset : public UFretteSlottableDataAsset
+class UFretteClueItemDataAsset : public UFretteSlottableItemDataAsset
 {
 	GENERATED_BODY()
 	

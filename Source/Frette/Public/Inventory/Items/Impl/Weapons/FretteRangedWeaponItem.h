@@ -11,6 +11,7 @@ UCLASS()
 class UFretteRangedWeaponItem : public UFretteWeaponItem
 {
 	GENERATED_BODY()
+	FRETTE_ITEM_DATA_GETTER(UFretteRangedWeaponDataAsset)
 
 public:
 	int GetCurrentAmmo() const { return CurrentClipAmmo; }
@@ -30,7 +31,7 @@ private:
 };
 
 UCLASS()
-class UFretteRangedWeaponDataAsset : public UFretteWeaponDataAsset
+class UFretteRangedWeaponDataAsset : public UFretteWeaponItemDataAsset
 {
 	GENERATED_BODY()
 	
