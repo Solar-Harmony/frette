@@ -27,7 +27,7 @@ class UFretteBodyPartData : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Meta = (Categories = "Frette"))
+	UPROPERTY(EditAnywhere, Meta = (Categories = "Frette.BodyPart"))
 	FGameplayTag BodyPartTag;
 
 	UPROPERTY(EditAnywhere)

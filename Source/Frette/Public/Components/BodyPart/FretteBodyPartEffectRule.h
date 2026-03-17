@@ -28,11 +28,9 @@ class FRETTE_API UFretteBodyPartEffectRule : public UObject
 
 public:
 	bool bHasTriggered = false;
-
 	virtual EBodyPartEventType GetRelatedEvent() const { return {}; }
-
 	bool CheckIfTriggers(const FFretteBodyPartContext& Context);
-
+	virtual bool CheckCondition(FFretteBodyPartContext Context);
 	void Reset() { bHasTriggered = false; }
 
 	UPROPERTY(EditAnywhere)
@@ -42,5 +40,4 @@ public:
 	FGameplayTag TagType;
 
 protected:
-	virtual bool CheckCondition(FFretteBodyPartContext Context);
 };

@@ -27,9 +27,7 @@ void UFretteBodyPartComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME(UFretteBodyPartComponent, BodyPartInstances);
 }
 
-//TODO: enlever les doublons de méthodes
-
-void UFretteBodyPartComponent::AddValueFromHit(const FGameplayTag BodyPartTag, int StackAmount, FGameplayTag EffectTag)
+void UFretteBodyPartComponent::AddValueFromHit(const FGameplayTag BodyPartTag, int Value, FGameplayTag EffectTag)
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
@@ -37,7 +35,7 @@ void UFretteBodyPartComponent::AddValueFromHit(const FGameplayTag BodyPartTag, i
 		{
 			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
 			{
-				BodyPart->AddValueByTag(StackAmount, EffectTag);
+				BodyPart->AddValueByTag(Value, EffectTag);
 			}
 		}
 	}
@@ -71,12 +69,12 @@ UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayT
 	return nullptr;
 }
 
-void UFretteBodyPartComponent::AddValueToAllParts(int StackAmount, FGameplayTag EffectTag)
+void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag EffectTag)
 {
 	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{
 		if (Instance)
-			Instance->AddValueByTag(StackAmount, EffectTag);
+			Instance->AddValueByTag(Value, EffectTag);
 	}
 }
 

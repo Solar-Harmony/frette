@@ -61,11 +61,10 @@ void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventT
 		{
 			ApplyGameplayEffects(RuleEntry.Effects);
 		}
-		else
+		else if (RuleEntry.Rule->bHasTriggered && !RuleEntry.Rule->CheckCondition(Context))
 		{
-			//Retire les éffet qui on été appliquer et qui ne respectent plus la regle qui l'a appliquer
-			if (RuleEntry.Rule->bHasTriggered)
-				RemoveGameplayEffects(RuleEntry.Effects);
+			RuleEntry.Rule->Reset();
+			RemoveGameplayEffects(RuleEntry.Effects);
 		}
 	}
 }
@@ -77,6 +76,8 @@ void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplay
 	for (TSubclassOf Effect : Effects)
 	{
 		OwnerASC->RemoveActiveGameplayEffectBySourceEffect(Effect, OwnerASC, 1);
+
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Removed effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
 	}
 }
 
@@ -94,7 +95,7 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 
 		OwnerASC->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Applied effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("Applied effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
 
 	}
 }
