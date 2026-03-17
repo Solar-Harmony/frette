@@ -4,16 +4,14 @@
 #include "Inventory/FretteInventoryComponent.h"
 #include "Weapons/FretteProjectile.h"
 
-//TODO: Faire que tout les équipements ont un Use ability qui peut être associer 
-//
 void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* WeaponInstance)
 {
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
 
-	//@TODO: Devrait utiliser un socket/muzzle location plutôt que le PawnViewLocation
+	// TODO: Devrait utiliser un socket/muzzle location plutôt que le PawnViewLocation
 	FVector MuzzleLocation = Character->GetPawnViewLocation();
 
-	//Utilise le controller.Rotation pour les IA ce qui n'est peut-être pas ce que l'on veux
+	// Utilise le controller.Rotation pour les IA ce qui n'est peut-être pas ce que l'on veux
 	FRotator AimRotation = Character->GetBaseAimRotation();
 
 	MuzzleLocation += AimRotation.Vector() * 100.f;
