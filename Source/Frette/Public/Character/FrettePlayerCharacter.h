@@ -31,9 +31,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
-	
-	UFUNCTION(BlueprintCallable)
-	UFretteEquipmentComponent* GetEquipmentComponent() const { return Equipment; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -50,9 +47,6 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float VerticalSensitivity = 1.f;
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UFretteEquipmentComponent> Equipment;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
