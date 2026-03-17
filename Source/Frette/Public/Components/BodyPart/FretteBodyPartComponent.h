@@ -17,22 +17,15 @@ class FRETTE_API UFretteBodyPartComponent : public UActorComponent
 public:
 	UFretteBodyPartComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	UFUNCTION(BlueprintCallable)
-	void ApplyDamageFromHit(const FName BoneName, float Damage);
-	void ApplyDamageFromHit(FGameplayTag BodyPartTag, float Damage);
-	void AddStatusEffectStackFromHit(FGameplayTag BodyPartTag, int StackAmount, FGameplayTag EffectTag);
+	void AddValueFromHit(FGameplayTag BodyPartTag, int StackAmount, FGameplayTag EffectTag);
+	UFretteBodyPartInstance* FindBodyPart(FGameplayTag BodyPartTag);
+	void AddValueToAllParts(int StackAmount, FGameplayTag EffectTag);
 
 	UFUNCTION(BlueprintPure)
 	float GetBodyPartHealth(FGameplayTag BodyPartTag);
-	UFretteBodyPartInstance* FindBodyPart(FGameplayTag BodyPartTag);
-	void AddStatusEffectStackToAllParts(int StackAmount, FGameplayTag EffectTag);
 
 	UFUNCTION()
 	void OnRep_BodyParts();
-
-	UFUNCTION(Server, Reliable)
-	void ServerApplyDamage(FGameplayTag BodyPartTag, float Damage);
 
 	FGameplayTag GetBodyPartFromBoneName(FName BoneName) const;
 

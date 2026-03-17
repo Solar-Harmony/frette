@@ -3,6 +3,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Character/FretteBaseCharacter.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
+#include "Components/BodyPart/FretteBodyPartTags.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Effect_Movement_FallDamage, "Effect.Movement.FallDamage");
 
@@ -72,7 +73,7 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFell) const
 
 	for (auto BoneTag : Config->AffectedBones)
 	{
-		BodyPartComponent->ApplyDamageFromHit(BoneTag, DamageAmount);
+		BodyPartComponent->AddValueFromHit(BoneTag, DamageAmount, TAG_BodyPartValues_Health);
 	}
 
 }

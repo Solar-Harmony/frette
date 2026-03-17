@@ -25,7 +25,7 @@ protected:
 	virtual void BeginPlay() override;
 	void OnTemperatureTick();
 
-	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Frette.StatusEffect"))
+	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Frette.BodyPartValues"))
 	FGameplayTag TemperatureEffectTag;
 
 	UPROPERTY()

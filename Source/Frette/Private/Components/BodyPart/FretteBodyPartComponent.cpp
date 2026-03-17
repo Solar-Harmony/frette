@@ -27,43 +27,9 @@ void UFretteBodyPartComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME(UFretteBodyPartComponent, BodyPartInstances);
 }
 
-void UFretteBodyPartComponent::ServerApplyDamage_Implementation(FGameplayTag BodyPartTag, float Damage)
-{
-	if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
-	{
-		BodyPart->ApplyDamage(Damage);
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,
-			FString::Printf(TEXT("received damage for body part %s: %.1f"), *BodyPartTag.ToString(), Damage));
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green,
-			FString::Printf(TEXT("%s health is now %.1f"), *BodyPartTag.ToString(), BodyPart->CurrentHealth));
-	}
-}
-
 //TODO: enlever les doublons de méthodes
-void UFretteBodyPartComponent::ApplyDamageFromHit(const FName BoneName, float Damage)
-{
-	if (GetOwnerRole() != ROLE_Authority)
-	{
-		FGameplayTag BodyPartTag = GetBodyPartFromBoneName(BoneName);
-		if (BodyPartTag.IsValid())
-		{
-			ServerApplyDamage(BodyPartTag, Damage);
-		}
-	}
-}
 
-void UFretteBodyPartComponent::ApplyDamageFromHit(const FGameplayTag BodyPartTag, float Damage)
-{
-	if (GetOwnerRole() != ROLE_Authority)
-	{
-		if (BodyPartTag.IsValid())
-		{
-			ServerApplyDamage(BodyPartTag, Damage);
-		}
-	}
-}
-
-void UFretteBodyPartComponent::AddStatusEffectStackFromHit(const FGameplayTag BodyPartTag, int StackAmount, FGameplayTag EffectTag)
+void UFretteBodyPartComponent::AddValueFromHit(const FGameplayTag BodyPartTag, int StackAmount, FGameplayTag EffectTag)
 {
 	if (GetOwnerRole() != ROLE_Authority)
 	{
@@ -105,7 +71,7 @@ UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayT
 	return nullptr;
 }
 
-void UFretteBodyPartComponent::AddStatusEffectStackToAllParts(int StackAmount, FGameplayTag EffectTag)
+void UFretteBodyPartComponent::AddValueToAllParts(int StackAmount, FGameplayTag EffectTag)
 {
 	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{

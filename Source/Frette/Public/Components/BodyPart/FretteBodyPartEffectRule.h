@@ -38,7 +38,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	ETriggerBehaviour TriggerBehaviour = ETriggerBehaviour::TriggerOnce;
 
-	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Frette.BodyPartValueTypes"))
+	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Frette.BodyPartValues"))
 	FGameplayTag TagType;
 
 protected:

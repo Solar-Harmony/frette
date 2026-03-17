@@ -36,5 +36,5 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Current body temperature: %d"), CurrentTemperatureStacks));
 
-	BodyPartComponent->AddStatusEffectStackToAllParts(StackDelta, TemperatureEffectTag);
+	BodyPartComponent->AddValueToAllParts(StackDelta, TemperatureEffectTag);
 }

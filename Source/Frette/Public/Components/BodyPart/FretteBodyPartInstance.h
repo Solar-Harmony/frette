@@ -22,7 +22,6 @@ class FRETTE_API UFretteBodyPartInstance : public UObject
 public:
 	FGameplayTag GetAssociatedTag() const { return SourceData->BodyPartTag; }
 	void Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner);
-	void ApplyDamage(float Damage);
 	void AddValueByTag(int Value, FGameplayTag Tag);
 	void CheckAndApplyRules(EBodyPartEventType EventType, FGameplayTag Tag, const FFretteBodyPartContext& Context) const;
 
