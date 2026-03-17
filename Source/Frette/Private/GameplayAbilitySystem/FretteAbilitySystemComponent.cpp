@@ -56,6 +56,12 @@ void UFretteAbilitySystemComponent::GrantAbilitiesFromAbilitySet(UAbilitySetData
 
 	for (const FAbilityTagMapping& Mapping : Loadout->AbilityMappings)
 	{
+		if (Mapping.Ability == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s() Invalid ability in ability set %s"), *FString(__FUNCTION__), *Loadout->GetName());
+			continue;
+		}
+		
 		FGameplayAbilitySpec Spec(Mapping.Ability, Mapping.AbilityLevel);
 		Spec.SourceObject = SourceObject;
 		Spec.GetDynamicSpecSourceTags().AddTag(Mapping.InputTag);
@@ -83,6 +89,7 @@ void UFretteAbilitySystemComponent::RemoveAbilitiesFromAbilitySet(UAbilitySetDat
 
 	for (const FAbilityTagMapping& Mapping : Loadout->AbilityMappings)
 	{
+		ClearAbility(InputAbilityMap[Mapping.InputTag]);
 		InputAbilityMap.Remove(Mapping.InputTag);
 	}
 }
