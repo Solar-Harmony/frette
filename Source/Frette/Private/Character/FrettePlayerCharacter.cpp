@@ -10,7 +10,6 @@ class AFrettePlayerState;
 
 AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
-	// Create the first person mesh that will be viewed only by this character's owner
 	FPMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("First Person Mesh"));
 
 	FPMesh->SetupAttachment(GetMesh());
@@ -23,8 +22,6 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	Camera->bUsePawnControlRotation = true;
 	Camera->bEnableFirstPersonFieldOfView = true;
 	Camera->bEnableFirstPersonScale = true;
-	// Camera->FirstPersonFieldOfView = 70.0f;
-	// Camera->FirstPersonScale = 0.6f;
 
 	PlayerInventory = CreateDefaultSubobject<UFretteInventoryComponent>("Equipment Inventory");
 	PlayerInventory->SetIsReplicated(true);
@@ -48,20 +45,50 @@ void AFrettePlayerCharacter::OnRep_PlayerState()
 
 void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
 {
-	const FVector MoveAxis3D = FVector(MoveAxis.X, MoveAxis.Y, 0.f);
-	const FVector MovementDirWS = Camera->GetComponentRotation().RotateVector(-MoveAxis3D);
-	AddMovementInput(MovementDirWS * 10000.0f, 1.0f);
+	if (!Controller)
+		return;
+
+	const FRotator YawRotation(0.f, GetControlRotation().Yaw, 0.f);
+
+	const FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(Forward, MoveAxis.X);
+	AddMovementInput(Right, MoveAxis.Y);
 }
 
 void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 {
 	AddControllerYawInput(LookAxis.X);
-	AddControllerPitchInput(LookAxis.Y * 2.5);
+	AddControllerPitchInput(LookAxis.Y);
 }
 
 void AFrettePlayerCharacter::DoPlayerJump()
 {
 	Jump();
+}
+
+//Set la position de la caméra a la position du socket de tête du mesh (pour les animations)
+//Et smooth la rotation pour avoir moins de jitter de petit movement de la souris
+void AFrettePlayerCharacter::CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult)
+{
+	FRotator TargetRotation = GetControlRotation();
+	TargetRotation.Pitch = FRotator::NormalizeAxis(TargetRotation.Pitch);
+
+	SmoothedControlRotation.Pitch = FRotator::NormalizeAxis(SmoothedControlRotation.Pitch);
+
+	SmoothedControlRotation = FMath::RInterpTo(
+		SmoothedControlRotation,
+		TargetRotation,
+		DeltaTime,
+		LookSmoothingSpeed
+		);
+
+	FTransform HeadTransform = GetMesh()->GetSocketTransform(FName("head"), RTS_World);
+
+	OutResult.Location = HeadTransform.GetLocation();
+	OutResult.Rotation = SmoothedControlRotation;
+	OutResult.FOV = Camera->FieldOfView;
 }
 
 //Je suis pas trop sur de ce qui devrait être appeler juste du coté serveur ou juste du coté client mais pour l'instant
@@ -86,5 +113,3 @@ void AFrettePlayerCharacter::BeginPlay()
 	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 
 }
-
-void AFrettePlayerCharacter::SetLookInputScale() {}
