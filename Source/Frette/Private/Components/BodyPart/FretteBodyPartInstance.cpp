@@ -1,7 +1,7 @@
 #include "Components/BodyPart/FretteBodyPartInstance.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Components/BodyPart/FretteBodyPartContext.h"
-#include "Components/BodyPart/EffectRules/FretteSingleDamageInstanceRule.h"
+#include "Components/BodyPart/EffectRules/FretteDeltaValueRule.h"
 #include "Net/UnrealNetwork.h"
 
 void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner)
@@ -11,56 +11,43 @@ void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFre
 	OwnerCharacter = Owner;
 	BuildRuleLookup();
 
-	SetMinDamageThresholdForInstantEffect();
+	SetMinDeltaValueThreshold();
 }
 
-//Pour essayer de réduire les lookup inutiles
-void UFretteBodyPartInstance::SetMinDamageThresholdForInstantEffect()
+//Pour essayer de réduire les lookup inutiles on va chercher le plus petit delta qui peut trigger un éffet et
+//Si le changement de la valeur est < on ne vérifiera pas les regle de delta
+void UFretteBodyPartInstance::SetMinDeltaValueThreshold()
 {
-	for (auto InstantDamageRule : *GetRulesForEvent(EBodyPartEventType::InstantDamage))
+	for (auto DeltaValueRule : GetRulesForEvent(EBodyPartEventType::DeltaValue))
 	{
-		int CurrentRuleDamageThreshold = Cast<UFretteSingleDamageInstanceRule>(InstantDamageRule.Rule)->DamageThreshold;
+		int CurrentRuleDamageThreshold = Cast<UFretteDeltaValueRule>(DeltaValueRule.Rule)->Threshold;
 
 		if (CurrentRuleDamageThreshold < MinDamageForInstantDamageEffect)
 			MinDamageForInstantDamageEffect = CurrentRuleDamageThreshold;
 	}
 }
 
-void UFretteBodyPartInstance::ApplyDamage(const float Damage)
-{
-	CurrentHealth -= Damage;
-
-	FFretteBodyPartContext Context = FFretteBodyPartContext();
-
-	if (Damage >= MinDamageForInstantDamageEffect)
-	{
-		Context.InstantDamage = Damage;
-		CheckAndApplyRules(EBodyPartEventType::InstantDamage, Context);
-	}
-
-	Context.RemainingHealth = CurrentHealth;
-
-	CheckAndApplyRules(EBodyPartEventType::RemainingHealth, Context);
-}
-
-//Ajout de stack temperature (le cold retire des stacks et la chaleur augmente les stacks)
 void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag Tag)
 {
 	FFretteBodyPartContext Context = FFretteBodyPartContext();
 
 	AccumulatedEffectStackByType.FindOrAdd(Tag) += Value;
 
-	Context.CumulativeValue = AccumulatedEffectStackByType[Tag];
+	if (Value >= MinDamageForInstantDamageEffect)
+	{
+		Context.ValueDelta = Value;
+		CheckAndApplyRules(EBodyPartEventType::DeltaValue, Tag, Context);
+	}
+
+	Context.AccumulatedValue = AccumulatedEffectStackByType[Tag];
 	Context.EffectType = Tag;
 
-	//TODO:Devrais faire le check des regle selon le EffectType aussi donc on va juste regarder les regle qui sont affecter par la temperature
-	//TODO:Devrais retirer les gameplay effects pour les éffets qui ne sont plus activer car les stacks on changer
-	CheckAndApplyRules(EBodyPartEventType::StatusEffect, Context);
+	CheckAndApplyRules(EBodyPartEventType::AccumulatedValue, Tag, Context);
 }
 
-void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventType, const FFretteBodyPartContext& Context) const
+void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventType, const FGameplayTag Tag, const FFretteBodyPartContext& Context) const
 {
-	const TArray<FFretteEffectRuleEntry>* Rules = GetRulesForEvent(EventType);
+	const TArray<FFretteEffectRuleEntry>* Rules = GetRulesForEvent(EventType, Tag);
 
 	if (!Rules)
 		return;
@@ -80,7 +67,6 @@ void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventT
 			if (RuleEntry.Rule->bHasTriggered)
 				RemoveGameplayEffects(RuleEntry.Effects);
 		}
-
 	}
 }
 
@@ -93,8 +79,6 @@ void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplay
 		OwnerASC->RemoveActiveGameplayEffectBySourceEffect(Effect, OwnerASC, 1);
 	}
 }
-
-//TODO: Ajouter le soin de parties du corps, retirer les éffets qui on été ajouté et reset les infos (hasTriggered, accumulatedDamageByType)
 
 void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGameplayEffect>> Effects) const
 {
@@ -141,13 +125,35 @@ void UFretteBodyPartInstance::BuildRuleLookup()
 		InstancedEntry.Rule = RuleInstance;
 		InstancedEntry.Effects = RuleEntry.Effects;
 
-		EventTypeToRulesMap.FindOrAdd(RuleInstance->GetRelatedEvent()).Add(InstancedEntry);
+		EventTypeToRulesMap.FindOrAdd(RuleInstance->GetRelatedEvent())
+		                   .FindOrAdd(RuleInstance->TagType)
+		                   .Add(InstancedEntry);
 	}
 }
 
-const TArray<FFretteEffectRuleEntry>* UFretteBodyPartInstance::GetRulesForEvent(const EBodyPartEventType EventType) const
+const TArray<FFretteEffectRuleEntry>* UFretteBodyPartInstance::GetRulesForEvent(const EBodyPartEventType EventType, const FGameplayTag& EffectTag) const
 {
-	return EventTypeToRulesMap.Find(EventType);
+	const TMap<FGameplayTag, TArray<FFretteEffectRuleEntry>>* TagMap = EventTypeToRulesMap.Find(EventType);
+	if (!TagMap)
+		return nullptr;
+
+	return TagMap->Find(EffectTag);
+}
+
+TArray<FFretteEffectRuleEntry> UFretteBodyPartInstance::GetRulesForEvent(const EBodyPartEventType EventType) const
+{
+	TArray<FFretteEffectRuleEntry> Result;
+
+	const TMap<FGameplayTag, TArray<FFretteEffectRuleEntry>>* TagMap = EventTypeToRulesMap.Find(EventType);
+	if (!TagMap)
+		return Result;
+
+	for (const auto& [Tag, Rules] : *TagMap)
+	{
+		Result.Append(Rules);
+	}
+
+	return Result;
 }
 
 void UFretteBodyPartInstance::OnRep_CurrentHealth() const

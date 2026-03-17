@@ -24,7 +24,7 @@ public:
 	void Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner);
 	void ApplyDamage(float Damage);
 	void AddValueByTag(int Value, FGameplayTag Tag);
-	void CheckAndApplyRules(EBodyPartEventType EventType, const FFretteBodyPartContext& Context) const;
+	void CheckAndApplyRules(EBodyPartEventType EventType, FGameplayTag Tag, const FFretteBodyPartContext& Context) const;
 
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth, BlueprintReadOnly)
 	float CurrentHealth;
@@ -39,8 +39,9 @@ private:
 	void ApplyGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const;
 	void RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const;
 	void BuildRuleLookup();
-	void SetMinDamageThresholdForInstantEffect();
-	const TArray<FFretteEffectRuleEntry>* GetRulesForEvent(const EBodyPartEventType EventType) const;
+	void SetMinDeltaValueThreshold();
+	const TArray<FFretteEffectRuleEntry>* GetRulesForEvent(const EBodyPartEventType EventType, const FGameplayTag& EffectTag) const;
+	TArray<FFretteEffectRuleEntry> GetRulesForEvent(const EBodyPartEventType EventType) const;
 
 	UPROPERTY()
 	TObjectPtr<UFretteBodyPartData> SourceData;
@@ -58,5 +59,6 @@ private:
 	//Je suis aller avec le TMap de event types car j'avais peur d'avoir des éffet qui applique des dégat
 	//ou des stack de statusEffect de manière fréquente (Cold stacks) et je voullais pas avoir a passer a travers
 	//tous les regles de déclanchement a chaque fois
-	TMap<EBodyPartEventType, TArray<FFretteEffectRuleEntry>> EventTypeToRulesMap;
+	TMap<EBodyPartEventType, TMap<FGameplayTag, TArray<FFretteEffectRuleEntry>>> EventTypeToRulesMap;
+
 };

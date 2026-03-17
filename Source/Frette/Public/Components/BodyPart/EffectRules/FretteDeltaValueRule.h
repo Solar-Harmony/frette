@@ -2,21 +2,21 @@
 
 #include "CoreMinimal.h"
 #include "Components/BodyPart/FretteBodyPartEffectRule.h"
-#include "FretteSingleDamageInstanceRule.generated.h"
+#include "FretteDeltaValueRule.generated.h"
 
 /**
  * 
  */
 UCLASS(EditInlineNew)
-class FRETTE_API UFretteSingleDamageInstanceRule : public UFretteBodyPartEffectRule
+class FRETTE_API UFretteDeltaValueRule : public UFretteBodyPartEffectRule
 {
 	GENERATED_BODY()
 
 public:
-	virtual EBodyPartEventType GetRelatedEvent() const override { return EBodyPartEventType::InstantDamage; }
+	virtual EBodyPartEventType GetRelatedEvent() const override { return EBodyPartEventType::DeltaValue; }
 
 	UPROPERTY(EditDefaultsOnly)
-	int DamageThreshold;
+	int Threshold;
 
 protected:
 	virtual bool CheckCondition(FFretteBodyPartContext Context) override;

@@ -8,10 +8,9 @@
 UENUM(BlueprintType)
 enum class EBodyPartEventType : uint8
 {
-	InstantDamage,
-	RemainingHealth,
-	Death,
-	StatusEffect
+	DeltaValue,
+	LimitReached,
+	AccumulatedValue
 };
 
 //Cooldown? repeat avec un cooldown sur l'éffet lui même
@@ -30,14 +29,17 @@ class FRETTE_API UFretteBodyPartEffectRule : public UObject
 public:
 	bool bHasTriggered = false;
 
-	UPROPERTY(EditAnywhere)
-	ETriggerBehaviour TriggerBehaviour = ETriggerBehaviour::TriggerOnce;
-
 	virtual EBodyPartEventType GetRelatedEvent() const { return {}; }
 
 	bool CheckIfTriggers(const FFretteBodyPartContext& Context);
 
 	void Reset() { bHasTriggered = false; }
+
+	UPROPERTY(EditAnywhere)
+	ETriggerBehaviour TriggerBehaviour = ETriggerBehaviour::TriggerOnce;
+
+	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Frette.BodyPartValueTypes"))
+	FGameplayTag TagType;
 
 protected:
 	virtual bool CheckCondition(FFretteBodyPartContext Context);

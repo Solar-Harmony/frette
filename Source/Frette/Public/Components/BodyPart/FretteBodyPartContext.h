@@ -9,13 +9,10 @@ struct FFretteBodyPartContext
 	GENERATED_BODY()
 
 	UPROPERTY()
-	float InstantDamage = 0.f;
+	float ValueDelta = 0.f;
 
 	UPROPERTY()
-	float RemainingHealth = 0.f;
-
-	UPROPERTY()
-	int CumulativeValue = 0;
+	int AccumulatedValue = 0;
 
 	UPROPERTY()
 	FGameplayTag EffectType;
