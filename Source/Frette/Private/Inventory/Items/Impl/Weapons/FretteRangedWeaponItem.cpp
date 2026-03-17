@@ -8,6 +8,5 @@ void UFretteRangedWeaponItem::UseAmmo()
 
 void UFretteRangedWeaponItem::Reload()
 {
-	UFretteRangedWeaponDataAsset* ItemData = Cast<UFretteRangedWeaponDataAsset>(Data);
-	CurrentClipAmmo = ItemData->MaxClipAmmo;
+	CurrentClipAmmo = GetData()->MaxClipAmmo;
 }

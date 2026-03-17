@@ -6,14 +6,12 @@
 void UFretteSlottableItem::OnEquipped()
 {
 	AFretteBaseCharacter* Character = Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
-	UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character); 
-	const UFretteSlottableItemDataAsset* ItemData = Cast<UFretteSlottableItemDataAsset>(Data);
-	
-	if (ASC)
+
+	if (UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character))
 	{
-		ASC->GrantAbilitiesFromAbilitySet(ItemData->GrantedAbilities, this);
+		ASC->GrantAbilitiesFromAbilitySet(GetData()->GrantedAbilities, this);
 		
-		for (const FFretteGameplayEffectConfig& EffectConfig : ItemData->GrantedEffects)
+		for (const FFretteGameplayEffectConfig& EffectConfig : GetData()->GrantedEffects)
 		{
 			ASC->ApplyEffect(EffectConfig, this);
 		}
@@ -23,14 +21,12 @@ void UFretteSlottableItem::OnEquipped()
 void UFretteSlottableItem::OnUnequipped()
 {
 	AFretteBaseCharacter* Character = Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
-	UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character); 
-	const UFretteSlottableItemDataAsset* ItemData = Cast<UFretteSlottableItemDataAsset>(Data);
-	
-	if (ASC)
+
+	if (UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character))
 	{
-		ASC->RemoveAbilitiesFromAbilitySet(ItemData->GrantedAbilities);
+		ASC->RemoveAbilitiesFromAbilitySet(GetData()->GrantedAbilities);
 		
-		for (const FFretteGameplayEffectConfig& EffectConfig : ItemData->GrantedEffects)
+		for (const FFretteGameplayEffectConfig& EffectConfig : GetData()->GrantedEffects)
 		{
 			ASC->RemoveActiveGameplayEffectBySourceEffect(EffectConfig.EffectClass, ASC, 1);
 		}

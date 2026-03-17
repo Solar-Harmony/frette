@@ -11,9 +11,10 @@ UCLASS()
 class UFretteRangedWeaponItem : public UFretteWeaponItem
 {
 	GENERATED_BODY()
-	FRETTE_ITEM_DATA_GETTER(UFretteRangedWeaponDataAsset)
 
 public:
+	FRETTE_ITEM_DATA_GETTER(UFretteRangedWeaponDataAsset)
+	
 	int GetCurrentAmmo() const { return CurrentClipAmmo; }
 	void UseAmmo();
 	void Reload();

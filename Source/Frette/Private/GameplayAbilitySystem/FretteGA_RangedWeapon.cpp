@@ -24,7 +24,7 @@ void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* Weap
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	GetWorld()->SpawnActor<AFretteProjectile>(
-		WeaponInstance->ProjectileType,
+		WeaponInstance->GetData()->ProjectileType,
 		MuzzleLocation,
 		AimRotation,
 		SpawnParams

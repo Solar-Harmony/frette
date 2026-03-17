@@ -1,13 +1,12 @@
 #include "Inventory/Items/Impl/FretteWeaponItem.h"
 
 #include "GameFramework/Character.h"
-#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
-#include "Net/UnrealNetwork.h"
+#include "Inventory/FretteInventoryComponent.h"
 
 void UFretteWeaponItem::OnEquipped()
 {
 	Super::OnEquipped();
-	const UFretteWeaponItemDataAsset* ItemData = Cast<UFretteWeaponItemDataAsset>(Data);
+	const UFretteWeaponItemDataAsset* ItemData = Cast<UFretteWeaponItemDataAsset>(GetData());
 	SpawnEquipmentActor(ItemData);
 }
 

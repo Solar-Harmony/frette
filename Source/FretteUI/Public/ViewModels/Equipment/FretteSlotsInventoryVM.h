@@ -68,7 +68,7 @@ private:
 			return;
 
 		UFretteSlotsInventoryItemVM* ItemVM = NewObject<UFretteSlotsInventoryItemVM>(this);
-		ItemVM->SetFromModel(NewItem);
+		ItemVM->SetFromModel(const_cast<UFretteSlottableItem*>(Cast<UFretteSlottableItem>(NewItem)));
 		Items.Add(ItemVM);
 		
 		const int32 FreeSlotIdx = FindFirstFreeSlot(ItemVM, false);

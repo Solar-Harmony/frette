@@ -99,7 +99,7 @@ bool FFretteInventoryList::IsValidItem(const UFretteInventoryItem* Item, bool bA
 	if (!bAllowInvalidId && !Item->HasValidID())
 		return false;
 
-	if (!IsValid(Item->Data))
+	if (!IsValid(Item->GetUntypedData()))
 		return false;
 
 	if (Item->GetOuter() != Owner)
@@ -221,8 +221,8 @@ void FFretteInventoryList::DumpInventory() const
 		const FFretteInventoryListEntry& Entry = Entries[i];
 		if (IsValid(Entry.Item))
 		{
-			const FString DataName = IsValid(Entry.Item->Data) ? Entry.Item->Data->GetName() : TEXT("NULL");
-			const FString DisplayName = IsValid(Entry.Item->Data) ? Entry.Item->Data->DisplayName.ToString() : TEXT("N/A");
+			const FString DataName = IsValid(Entry.Item->GetUntypedData()) ? Entry.Item->GetUntypedData()->GetName() : TEXT("NULL");
+			const FString DisplayName = IsValid(Entry.Item->GetUntypedData()) ? Entry.Item->GetUntypedData()->DisplayName.ToString() : TEXT("N/A");
 			Builder.Appendf(TEXT("  [%d] Item ID: %d | Data: %s (%s) | UpdatedIdx: %d\n"),
 				i, Entry.Item->Id, *DataName, *DisplayName, Entry.UpdatedIdx);
 		}

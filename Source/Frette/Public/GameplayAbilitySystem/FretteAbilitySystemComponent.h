@@ -35,7 +35,7 @@ public:
 	
 	FActiveGameplayEffectHandle ApplyEffect(const FFretteGameplayEffectConfig& Config, const UObject* SourceObject);
 	
-	static UFretteAbilitySystemComponent* Get(class AFretteBaseCharacter* Character) { return Cast<UFretteAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character)); }
+	static UFretteAbilitySystemComponent* Get(class AFretteBaseCharacter* Character);
 
 protected:
 	//Pourrais peut-être avoir le input action directement plutot que le gameplayTag 

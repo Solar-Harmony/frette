@@ -20,14 +20,14 @@ public:
 
 	void SetName(const UFretteInventoryItem* Item)
 	{
-		UE_MVVM_SET_PROPERTY_VALUE(Name, Item->Data->DisplayName);
+		UE_MVVM_SET_PROPERTY_VALUE(Name, Item->GetUntypedData()->DisplayName);
 	}
 
 	void SetIcon(const UFretteInventoryItem* Item)
 	{
 		// we might want async loading, or preloading
 		// also check out Common Lazy Image?
-		UTexture2D* IconPtr = Item->Data->Icon.LoadSynchronous();
+		UTexture2D* IconPtr = Item->GetUntypedData()->Icon.LoadSynchronous();
 		UE_MVVM_SET_PROPERTY_VALUE(Icon, IconPtr);
 	}
 };

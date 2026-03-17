@@ -1,13 +1,9 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
-#include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Components/CapsuleComponent.h"
-#include "Equipments/FretteFakeEquipmentComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "Inventory/FretteInventoryComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Player/FrettePlayerState.h"
 
 class AFrettePlayerState;
@@ -48,7 +44,6 @@ void AFrettePlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 	InitAbilityActorInfo();
-	Equipment->Initialize(PlayerInventory);
 }
 
 void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)

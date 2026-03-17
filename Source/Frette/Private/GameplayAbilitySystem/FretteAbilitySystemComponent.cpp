@@ -1,4 +1,6 @@
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
+
+#include "Character/FretteBaseCharacter.h"
 #include "GameplayAbilitySystem/FretteGameplayAbility.h"
 
 void UFretteAbilitySystemComponent::AbilityInputPressed(const FGameplayTag& InputTag)
@@ -98,4 +100,9 @@ FActiveGameplayEffectHandle UFretteAbilitySystemComponent::ApplyEffect(const FFr
 	}
 	
 	return ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+}
+
+UFretteAbilitySystemComponent* UFretteAbilitySystemComponent::Get(class AFretteBaseCharacter* Character)
+{
+	return Cast<UFretteAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character));
 }
