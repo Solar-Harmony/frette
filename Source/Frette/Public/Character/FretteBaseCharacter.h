@@ -15,10 +15,6 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable)
-	UFretteEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
-	
 protected:
 	AFretteBaseCharacter();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
@@ -28,7 +24,6 @@ protected:
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> AbilitySystemComponent;
-	
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
@@ -42,9 +37,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category= "Frette|Archetype")
 	TObjectPtr<UAbilitySetDataAsset> ArchetypeLoadout;
 
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UFretteEquipmentComponent> EquipmentComponent;
-	
 	UPROPERTY(EditAnywhere)
 	int CharacterLevel = 1;
 

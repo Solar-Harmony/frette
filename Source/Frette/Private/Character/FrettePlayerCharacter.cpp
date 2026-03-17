@@ -1,9 +1,11 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
-#include "Camera/CameraComponent.h"
+#include "EnhancedInputComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Equipment/FretteEquipmentComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
-#include "Inventory/FretteInventoryComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/FrettePlayerState.h"
 
 class AFrettePlayerState;
@@ -25,6 +27,9 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	PlayerInventory = CreateDefaultSubobject<UFretteInventoryComponent>("Equipment Inventory");
 	PlayerInventory->SetIsReplicated(true);
+
+	Equipment = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment"));
+	Equipment->SetIsReplicated(true);
 }
 
 //Client side
