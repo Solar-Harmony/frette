@@ -89,7 +89,12 @@ void UFretteAbilitySystemComponent::RemoveAbilitiesFromAbilitySet(UAbilitySetDat
 
 	for (const FAbilityTagMapping& Mapping : Loadout->AbilityMappings)
 	{
-		ClearAbility(InputAbilityMap[Mapping.InputTag]);
+		const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(Mapping.InputTag);
+		if (Handle != nullptr && Handle->IsValid())
+		{
+			ClearAbility(*Handle);
+		}
+		
 		InputAbilityMap.Remove(Mapping.InputTag);
 	}
 }
