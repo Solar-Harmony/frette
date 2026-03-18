@@ -13,6 +13,6 @@ class FRETTEUI_API UFretteInventorySlotWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Categories = "Frette.Inventory.SlotType"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (Categories = "Frette.BodyPart"))
 	FGameplayTag CompatibleSlotType;
 };

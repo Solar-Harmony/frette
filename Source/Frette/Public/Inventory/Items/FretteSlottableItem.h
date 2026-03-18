@@ -36,7 +36,7 @@ class UFretteSlottableItemDataAsset : public UFretteInventoryItemDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (Categories = "Frette.Inventory.SlotType"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (Categories = "Frette.BodyPart"))
 	FGameplayTag ItemSlotTag;
 	
 	UPROPERTY(EditDefaultsOnly)
