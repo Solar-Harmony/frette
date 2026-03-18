@@ -5,6 +5,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
+AFretteBaseCharacter::AFretteBaseCharacter()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
 void AFretteBaseCharacter::ApplyStartupEffects() const
 {
 	check(AbilitySystemComponent)

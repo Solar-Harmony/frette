@@ -1,11 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FretteBodyPartEffectRule.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "FretteBodyPartData.generated.h"
 
+class UFretteBodyPartEffectRule;
 class UGameplayEffect;
 
 //Je sais pas trop si je devrais juste avoir les effect a déclancher directement dans la regle

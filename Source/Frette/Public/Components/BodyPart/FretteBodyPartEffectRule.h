@@ -13,7 +13,6 @@ enum class EBodyPartEventType : uint8
 	AccumulatedValue
 };
 
-//Cooldown? repeat avec un cooldown sur l'éffet lui même
 UENUM(BlueprintType)
 enum class ETriggerBehaviour : uint8
 {

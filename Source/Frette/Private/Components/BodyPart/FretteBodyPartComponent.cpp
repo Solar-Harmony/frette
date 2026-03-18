@@ -29,7 +29,7 @@ void UFretteBodyPartComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 
 void UFretteBodyPartComponent::AddValueFromHit(const FGameplayTag BodyPartTag, int Value, FGameplayTag EffectTag)
 {
-	if (GetOwnerRole() != ROLE_Authority)
+	if (GetOwnerRole() == ROLE_Authority)
 	{
 		if (BodyPartTag.IsValid())
 		{
@@ -50,17 +50,11 @@ FGameplayTag UFretteBodyPartComponent::GetBodyPartFromBoneName(const FName BoneN
 	return FGameplayTag();
 }
 
-float UFretteBodyPartComponent::GetBodyPartHealth(const FGameplayTag BodyPartTag)
-{
-	const UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag);
-	return BodyPart ? BodyPart->CurrentHealth : 0.f;
-}
-
 UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayTag BodyPartTag)
 {
 	for (TObjectPtr BodyPart : BodyPartInstances)
 	{
-		if (BodyPart->GetAssociatedTag().MatchesTagExact(BodyPartTag))
+		if (BodyPart->GetBodyPartTag().MatchesTagExact(BodyPartTag))
 			return BodyPart;
 	}
 
@@ -71,10 +65,13 @@ UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayT
 
 void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag EffectTag)
 {
-	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
+	if (GetOwnerRole() == ROLE_Authority)
 	{
-		if (Instance)
-			Instance->AddValueByTag(Value, EffectTag);
+		for (UFretteBodyPartInstance* Instance : BodyPartInstances)
+		{
+			if (Instance)
+				Instance->AddValueByTag(Value, EffectTag);
+		}
 	}
 }
 

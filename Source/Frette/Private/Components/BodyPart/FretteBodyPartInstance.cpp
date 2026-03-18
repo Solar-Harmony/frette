@@ -10,12 +10,26 @@ void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFre
 
 	for (auto Data : SourceData->ValueDatas)
 	{
-		AccumulatedValuesByType.FindOrAdd(Data.Type) = Data.StartValue;
+		FindOrAddAccumulatedValue(Data.Type) = Data.StartValue;
 	}
 
 	OwnerCharacter = Owner;
 	BuildRuleLookup();
 	SetMinDeltaValueThreshold();
+}
+
+int& UFretteBodyPartInstance::FindOrAddAccumulatedValue(const FGameplayTag& Tag)
+{
+	FFretteAccumulatedValueEntry* Existing = AccumulatedValues.FindByPredicate(
+		[&Tag](const FFretteAccumulatedValueEntry& Entry) { return Entry.Tag == Tag; });
+
+	if (Existing)
+		return Existing->Value;
+
+	FFretteAccumulatedValueEntry& NewEntry = AccumulatedValues.AddDefaulted_GetRef();
+	NewEntry.Tag = Tag;
+
+	return NewEntry.Value;
 }
 
 //Pour essayer de réduire les lookup inutiles on va chercher le plus petit delta qui peut trigger un éffet et
@@ -24,10 +38,12 @@ void UFretteBodyPartInstance::SetMinDeltaValueThreshold()
 {
 	for (auto DeltaValueRule : GetRulesForEvent(EBodyPartEventType::DeltaValue))
 	{
-		int CurrentRuleDamageThreshold = Cast<UFretteDeltaValueRule>(DeltaValueRule.Rule)->Threshold;
+		const UFretteDeltaValueRule* Rule = Cast<UFretteDeltaValueRule>(DeltaValueRule.Rule);
 
-		if (CurrentRuleDamageThreshold < MinDamageForInstantDamageEffect)
-			MinDamageForInstantDamageEffect = CurrentRuleDamageThreshold;
+		ensureMsgf(Rule, TEXT("Rule for DeltaValue event is not a UFretteDeltaValueRule"));
+
+		if (Rule->Threshold < MinValueDelta)
+			MinValueDelta = Rule->Threshold;
 	}
 }
 
@@ -35,22 +51,60 @@ void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag 
 {
 	FFretteBodyPartContext Context = FFretteBodyPartContext();
 
-	float NewValue = AccumulatedValuesByType.FindOrAdd(Tag) + Value;
+	const float ClampedDelta = ClampDelta(Value, Tag);
+
+	if (ClampedDelta == 0.f)
+		return;
+
+	int CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("%s %s: %d"), *GetBodyPartTag().ToString(), *Tag.ToString(), CurrentValue));
+
+	CheckDeltaRules(Tag, Context, ClampedDelta);
+
+	CheckAccumulatedValueRules(Tag, Context, CurrentValue);
+}
+
+float UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Tag)
+{
+	const int AccumulatedValue = FindOrAddAccumulatedValue(Tag);
+	const float NewValue = AccumulatedValue + Value;
+
 	const float Min = SourceData->GetMinValueForType(Tag);
 	const float Max = SourceData->GetMaxValueForType(Tag);
 
-	AccumulatedValuesByType.FindOrAdd(Tag) += NewValue;
+	float ClampedDelta;
 
-	if (Value >= MinDamageForInstantDamageEffect)
+	if (NewValue < Min || NewValue > Max)
 	{
-		Context.ValueDelta = Value;
-		CheckAndApplyRules(EBodyPartEventType::DeltaValue, Tag, Context);
+		ClampedDelta = FMath::Clamp(NewValue, Min, Max) - AccumulatedValue;
+	}
+	else
+	{
+		ClampedDelta = Value;
 	}
 
-	Context.AccumulatedValue = AccumulatedValuesByType[Tag];
+	return ClampedDelta;
+}
+
+void UFretteBodyPartInstance::CheckDeltaRules(const FGameplayTag Tag, FFretteBodyPartContext& Context, const float ClampedDelta) const
+{
+	if (ClampedDelta >= MinValueDelta)
+	{
+		Context.ValueDelta = ClampedDelta;
+		CheckAndApplyRules(EBodyPartEventType::DeltaValue, Tag, Context);
+	}
+}
+
+void UFretteBodyPartInstance::CheckAccumulatedValueRules(const FGameplayTag Tag, FFretteBodyPartContext& Context, const int CurrentValue) const
+{
+	Context.AccumulatedValue = CurrentValue;
 	Context.EffectType = Tag;
 
 	CheckAndApplyRules(EBodyPartEventType::AccumulatedValue, Tag, Context);
+
+	Context.SourceData = SourceData;
+	CheckAndApplyRules(EBodyPartEventType::LimitReached, Tag, Context);
 }
 
 void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventType, const FGameplayTag Tag, const FFretteBodyPartContext& Context) const
@@ -98,19 +152,12 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 		FGameplayEffectContextHandle EffectContext = OwnerASC->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
 
-		//On pourrais utiliser le niveau ici pour l'intensité de l'éffet selon le nombre de stack
 		const FGameplayEffectSpecHandle NewHandle = OwnerASC->MakeOutgoingSpec(Effect, 1, EffectContext);
 
 		OwnerASC->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
 
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("Applied effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("Applied effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
 	}
-}
-
-void UFretteBodyPartInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UFretteBodyPartInstance, CurrentHealth);
 }
 
 void UFretteBodyPartInstance::BuildRuleLookup()
@@ -164,7 +211,11 @@ TArray<FFretteEffectRuleEntry> UFretteBodyPartInstance::GetRulesForEvent(const E
 	return Result;
 }
 
-void UFretteBodyPartInstance::OnRep_CurrentHealth() const
+void UFretteBodyPartInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	UE_LOG(LogTemp, Log, TEXT("MyValue changed to %f"), CurrentHealth);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UFretteBodyPartInstance, AccumulatedValues);
+
 }
+
+void UFretteBodyPartInstance::OnRep_AccumulatedValues() {}

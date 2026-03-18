@@ -10,9 +10,17 @@
 struct FGameplayTag;
 class UFretteBodyPartData;
 
-//Pas un fan des context objects mais c'Est le plus simple que j'ai trouver pour send l'info aux regles
-//Sans juste donner acces a l'instance du body part
-//Pourrais peut-être juste cast la regle au type précis de la regle vu que chaque regle est associé a un event spécifique
+USTRUCT()
+struct FFretteAccumulatedValueEntry
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FGameplayTag Tag;
+
+	UPROPERTY()
+	int32 Value = 0;
+};
 
 UCLASS()
 class FRETTE_API UFretteBodyPartInstance : public UObject
@@ -20,25 +28,26 @@ class FRETTE_API UFretteBodyPartInstance : public UObject
 	GENERATED_BODY()
 
 public:
-	FGameplayTag GetAssociatedTag() const { return SourceData->BodyPartTag; }
+	FGameplayTag GetBodyPartTag() const { return SourceData->BodyPartTag; }
 	void Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner);
+	int32& FindOrAddAccumulatedValue(const FGameplayTag& Tag);
 	void AddValueByTag(int Value, FGameplayTag Tag);
 	void CheckAndApplyRules(EBodyPartEventType EventType, FGameplayTag Tag, const FFretteBodyPartContext& Context) const;
 
-	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth, BlueprintReadOnly)
-	float CurrentHealth;
+	UPROPERTY(ReplicatedUsing=OnRep_AccumulatedValues)
+	TArray<FFretteAccumulatedValueEntry> AccumulatedValues;
 
 	UFUNCTION()
-	void OnRep_CurrentHealth() const;
-
-	UPROPERTY(BlueprintReadOnly)
-	TMap<FGameplayTag, int> AccumulatedValuesByType;
+	void OnRep_AccumulatedValues();
 
 private:
 	void ApplyGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const;
 	void RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const;
 	void BuildRuleLookup();
 	void SetMinDeltaValueThreshold();
+	float ClampDelta(int Value, FGameplayTag Tag);
+	void CheckDeltaRules(FGameplayTag Tag, FFretteBodyPartContext& Context, float ClampedDelta) const;
+	void CheckAccumulatedValueRules(FGameplayTag Tag, FFretteBodyPartContext& Context, int CurrentValue) const;
 	const TArray<FFretteEffectRuleEntry>* GetRulesForEvent(const EBodyPartEventType EventType, const FGameplayTag& EffectTag) const;
 	TArray<FFretteEffectRuleEntry> GetRulesForEvent(const EBodyPartEventType EventType) const;
 
@@ -48,7 +57,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<AFretteBaseCharacter> OwnerCharacter;
 
-	int MinDamageForInstantDamageEffect = 9999;
+	int MinValueDelta = 9999;
 
 	// Nécéssaire pour garder les regles instancier en vie sinon ils se font garbage collect
 	// et ça fait des crash quand on essaye d'y accéder

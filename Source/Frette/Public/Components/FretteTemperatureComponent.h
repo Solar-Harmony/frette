@@ -19,11 +19,13 @@ public:
 	// et on retire un modifier avec le tag feu quand on quitte le range du feu
 	//Devras être setter par les éléments dans le monde
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	int TargetTemperature = -30;
+	int TargetTemperature = -20;
 
 protected:
+	UFretteTemperatureComponent();
 	virtual void BeginPlay() override;
 	void OnTemperatureTick();
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Frette.BodyPartValues"))
 	FGameplayTag TemperatureEffectTag;

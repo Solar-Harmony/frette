@@ -27,9 +27,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
 	void AddValueToAllParts(int Value, FGameplayTag EffectTag);
 
-	UFUNCTION(BlueprintPure)
-	float GetBodyPartHealth(FGameplayTag BodyPartTag);
-
 	UFUNCTION()
 	void OnRep_BodyParts();
 

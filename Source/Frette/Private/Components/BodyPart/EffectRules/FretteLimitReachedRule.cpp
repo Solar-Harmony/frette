@@ -1,6 +1,15 @@
 #include "Components/BodyPart/EffectRules/FretteLimitReachedRule.h"
 
-bool UFretteLimitReachedRule::CheckCondition(FFretteBodyPartContext Context)
+bool UFretteLimitReachedRule::CheckCondition(const FFretteBodyPartContext Context)
 {
-	return true;
+	switch (LimitToCheck)
+	{
+		case EValueLimitType::Min:
+			return Context.AccumulatedValue == Context.SourceData->GetMinValueForType(Context.EffectType);
+
+		case EValueLimitType::Max:
+			return Context.AccumulatedValue == Context.SourceData->GetMaxValueForType(Context.EffectType);
+	}
+
+	return false;
 }

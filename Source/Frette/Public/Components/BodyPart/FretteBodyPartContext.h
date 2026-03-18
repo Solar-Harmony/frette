@@ -1,7 +1,10 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
+#include "FretteBodyPartData.h"
 #include "GameplayTagContainer.h"
 #include "FretteBodyPartContext.generated.h"
+
+class UFretteBodyPartData;
 
 USTRUCT(BlueprintType)
 struct FFretteBodyPartContext
@@ -16,4 +19,7 @@ struct FFretteBodyPartContext
 
 	UPROPERTY()
 	FGameplayTag EffectType;
+
+	UPROPERTY()
+	UFretteBodyPartData* SourceData = nullptr;
 };

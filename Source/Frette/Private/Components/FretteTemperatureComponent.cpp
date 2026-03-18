@@ -2,23 +2,24 @@
 
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 
+UFretteTemperatureComponent::UFretteTemperatureComponent()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+}
+
 void UFretteTemperatureComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	SetComponentTickInterval(TimeBetweenTemperatureChange);
 
 	BodyPartComponent = GetOwner()->GetComponentByClass<UFretteBodyPartComponent>();
+}
 
-	// Only drive stacks from the server
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		GetWorld()->GetTimerManager().SetTimer(
-			TemperatureTickHandle,
-			this,
-			&UFretteTemperatureComponent::OnTemperatureTick,
-			TimeBetweenTemperatureChange,
-			true // looping
-			);
-	}
+void UFretteTemperatureComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	OnTemperatureTick();
 }
 
 //Le target temperature devras être par partie du corps selon les vetement équippé
@@ -26,15 +27,15 @@ void UFretteTemperatureComponent::BeginPlay()
 //Marcher dans l'eau/neige qui refroidis les parties qui touche ceux-ci par exemple
 void UFretteTemperatureComponent::OnTemperatureTick()
 {
-	if (!BodyPartComponent || CurrentTemperatureStacks == TargetTemperature)
-		return;
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		if (!BodyPartComponent || CurrentTemperatureStacks == TargetTemperature)
+			return;
 
-	// Move one step toward TargetTemperature
-	const int StackDelta = TargetTemperature > CurrentTemperatureStacks ? 1 : -1;
+		const int StackDelta = TargetTemperature > CurrentTemperatureStacks ? 1 : -1;
 
-	CurrentTemperatureStacks += StackDelta;
+		CurrentTemperatureStacks += StackDelta;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Current body temperature: %d"), CurrentTemperatureStacks));
-
-	BodyPartComponent->AddValueToAllParts(StackDelta, TemperatureEffectTag);
+		BodyPartComponent->AddValueToAllParts(StackDelta, TemperatureEffectTag);
+	}
 }
