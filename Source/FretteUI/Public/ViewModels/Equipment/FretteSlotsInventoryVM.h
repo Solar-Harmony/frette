@@ -30,6 +30,13 @@ protected:
 			return;
 
 		UFretteSlotsInventoryItemVM* ItemVM = SlotVM->ItemVM;
+		
+		// call use on the item
+		if (ItemVM != nullptr)
+		{
+			ItemVM->Ptr->Use();
+		}
+		
 		const int32 NewSlotIdx = FindFirstFreeSlot(ItemVM, SlotVM->IsCompatibleWithAnything());
 		if (NewSlotIdx == INDEX_NONE)
 		{
