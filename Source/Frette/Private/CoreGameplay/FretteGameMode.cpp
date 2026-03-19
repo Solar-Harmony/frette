@@ -4,6 +4,7 @@
 #include "Components/FretteGameplayStatics.h"
 #include "CoreGameplay/FretteClue.h"
 #include "CoreGameplay/FretteClueTemplateSet.h"
+#include "CoreGameplay/FretteGameState.h"
 #include "CoreGameplay/FretteLandmark.h"
 #include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
@@ -14,7 +15,9 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	
 	Info.ObjectiveName = MainObjective->DisplayName;
 	
-	const EClueType PickedType = PickNextClueType();
+	const EClueType PickedType = bPlayerCollectedObjective
+		? EClueType::Dud
+		: PickNextClueType();
 	
 	if (PickedType == EClueType::Dud)
 	{
@@ -63,6 +66,32 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 		
 	UE_LOG(LogFrette, Log, TEXT("Clue generated. Leads to landmark: %s, is near objective: %d"), *POI->GetName(), bIsPrimaryClue);
 	return Template->GenerateClueText(Info);
+}
+
+void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerCharacter)
+{
+	const float Dist = FVector::Dist(PlayerCharacter->GetActorLocation(), MainObjective->GetActorLocation());
+	if (Dist <= MainObjective->RightOnObjectiveRadiusCm)
+	{
+		bPlayerCollectedObjective = true;
+		UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
+		Inventory->AddItem(MainObjective->ObjectiveItemData);
+	}
+	else if (Dist <= MainObjective->NearObjectiveRadiusCm)
+	{
+		// TODO: Give the player some feedback that they are close
+	}
+}
+
+void AFretteGameMode::CheckVictory(const AFrettePlayerCharacter* PlayerCharacter) const
+{
+	const UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
+	const bool bHasTreasure = Inventory->HasItemOfType<UFretteObjectiveItem>();
+	if (bHasTreasure)
+	{
+		AFretteGameState* GameState = GetGameState<AFretteGameState>();
+		GameState->GameOutcome = EGameOutcome::Victory;
+	}
 }
 
 void AFretteGameMode::BeginPlay()
