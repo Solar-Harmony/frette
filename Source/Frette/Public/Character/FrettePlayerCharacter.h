@@ -1,14 +1,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FakeInventoryComponent.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 
+#include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
 class UFretteTemperatureComponent;
+
+class UCameraComponent;
+class UInventoryComponent;
 
 UCLASS()
 class AFrettePlayerCharacter : public AFretteBaseCharacter
@@ -16,6 +19,8 @@ class AFrettePlayerCharacter : public AFretteBaseCharacter
 	GENERATED_BODY()
 
 public:
+	UFretteEquipmentComponent* GetEquipmentComponent() const { return Equipment; }
+	
 	AFrettePlayerCharacter();
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
@@ -29,8 +34,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UFakeInventoryComponent> InventoryComponent;
+	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) override;
+
+	UFUNCTION(BlueprintCallable)
+	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
@@ -39,8 +46,25 @@ public:
 	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USkeletalMeshComponent> FPMesh;
+
+	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadOnly)
+	FRotator SmoothedControlRotation;
+
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
+	float LookSmoothingSpeed = 20.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteEquipmentComponent> Equipment;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
 
 private:
 	virtual void InitAbilityActorInfo() override;

@@ -1,20 +1,37 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
+#include "EnhancedInputComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/FretteTemperatureComponent.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
+#include "Equipment/FretteEquipmentComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/FrettePlayerState.h"
 
 class AFrettePlayerState;
 
 AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(GetCapsuleComponent());
+	FPMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("First Person Mesh"));
 
-	InventoryComponent = CreateDefaultSubobject<UFakeInventoryComponent>(TEXT("Inventory"));
+	FPMesh->SetupAttachment(GetMesh());
+	FPMesh->SetOnlyOwnerSee(true);
+	FPMesh->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
+	FPMesh->SetCollisionProfileName(FName("NoCollision"));
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(FPMesh, FName("head"));
+	Camera->bUsePawnControlRotation = true;
+	Camera->bEnableFirstPersonFieldOfView = true;
+	Camera->bEnableFirstPersonScale = true;
+
+	PlayerInventory = CreateDefaultSubobject<UFretteInventoryComponent>("Equipment Inventory");
+	PlayerInventory->SetIsReplicated(true);
+
+	Equipment = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment"));
+	Equipment->SetIsReplicated(true);
 
 	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
 	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
@@ -36,31 +53,50 @@ void AFrettePlayerCharacter::OnRep_PlayerState()
 
 void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
 {
-	const FVector MoveAxis3D = FVector(MoveAxis.X, MoveAxis.Y, 0.f);
-	const FVector MovementDirWS = Camera->GetComponentRotation().RotateVector(-MoveAxis3D);
-	AddMovementInput(MovementDirWS * 10000.0f, 1.0f);
+	if (!Controller)
+		return;
+
+	const FRotator YawRotation(0.f, GetControlRotation().Yaw, 0.f);
+
+	const FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(Forward, MoveAxis.X);
+	AddMovementInput(Right, MoveAxis.Y);
 }
 
 void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 {
-	const float YawDelta = LookAxis.X;
-	const float PitchDelta = LookAxis.Y;
-
-	FRotator CameraRotation = Camera->GetComponentRotation();
-	CameraRotation.Yaw += YawDelta;
-	CameraRotation.Pitch = FMath::Clamp(CameraRotation.Pitch + PitchDelta, -89.f, 89.f);
-	CameraRotation.Roll = 0.0f;
-
-	Camera->SetWorldRotation(CameraRotation.Quaternion());
-
-	CameraRotation.Yaw -= 90.0f;
-	CameraRotation.Pitch = 0.0f;
-	GetMesh()->SetWorldRotation(CameraRotation.Quaternion());
+	AddControllerYawInput(LookAxis.X);
+	AddControllerPitchInput(LookAxis.Y);
 }
 
 void AFrettePlayerCharacter::DoPlayerJump()
 {
 	Jump();
+}
+
+//Set la position de la caméra a la position du socket de tête du mesh (pour les animations)
+//Et smooth la rotation pour avoir moins de jitter de petit movement de la souris
+void AFrettePlayerCharacter::CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult)
+{
+	FRotator TargetRotation = GetControlRotation();
+	TargetRotation.Pitch = FRotator::NormalizeAxis(TargetRotation.Pitch);
+
+	SmoothedControlRotation.Pitch = FRotator::NormalizeAxis(SmoothedControlRotation.Pitch);
+
+	SmoothedControlRotation = FMath::RInterpTo(
+		SmoothedControlRotation,
+		TargetRotation,
+		DeltaTime,
+		LookSmoothingSpeed
+		);
+
+	FTransform HeadTransform = GetMesh()->GetSocketTransform(FName("head"), RTS_World);
+
+	OutResult.Location = HeadTransform.GetLocation();
+	OutResult.Rotation = SmoothedControlRotation;
+	OutResult.FOV = Camera->FieldOfView;
 }
 
 //Je suis pas trop sur de ce qui devrait être appeler juste du coté serveur ou juste du coté client mais pour l'instant
@@ -75,4 +111,13 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(State, this);
 	ApplyStartupEffects();
 	SubToAttributeChanges();
+}
+
+void AFrettePlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//Fixes weird rotation at the beginning of the game
+	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+
 }

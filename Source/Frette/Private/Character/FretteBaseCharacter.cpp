@@ -2,16 +2,24 @@
 
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
+#include "Components/FallDamageComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
 AFretteBaseCharacter::AFretteBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+    //@TODO: retirer le component ajouter sur le blueprint quand le character est pas locked
+	//CreateDefaultSubobject<UFallDamageComponent>(TEXT("FallDamageComponent"));
 }
 
-void AFretteBaseCharacter::ApplyStartupEffects() const
+
+
+void AFretteBaseCharacter::ApplyStartupEffects()
 {
+	if (!HasAuthority())
+		return;
+
 	check(AbilitySystemComponent)
 
 	if (!DefaultAttributes)
@@ -24,7 +32,7 @@ void AFretteBaseCharacter::ApplyStartupEffects() const
 
 	ApplyDefaultAttributeEffect(EffectContext);
 	ApplyDefaultStartupEffect(EffectContext);
-	AbilitySystemComponent->GrantAbilitiesFromLoadout(ArchetypeLoadout);
+	AbilitySystemComponent->GrantAbilities(ArchetypeLoadout, this);
 }
 
 void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const

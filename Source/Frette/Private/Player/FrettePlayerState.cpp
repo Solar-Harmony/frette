@@ -2,14 +2,13 @@
 
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Net/UnrealNetwork.h"
 
 AFrettePlayerState::AFrettePlayerState()
 {
 	AbilitySystemComponent = CreateDefaultSubobject<UFretteAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
-
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
-
 	AttributeSet = CreateDefaultSubobject<UFretteAttributeSet>("AttributeSet");
 
 	//How often the server will try to update the clients in a second?

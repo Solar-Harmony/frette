@@ -5,6 +5,7 @@
 #include "Damage/FretteBodyPartDefinitions.h"
 
 #include "GameFramework/PlayerState.h"
+#include "Inventory/FretteInventoryComponent.h"
 #include "FrettePlayerState.generated.h"
 
 class UAttributeSet;

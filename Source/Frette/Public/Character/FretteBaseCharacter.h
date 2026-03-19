@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "Equipment/FretteEquipmentComponent.h"
 #include "GameFramework/Character.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "FretteBaseCharacter.generated.h"
@@ -16,13 +17,7 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 
 protected:
 	AFretteBaseCharacter();
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
-
-	void ApplyStartupEffects() const;
-	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
-	void ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const;
-	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
-
+	
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> AbilitySystemComponent;
 
@@ -35,16 +30,18 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Frette|AbilitySystem")
 	TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
 
-	UPROPERTY(EditDefaultsOnly, Category="Frette|Archetype")
-	TObjectPtr<UAbilitySetDataAsset> ArchetypeLoadout;
+	UPROPERTY(EditDefaultsOnly, Category= "Frette|Archetype")
+	TObjectPtr<UFretteAbilitySetDataAsset> ArchetypeLoadout;
 
 	UPROPERTY(EditAnywhere)
 	int CharacterLevel = 1;
-
+	
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
+	void ApplyStartupEffects();
+	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
+	void ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const;
+	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 	virtual void InitAbilityActorInfo();
-
 	void SubToAttributeChanges();
-
 	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
-
 };
