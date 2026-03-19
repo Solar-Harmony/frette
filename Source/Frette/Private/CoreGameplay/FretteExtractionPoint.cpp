@@ -3,6 +3,7 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "CoreGameplay/FretteGameMode.h"
 #include "Inventory/FretteInventoryComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 void AFretteExtractionPoint::NotifyActorBeginOverlap(AActor* OtherActor)
 {
@@ -14,7 +15,11 @@ void AFretteExtractionPoint::NotifyActorBeginOverlap(AActor* OtherActor)
 	
 	if (HasAuthority())
 	{
-		const AFretteGameMode* GameMode = CastChecked<AFretteGameMode>(GetWorld()->GetAuthGameMode());
-		GameMode->CheckVictory(PlayerCharacter);
+		const AFretteGameMode* GameMode = CastChecked<AFretteGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+		
+		if (!GameMode->IsGameEnded())
+		{
+			GameMode->CheckVictory(PlayerCharacter);
+		}
 	}
 }

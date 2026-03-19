@@ -70,16 +70,29 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 
 void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerCharacter)
 {
+	if (bPlayerCollectedObjective)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("You have already collected the objective!"));
+		return;
+	}
+	
 	const float Dist = FVector::Dist(PlayerCharacter->GetActorLocation(), MainObjective->GetActorLocation());
 	if (Dist <= MainObjective->RightOnObjectiveRadiusCm)
 	{
 		bPlayerCollectedObjective = true;
 		UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
 		Inventory->AddItem(MainObjective->ObjectiveItemData);
+		MainObjective->SetActorHiddenInGame(true);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("YOU HAVE FOUND THE OBJECTIVE! BRING IT BACK TO THE EXTRACTION POINT TO WIN!"));
 	}
 	else if (Dist <= MainObjective->NearObjectiveRadiusCm)
 	{
-		// TODO: Give the player some feedback that they are close
+		// TODO: Give the player some UI feedback that they are close
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("You are near the objective! But not close enough to collect it."));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("You are too far from the objective."));
 	}
 }
 
@@ -89,9 +102,15 @@ void AFretteGameMode::CheckVictory(const AFrettePlayerCharacter* PlayerCharacter
 	const bool bHasTreasure = Inventory->HasItemOfType<UFretteObjectiveItem>();
 	if (bHasTreasure)
 	{
-		AFretteGameState* GameState = GetGameState<AFretteGameState>();
-		GameState->GameOutcome = EGameOutcome::Victory;
+		AFretteGameState* State = GetGameState<AFretteGameState>();
+		State->GameOutcome = EGameOutcome::Victory;	
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("GG you won"));
 	}
+}
+
+bool AFretteGameMode::IsGameEnded() const
+{
+	return GetGameState<AFretteGameState>()->GameOutcome != EGameOutcome::InProgress;
 }
 
 void AFretteGameMode::BeginPlay()

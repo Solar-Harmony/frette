@@ -7,7 +7,7 @@
  * If a player gets there with the main objective item in his inventory, they win the game.
  * Needs a Blueprint to configure collision for overlaps.
  */
-UCLASS(Abstract)
+UCLASS(Abstract, Blueprintable)
 class AFretteExtractionPoint : public AActor
 {
 	GENERATED_BODY()

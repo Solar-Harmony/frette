@@ -28,8 +28,8 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	PlayerInventory = CreateDefaultSubobject<UFretteInventoryComponent>("Equipment Inventory");
 	PlayerInventory->SetIsReplicated(true);
 
-	Equipment = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment"));
-	Equipment->SetIsReplicated(true);
+	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment"));
+	EquipmentComponent->SetIsReplicated(true);
 }
 
 //Client side

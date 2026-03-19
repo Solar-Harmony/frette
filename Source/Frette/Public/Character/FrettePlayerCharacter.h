@@ -15,7 +15,7 @@ class AFrettePlayerCharacter : public AFretteBaseCharacter
 	GENERATED_BODY()
 
 public:
-	UFretteEquipmentComponent* GetEquipmentComponent() const { return Equipment; }
+	UFretteEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
 	
 	AFrettePlayerCharacter();
 	virtual void PossessedBy(AController* NewController) override;
@@ -48,11 +48,11 @@ protected:
 	FRotator SmoothedControlRotation;
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
-	float LookSmoothingSpeed = 20.f;
+	float LookSmoothingSpeed = 20.0f;
 
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UFretteEquipmentComponent> Equipment;
-
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFretteEquipmentComponent> EquipmentComponent;
+	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
 

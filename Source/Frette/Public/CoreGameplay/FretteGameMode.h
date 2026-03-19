@@ -30,6 +30,8 @@ public:
 	// Checks if the player meets condition to win the game
 	void CheckVictory(const AFrettePlayerCharacter* PlayerCharacter) const;
 	
+	bool IsGameEnded() const;
+	
 protected:
 	virtual void BeginPlay() override;
 	AFretteMainObjective* GetMainObjective() const { return MainObjective; }

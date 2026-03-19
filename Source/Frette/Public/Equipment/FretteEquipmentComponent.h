@@ -19,6 +19,11 @@ class FRETTE_API UFretteEquipmentComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UFretteEquipmentComponent()
+	{
+		SetIsReplicatedByDefault(true);
+	}
+	
 	UFUNCTION(Server, Reliable)
 	void EquipItem(UFretteSlottableItem* Item) const;
 	
