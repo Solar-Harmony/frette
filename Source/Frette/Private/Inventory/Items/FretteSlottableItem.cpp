@@ -9,7 +9,7 @@ void UFretteSlottableItem::OnEquipped()
 
 	if (UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character))
 	{
-		ASC->GrantAbilitiesFromAbilitySet(GetData()->GrantedAbilities, this);
+		ASC->GrantAbilities(GetData()->GrantedAbilities.GetAbilityConfigs(), this);
 		
 		for (const FFretteGameplayEffectConfig& EffectConfig : GetData()->GrantedEffects)
 		{
@@ -24,7 +24,7 @@ void UFretteSlottableItem::OnUnequipped()
 
 	if (UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character))
 	{
-		ASC->RemoveAbilitiesFromAbilitySet(GetData()->GrantedAbilities);
+		ASC->RevokeAbilities(GetData()->GrantedAbilities.GetAbilityConfigs());
 		
 		for (const FFretteGameplayEffectConfig& EffectConfig : GetData()->GrantedEffects)
 		{

@@ -2,7 +2,7 @@
 
 #include "FretteInventoryItem.h"
 #include "GameplayTagContainer.h"
-#include "GameplayAbilitySystem/AbilitySetDataAsset.h"
+#include "GameplayAbilitySystem/FretteAbilitySetDataAsset.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "FretteSlottableItem.generated.h"
 
@@ -40,7 +40,7 @@ public:
 	FGameplayTag ItemSlotTag;
 	
 	UPROPERTY(EditDefaultsOnly)
-	UAbilitySetDataAsset* GrantedAbilities;
+	FFretteAbilitySet GrantedAbilities;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FFretteGameplayEffectConfig> GrantedEffects;

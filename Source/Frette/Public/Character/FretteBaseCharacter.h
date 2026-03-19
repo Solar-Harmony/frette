@@ -35,7 +35,7 @@ protected:
 	TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
 
 	UPROPERTY(EditDefaultsOnly, Category= "Frette|Archetype")
-	TObjectPtr<UAbilitySetDataAsset> ArchetypeLoadout;
+	TObjectPtr<UFretteAbilitySetDataAsset> ArchetypeLoadout;
 
 	UPROPERTY(EditAnywhere)
 	int CharacterLevel = 1;

@@ -1,6 +1,8 @@
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Character/FretteBaseCharacter.h"
+#include "Frette/Frette.h"
 #include "GameplayAbilitySystem/FretteGameplayAbility.h"
 
 void UFretteAbilitySystemComponent::AbilityInputPressed(const FGameplayTag& InputTag)
@@ -49,25 +51,53 @@ void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& Inp
 	}
 }
 
-void UFretteAbilitySystemComponent::GrantAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout, UObject* SourceObject)
+void UFretteAbilitySystemComponent::GrantAbility(const FFretteGameplayAbilityConfig& AbilityConfig, UObject* SourceObject)
 {
-	if (Loadout == nullptr)
-		return;
+	require(AbilityConfig.IsValid(), "Tried to apply an invalid ability config.");
+	
+	FGameplayAbilitySpec Spec(AbilityConfig.Ability, AbilityConfig.AbilityLevel);
+	Spec.SourceObject = SourceObject;
+	Spec.GetDynamicSpecSourceTags().AddTag(AbilityConfig.InputTag);
 
-	for (const FAbilityTagMapping& Mapping : Loadout->AbilityMappings)
+	GiveAbility(Spec);
+}
+
+void UFretteAbilitySystemComponent::RevokeAbility(const FFretteGameplayAbilityConfig& AbilityConfig)
+{
+	require(AbilityConfig.IsValid(), "Tried to revoke an invalid ability config.");
+	
+	const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(AbilityConfig.InputTag);
+	require(Handle != nullptr && Handle->IsValid(), "Tried to revoke an ability that wasn't granted.");
+
+	ClearAbility(*Handle);
+}
+
+void UFretteAbilitySystemComponent::GrantAbilities(const TArray<FFretteGameplayAbilityConfig>& AbilityConfigs, UObject* SourceObject)
+{
+	for (const FFretteGameplayAbilityConfig& Config : AbilityConfigs)
 	{
-		if (Mapping.Ability == nullptr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s() Invalid ability in ability set %s"), *FString(__FUNCTION__), *Loadout->GetName());
-			continue;
-		}
-		
-		FGameplayAbilitySpec Spec(Mapping.Ability, Mapping.AbilityLevel);
-		Spec.SourceObject = SourceObject;
-		Spec.GetDynamicSpecSourceTags().AddTag(Mapping.InputTag);
-
-		GiveAbility(Spec);
+		GrantAbility(Config, SourceObject);
 	}
+}
+
+void UFretteAbilitySystemComponent::RevokeAbilities(const TArray<FFretteGameplayAbilityConfig>& AbilityConfigs)
+{
+	for (const FFretteGameplayAbilityConfig& Config : AbilityConfigs)
+	{
+		RevokeAbility(Config);
+	}
+}
+
+void UFretteAbilitySystemComponent::GrantAbilities(const UFretteAbilitySetDataAsset* AbilitySet, UObject* SourceObject)
+{
+	require(AbilitySet, "Tried to grant abilities from a null ability set.");
+	GrantAbilities(AbilitySet->AbilityConfigs, SourceObject);
+}
+
+void UFretteAbilitySystemComponent::RevokeAbilities(const UFretteAbilitySetDataAsset* AbilitySet)
+{
+	require(AbilitySet, "Tried to revoke abilities from a null ability set.");
+	RevokeAbilities(AbilitySet->AbilityConfigs);
 }
 
 void UFretteAbilitySystemComponent::OnGiveAbility(FGameplayAbilitySpec& AbilitySpec)
@@ -82,22 +112,18 @@ void UFretteAbilitySystemComponent::OnGiveAbility(FGameplayAbilitySpec& AbilityS
 	}
 }
 
-void UFretteAbilitySystemComponent::RemoveAbilitiesFromAbilitySet(UAbilitySetDataAsset* Loadout)
+void UFretteAbilitySystemComponent::OnRemoveAbility(FGameplayAbilitySpec& AbilitySpec)
 {
-	if (Loadout == nullptr)
-		return;
-
-	for (const FAbilityTagMapping& Mapping : Loadout->AbilityMappings)
+	Super::OnRemoveAbility(AbilitySpec);
+	
+	const FGameplayTagContainer& SourceTags = AbilitySpec.GetDynamicSpecSourceTags();
+	
+	for (const FGameplayTag& Tag : SourceTags)
 	{
-		const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(Mapping.InputTag);
-		if (Handle != nullptr && Handle->IsValid())
-		{
-			ClearAbility(*Handle);
-		}
-		
-		InputAbilityMap.Remove(Mapping.InputTag);
+		InputAbilityMap.Remove(Tag);
 	}
 }
+
 
 FActiveGameplayEffectHandle UFretteAbilitySystemComponent::ApplyEffect(const FFretteGameplayEffectConfig& Config, const UObject* SourceObject)
 {

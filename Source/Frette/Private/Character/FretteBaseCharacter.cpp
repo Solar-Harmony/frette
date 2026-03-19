@@ -29,7 +29,7 @@ void AFretteBaseCharacter::ApplyStartupEffects()
 
 	ApplyDefaultAttributeEffect(EffectContext);
 	ApplyDefaultStartupEffect(EffectContext);
-	AbilitySystemComponent->GrantAbilitiesFromAbilitySet(ArchetypeLoadout, this);
+	AbilitySystemComponent->GrantAbilities(ArchetypeLoadout, this);
 }
 
 void AFretteBaseCharacter::ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const
