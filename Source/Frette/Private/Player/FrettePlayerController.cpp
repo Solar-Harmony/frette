@@ -41,6 +41,18 @@ void AFrettePlayerController::SetupInputComponent()
 	FretteInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ThisClass::OnInteractPressed);
 }
 
+// this is needed by the listen server, because since it is both client and server
+// it will not replicate to itself and thus won't trigger OnRep callbacks
+void AFrettePlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+	
+	if (IsLocalController())
+	{
+		SetupWidgetsAndViewModels();
+	}
+}
+
 void AFrettePlayerController::OnInteractPressed()
 {
 	Interactor->Interact();

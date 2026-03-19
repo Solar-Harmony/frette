@@ -69,6 +69,18 @@ private:
 		Inventory->SubToItemRemoved(FOnItemRemoved::FDelegate::CreateUObject(this, &UFretteSlotsInventoryVM::RemoveItem));
 	}
 	
+	// populate the startup items
+	// this is needed on listen server because viewmodels are created after the items are added to the inventory
+	void RefreshAllItems()
+	{
+		const UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
+		for (int32 Idx = 0; Idx < Inventory->GetNumItems(); ++Idx)
+		{
+			const UFretteInventoryItem* Item = Inventory->GetItemByIndexEditor(Idx);
+			AddItem(Item);
+		}
+	}
+	
 	void AddItem(const UFretteInventoryItem* NewItem)
 	{
 		if (!NewItem->IsA<UFretteSlottableItem>())

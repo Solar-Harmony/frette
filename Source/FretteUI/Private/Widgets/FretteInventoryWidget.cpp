@@ -31,6 +31,8 @@ void UFretteInventoryWidget::InitializeSlotViewmodels() const
 		SlotVM->SetCompatibleTag(SlotWidget->CompatibleSlotType);
 		SlotsVM->Slots.Add(SlotVM);
 	}
+	
+	SlotsVM->RefreshAllItems();
 }
 
 void UFretteInventoryWidget::NativeConstruct()

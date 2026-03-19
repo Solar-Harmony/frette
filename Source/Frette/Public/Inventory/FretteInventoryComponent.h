@@ -28,6 +28,8 @@ class FRETTE_API UFretteInventoryComponent : public UActorComponent
 
 public:
 	UFretteInventoryComponent();
+	
+	virtual void ReadyForReplication() override;
 
 	FORCEINLINE FDelegateHandle SubToItemAdded(const FOnItemAdded::FDelegate& Delegate)
 	{
@@ -79,8 +81,6 @@ public:
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
 	void RemoveItem(int32 ItemId);
-
-	virtual void ReadyForReplication() override;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
