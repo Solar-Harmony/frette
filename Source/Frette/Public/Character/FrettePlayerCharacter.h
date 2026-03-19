@@ -3,8 +3,6 @@
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "Equipments/FretteFakeEquipmentComponent.h"
-
 #include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
@@ -17,6 +15,8 @@ class AFrettePlayerCharacter : public AFretteBaseCharacter
 	GENERATED_BODY()
 
 public:
+	UFretteEquipmentComponent* GetEquipmentComponent() const { return Equipment; }
+	
 	AFrettePlayerCharacter();
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;

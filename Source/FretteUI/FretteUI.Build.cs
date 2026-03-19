@@ -9,7 +9,7 @@ public class FretteUI : ModuleRules
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core", "Frette"
+                "Core"
             }
         );
 
@@ -23,7 +23,8 @@ public class FretteUI : ModuleRules
                 "UMG",
                 "ModelViewViewModel",
                 "ModelViewViewModelBlueprint",
-                "Frette"
+                "GameplayTags",
+                "Frette",
             }
         );
     }

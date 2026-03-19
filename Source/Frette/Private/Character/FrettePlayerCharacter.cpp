@@ -2,7 +2,7 @@
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Equipments/FretteFakeEquipmentComponent.h"
+#include "Equipment/FretteEquipmentComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "Kismet/GameplayStatics.h"
@@ -29,6 +29,7 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	PlayerInventory->SetIsReplicated(true);
 
 	Equipment = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment"));
+	Equipment->SetIsReplicated(true);
 }
 
 //Client side

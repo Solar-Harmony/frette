@@ -2,11 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
-#include "Equipments/FretteEquipmentDataAsset.h"
-#include "Equipments/FretteFakeEquipmentComponent.h"
+#include "Equipment/FretteEquipmentComponent.h"
 #include "GameFramework/Character.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
-#include "Weapons/FretteRangedWeaponInstance.h"
 #include "FretteBaseCharacter.generated.h"
 
 class UAttributeSet;
@@ -19,11 +17,7 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 
 protected:
 	AFretteBaseCharacter();
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
-	void ApplyStartupEffects();
-	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
-	void ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const;
-	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
+	
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> AbilitySystemComponent;
 
@@ -37,26 +31,17 @@ protected:
 	TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
 
 	UPROPERTY(EditDefaultsOnly, Category= "Frette|Archetype")
-	TObjectPtr<UAbilitySetDataAsset> ArchetypeLoadout;
+	TObjectPtr<UFretteAbilitySetDataAsset> ArchetypeLoadout;
 
 	UPROPERTY(EditAnywhere)
 	int CharacterLevel = 1;
-
+	
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
+	void ApplyStartupEffects();
+	void ApplyDefaultAttributeEffect(const FGameplayEffectContextHandle& EffectContext) const;
+	void ApplyDefaultStartupEffect(const FGameplayEffectContextHandle& EffectContext) const;
+	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 	virtual void InitAbilityActorInfo();
-
 	void SubToAttributeChanges();
-
 	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
-
-	//For testing purposes
-	//@TODO:Inventaire | Faudrait le changer pour faire un vrai equiment manager system ou wtv
-	UPROPERTY(EditAnywhere, Category="Frette|Equipment")
-	TObjectPtr<UFretteEquipmentDataAsset> EquippedItem;
-
-	UPROPERTY()
-	TObjectPtr<UFretteWeaponInstance> CurrentWeaponInstance = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<UFretteFakeEquipmentComponent> EquipmentComponent;
-
 };

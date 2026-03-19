@@ -10,6 +10,19 @@ UFretteInventoryComponent::UFretteInventoryComponent()
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
+void UFretteInventoryComponent::ReadyForReplication()
+{
+	Super::ReadyForReplication();
+	
+	if (GetOwner()->HasAuthority())
+	{
+		for (TObjectPtr StartingItemData : StartingItems)
+		{
+			AddItem(StartingItemData);
+		}
+	}
+}
+
 UFretteInventoryItem* UFretteInventoryComponent::GetItemByIndexEditor(int32 Idx) const
 {
 	return Inventory.GetItemByIndex(Idx);
@@ -48,14 +61,4 @@ void UFretteInventoryComponent::RemoveItem_Implementation(int32 ItemId)
 	require(Inventory.HasEntry(ItemId), "Inventory: Cannot remove item #%d because this inventory has no item with that ID.", ItemId);
 
 	Inventory.RemoveEntry(ItemId);
-}
-
-void UFretteInventoryComponent::ReadyForReplication()
-{
-	Super::ReadyForReplication();
-
-	for (TObjectPtr StartingItemData : StartingItems)
-	{
-		AddItem(StartingItemData);
-	}
 }

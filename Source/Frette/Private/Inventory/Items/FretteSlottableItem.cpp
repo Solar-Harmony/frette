@@ -1,0 +1,34 @@
+﻿#include "Inventory/Items/FretteSlottableItem.h"
+
+#include "Character/FretteBaseCharacter.h"
+#include "Inventory/FretteInventoryComponent.h"
+
+void UFretteSlottableItem::OnEquipped()
+{
+	AFretteBaseCharacter* Character = Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
+
+	if (UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character))
+	{
+		ASC->GrantAbilities(GetData()->GrantedAbilities.GetAbilityConfigs(), this);
+		
+		for (const FFretteGameplayEffectConfig& EffectConfig : GetData()->GrantedEffects)
+		{
+			ASC->ApplyEffect(EffectConfig, this);
+		}
+	}
+}
+
+void UFretteSlottableItem::OnUnequipped()
+{
+	AFretteBaseCharacter* Character = Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
+
+	if (UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character))
+	{
+		ASC->RevokeAbilities(GetData()->GrantedAbilities.GetAbilityConfigs());
+		
+		for (const FFretteGameplayEffectConfig& EffectConfig : GetData()->GrantedEffects)
+		{
+			ASC->RemoveActiveGameplayEffectBySourceEffect(EffectConfig.EffectClass, ASC, 1);
+		}
+	}
+}

@@ -36,8 +36,6 @@ private:
 	// Returns a random landmark, which can never be picked again (sampling without replacement).
 	// @param bNearObjective Whether we pick from the landmarks near the treasure (primary, quest hints) or away (secondary, POIs)
 	AFretteLandmark* GetRandomLandmark(bool bNearObjective);
-
-	static FString DirVectorToCardinal(const FVector2D& Dir);
 	
 	UPROPERTY(Transient)
 	TObjectPtr<AFretteMainObjective> MainObjective;

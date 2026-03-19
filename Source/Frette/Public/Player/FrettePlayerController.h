@@ -28,6 +28,9 @@ public:
 
 protected:
 	virtual void SetupInputComponent() override;
+	
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnRep_PlayerState() override;
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Create Widgets and Viewmodels"))
 	void SetupWidgetsAndViewModels();
@@ -36,8 +39,7 @@ private:
 	AFrettePlayerController();
 	
 	virtual void BeginPlay() override;
-	virtual void OnRep_PlayerState() override;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Frette")
 	TObjectPtr<class UInputMappingContext> DefaultInputContext;
 

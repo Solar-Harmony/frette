@@ -21,7 +21,7 @@ void AFretteEffectActor::ApplyEffectToTarget(AActor* TargetActor, const TTuple<T
 
 	const FGameplayEffectSpecHandle   EffectSpecHandle = TargetASC->MakeOutgoingSpec(EffectType.Key, ActorLevel, EffectContextHandle);
 	const FActiveGameplayEffectHandle ActiveEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
-
+	
 	const bool bIsInfinite = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite;
 	if (bIsInfinite && EffectType.Value.RemovalPolicy != EEffectRemovalPolicy::DefaultRemove)
 	{

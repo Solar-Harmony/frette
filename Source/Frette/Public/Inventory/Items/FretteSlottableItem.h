@@ -2,42 +2,48 @@
 
 #include "FretteInventoryItem.h"
 #include "GameplayTagContainer.h"
+#include "GameplayAbilitySystem/FretteAbilitySetDataAsset.h"
+#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "FretteSlottableItem.generated.h"
 
-// An equippable item that supports arbitrary positioning, with no stacking support.
-// Use for unique items that require per-item data like durability, ammo count, etc.
+class UFretteSlottableItemDataAsset;
+
 UCLASS(BlueprintType)
 class UFretteSlottableItem : public UFretteInventoryItem
 {
 	GENERATED_BODY()
 
 public:
-	// Index of the visual inventory slot the item is in, -1 if unassigned. 
-	// This is managed by the UI widget and may differ from the item's index in the replicated inventory array.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
-	int32 SlotIndex = -1;
+	FRETTE_ITEM_DATA_GETTER(UFretteSlottableItemDataAsset)
+	
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	int32 SlotID = -1;
+	
+	virtual void OnEquipped();
+	virtual void OnUnequipped();
 
+protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-		DOREPLIFETIME(ThisClass, SlotIndex);
+		DOREPLIFETIME(ThisClass, SlotID);
 	}
 };
 
 UCLASS(BlueprintType, Category = "Frette|Inventory")
-class UFretteSlottableDataAsset : public UFretteInventoryItemDataAsset
+class UFretteSlottableItemDataAsset : public UFretteInventoryItemDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	// Tag to restrict which inventory slots the item can be placed in.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Categories = "Frette.EquipmentSlot"))
-	FGameplayTag SlotTag = FGameplayTag();
-
-	virtual UFretteInventoryItem* CreateRuntimeItem(UObject* Outer) override
-	{
-		auto* Item = NewObject<UFretteSlottableItem>(Outer);
-		Item->Data = this;
-		return Item;
-	}
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (Categories = "Frette.BodyPart"))
+	FGameplayTag ItemSlotTag;
+	
+	UPROPERTY(EditDefaultsOnly)
+	FFretteAbilitySet GrantedAbilities;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TArray<FFretteGameplayEffectConfig> GrantedEffects;
+	
+	virtual const UClass* GetRuntimeItemClass() const override { return UFretteSlottableItem::StaticClass(); }
 };

@@ -1,24 +1,20 @@
 #include "Equipment/FretteEquipmentComponent.h"
-#include "Frette/Frette.h"
-#include "Inventory/FretteInventoryComponent.h"
 #include "Inventory/Items/FretteSlottableItem.h"
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_EquipmentSlot_Head, "Frette.EquipmentSlot.Head");
-UE_DEFINE_GAMEPLAY_TAG(TAG_EquipmentSlot_Chest, "Frette.EquipmentSlot.Chest");
-UE_DEFINE_GAMEPLAY_TAG(TAG_EquipmentSlot_Legs, "Frette.EquipmentSlot.Legs");
-UE_DEFINE_GAMEPLAY_TAG(TAG_EquipmentSlot_Feet, "Frette.EquipmentSlot.Feet");
-UE_DEFINE_GAMEPLAY_TAG(TAG_EquipmentSlot_HandLeft, "Frette.EquipmentSlot.HandLeft");
-UE_DEFINE_GAMEPLAY_TAG(TAG_EquipmentSlot_HandRight, "Frette.EquipmentSlot.HandRight");
+// TODO: Enlever dans le merge, Yanick va les definir aussi
+UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Head,	"Frette.BodyPart.Head");
+UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Torso,	"Frette.BodyPart.Torso");
+UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Legs,	"Frette.BodyPart.Legs");
+UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Feet,	"Frette.BodyPart.Feet");
+UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Hands,	"Frette.BodyPart.Hands");
 
-void UFretteEquipmentComponent::Initialize(UFretteInventoryComponent* Inventory)
+// live ça fait evidemment pas grand chose mais on devrait s'occuper d'afficher l'item visuel là maybe
+void UFretteEquipmentComponent::EquipItem_Implementation(UFretteSlottableItem* Item) const
 {
-	Inventory->SubToItemSelected(FOnItemSelected::FDelegate::CreateUObject(this, &UFretteEquipmentComponent::OnInventoryItemSelected));
+	Item->OnEquipped();
 }
 
-void UFretteEquipmentComponent::OnInventoryItemSelected(const UFretteInventoryItem* Item)
+void UFretteEquipmentComponent::UnequipItem_Implementation(UFretteSlottableItem* Item) const
 {
-	if (Item->IsA<UFretteSlottableItem>())
-	{
-		UE_LOG(LogFrette, Log, TEXT("Equipment: Received new item '%s'."), *Item->Data->DisplayName.ToString());
-	}
+	Item->OnUnequipped();
 }

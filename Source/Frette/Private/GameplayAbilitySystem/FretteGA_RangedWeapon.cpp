@@ -1,39 +1,37 @@
 #include "GameplayAbilitySystem/FretteGA_RangedWeapon.h"
 
-#include "GameFramework/Character.h"
+#include "Character/FretteBaseCharacter.h"
+#include "Inventory/FretteInventoryComponent.h"
 #include "Weapons/FretteProjectile.h"
-#include "Weapons/FretteRangedWeaponInstance.h"
 
-//TODO: Faire que tout les équipements ont un Use ability qui peut être associer 
-//
-void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponInstance* WeaponInstance)
+void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* WeaponInstance)
 {
 	ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
 
-	//@TODO: Devrait utiliser un socket/muzzle location plutôt que le PawnViewLocation
+	// TODO: Devrait utiliser un socket/muzzle location plutôt que le PawnViewLocation
 	FVector MuzzleLocation = Character->GetPawnViewLocation();
 
-	//Utilise le controller.Rotation pour les IA ce qui n'est peut-être pas ce que l'on veux
+	// Utilise le controller.Rotation pour les IA ce qui n'est peut-être pas ce que l'on veux
 	FRotator AimRotation = Character->GetBaseAimRotation();
 
 	MuzzleLocation += AimRotation.Vector() * 100.f;
 
 	FActorSpawnParameters SpawnParams;
-	SpawnParams.Instigator = WeaponInstance->GetPawn();
+	SpawnParams.Instigator = WeaponInstance->GetOwningPlayer();
 	SpawnParams.Owner = SpawnParams.Instigator;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	GetWorld()->SpawnActor<AFretteProjectile>(
-		WeaponInstance->ProjectileType,
+		WeaponInstance->GetData()->ProjectileType,
 		MuzzleLocation,
 		AimRotation,
 		SpawnParams
 		);
 }
 
-UFretteRangedWeaponInstance* UFretteGA_RangedWeapon::GetWeaponInstance() const
+UFretteRangedWeaponItem* UFretteGA_RangedWeapon::GetWeaponInstance() const
 {
-	return Cast<UFretteRangedWeaponInstance>(GetCurrentSourceObject());
+	return Cast<UFretteRangedWeaponItem>(GetCurrentSourceObject());
 }
 
 bool UFretteGA_RangedWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
@@ -41,7 +39,7 @@ bool UFretteGA_RangedWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, 
 	if (!Super::CheckCost(Handle, ActorInfo, OptionalRelevantTags))
 		return false;
 
-	const UFretteRangedWeaponInstance* WeaponInstance = GetWeaponInstance();
+	const UFretteRangedWeaponItem* WeaponInstance = GetWeaponInstance();
 	if (!WeaponInstance)
 		return false;
 
@@ -52,7 +50,7 @@ void UFretteGA_RangedWeapon::ApplyCost(const FGameplayAbilitySpecHandle Handle, 
 {
 	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
 
-	UFretteRangedWeaponInstance* WeaponInstance = GetWeaponInstance();
+	UFretteRangedWeaponItem* WeaponInstance = GetWeaponInstance();
 	check(WeaponInstance);
 
 	WeaponInstance->UseAmmo();
