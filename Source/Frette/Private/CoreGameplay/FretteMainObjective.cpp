@@ -1,7 +1,12 @@
 #include "CoreGameplay/FretteMainObjective.h"
 
+#include "Net/UnrealNetwork.h"
+
 AFretteMainObjective::AFretteMainObjective()
 {
+	bReplicates = true;
+	bAlwaysRelevant = true;
+
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetSimulatePhysics(false);
 	Mesh->SetCollisionProfileName(TEXT("BlockAll"));
@@ -27,6 +32,40 @@ AFretteMainObjective::AFretteMainObjective()
 	DebugSphereInner->SetHiddenInGame(true);
 	DebugSphereInner->ShapeColor = FColor::Cyan;
 #endif
+}
+
+void AFretteMainObjective::SetCollected(bool bInCollected)
+{
+	if (!HasAuthority())
+		return;
+
+	if (bIsCollected == bInCollected)
+		return;
+
+	bIsCollected = bInCollected;
+	ApplyCollectedState();
+}
+
+void AFretteMainObjective::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFretteMainObjective, bIsCollected);
+}
+
+void AFretteMainObjective::OnRep_IsCollected()
+{
+	ApplyCollectedState();
+}
+
+void AFretteMainObjective::ApplyCollectedState()
+{
+	SetActorHiddenInGame(bIsCollected);
+	SetActorEnableCollision(!bIsCollected);
+	if (IsValid(Mesh))
+	{
+		Mesh->SetHiddenInGame(bIsCollected);
+		Mesh->SetCollisionEnabled(bIsCollected ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryAndPhysics);
+	}
 }
 
 void AFretteMainObjective::OnConstruction(const FTransform& Transform)

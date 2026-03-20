@@ -15,6 +15,7 @@ class AFretteMainObjective : public AActor
 
 public:
 	AFretteMainObjective();
+	void SetCollected(bool bInCollected);
 		
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Frette", meta=(DisplayName = "Near Objective Radius", Units="cm"))
 	float NearObjectiveRadiusCm = 1000.0f;
@@ -42,6 +43,14 @@ public:
 #endif
 	
 protected:
+	UFUNCTION()
+	void OnRep_IsCollected();
+	void ApplyCollectedState();
+
+	UPROPERTY(ReplicatedUsing = OnRep_IsCollected)
+	bool bIsCollected = false;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 	
 #if WITH_EDITORONLY_DATA

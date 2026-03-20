@@ -83,7 +83,7 @@ void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerChar
 		bPlayerCollectedObjective = true;
 		UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
 		Inventory->AddItem(MainObjective->ObjectiveItemData);
-		MainObjective->SetActorHiddenInGame(true);
+		MainObjective->SetCollected(true);
 		UFretteNotificationsComponent::NotifyAll(PlayerCharacter, INVTEXT("YOU HAVE FOUND THE OBJECTIVE! BRING IT BACK TO THE EXTRACTION POINT TO WIN!"));
 	}
 	else if (Dist <= MainObjective->NearObjectiveRadiusCm)
