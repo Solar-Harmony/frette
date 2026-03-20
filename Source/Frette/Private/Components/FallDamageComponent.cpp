@@ -65,6 +65,8 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 
 	const float DamageAmount = Config->DamageCurve.GetRichCurveConst()->Eval(FMath::Abs(DistanceFallen));
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Fall damage: %f"), DamageAmount));
+
 	NewHandle.Data->SetSetByCallerMagnitude(TAG_Effect_Movement_FallDamage, -DamageAmount);
 
 	ensureMsgf(NewHandle.IsValid(), TEXT("Probably need to set the DamageEffect in the Config"));
@@ -73,7 +75,7 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 
 	for (auto BoneTag : Config->AffectedBones)
 	{
-		BodyPartComponent->AddValueFromHit(BoneTag, DamageAmount, TAG_BodyPartValues_Health);
+		BodyPartComponent->AddValueFromHit(BoneTag, -DamageAmount, TAG_BodyPartValues_Health);
 	}
 
 }

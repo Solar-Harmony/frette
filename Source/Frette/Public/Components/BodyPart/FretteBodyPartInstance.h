@@ -29,6 +29,7 @@ class FRETTE_API UFretteBodyPartInstance : public UObject
 
 public:
 	FGameplayTag GetBodyPartTag() const { return SourceData->BodyPartTag; }
+
 	void Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner);
 	int32& FindOrAddAccumulatedValue(const FGameplayTag& Tag);
 	void AddValueByTag(int Value, FGameplayTag Tag);
@@ -46,7 +47,7 @@ private:
 	void BuildRuleLookup();
 	void SetMinDeltaValueThreshold();
 	float ClampDelta(int Value, FGameplayTag Tag);
-	void CheckDeltaRules(FGameplayTag Tag, FFretteBodyPartContext& Context, float ClampedDelta) const;
+	void CheckDeltaRules(FGameplayTag Tag, FFretteBodyPartContext& Context, int ClampedDelta) const;
 	void CheckAccumulatedValueRules(FGameplayTag Tag, FFretteBodyPartContext& Context, int CurrentValue) const;
 	const TArray<FFretteEffectRuleEntry>* GetRulesForEvent(const EBodyPartEventType EventType, const FGameplayTag& EffectTag) const;
 	TArray<FFretteEffectRuleEntry> GetRulesForEvent(const EBodyPartEventType EventType) const;

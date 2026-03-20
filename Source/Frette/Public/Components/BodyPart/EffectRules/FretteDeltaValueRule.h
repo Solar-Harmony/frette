@@ -15,7 +15,7 @@ class FRETTE_API UFretteDeltaValueRule : public UFretteBodyPartEffectRule
 public:
 	virtual EBodyPartEventType GetRelatedEvent() const override { return EBodyPartEventType::DeltaValue; }
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1"))
 	int Threshold;
 
 protected:

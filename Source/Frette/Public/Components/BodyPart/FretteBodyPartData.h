@@ -30,13 +30,13 @@ struct FFretteValueData
 	FGameplayTag Type;
 
 	UPROPERTY(EditAnywhere)
-	float MaxValue = 100.f;
+	int MaxValue = 100.f;
 
 	UPROPERTY(EditAnywhere)
-	float MinValue = 0.f;
+	int MinValue = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float StartValue = 100.f;
+	int StartValue = 100.f;
 };
 
 UCLASS()
@@ -54,17 +54,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<FFretteEffectRuleEntry> EffectRules;
 
-	float GetMaxValueForType(FGameplayTag Type) const
+	int GetMaxValueForType(FGameplayTag Type) const
 	{
 		for (const FFretteValueData& ValueData : ValueDatas)
 		{
 			if (Type == ValueData.Type)
 				return ValueData.MaxValue;
 		}
-		return 100.f;
+		return 100;
 	};
 
-	float GetMinValueForType(FGameplayTag Type) const
+	int GetMinValueForType(FGameplayTag Type) const
 	{
 		for (const FFretteValueData& ValueData : ValueDatas)
 		{
@@ -72,17 +72,17 @@ public:
 				return ValueData.MinValue;
 		}
 
-		return 0.f;
+		return 0;
 	};
 
-	float GetStartValueForType(FGameplayTag Type) const
+	int GetStartValueForType(FGameplayTag Type) const
 	{
 		for (const FFretteValueData& ValueData : ValueDatas)
 		{
 			if (Type == ValueData.Type)
 				return ValueData.StartValue;
 		}
-		return 100.f;
+		return 100;
 	};
 
 };

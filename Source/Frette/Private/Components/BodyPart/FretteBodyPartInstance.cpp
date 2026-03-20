@@ -68,12 +68,11 @@ void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag 
 float UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Tag)
 {
 	const int AccumulatedValue = FindOrAddAccumulatedValue(Tag);
-	const float NewValue = AccumulatedValue + Value;
+	const int NewValue = AccumulatedValue + Value;
 
-	const float Min = SourceData->GetMinValueForType(Tag);
-	const float Max = SourceData->GetMaxValueForType(Tag);
-
-	float ClampedDelta;
+	const int Min = SourceData->GetMinValueForType(Tag);
+	const int Max = SourceData->GetMaxValueForType(Tag);
+	int ClampedDelta;
 
 	if (NewValue < Min || NewValue > Max)
 	{
@@ -87,11 +86,13 @@ float UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Ta
 	return ClampedDelta;
 }
 
-void UFretteBodyPartInstance::CheckDeltaRules(const FGameplayTag Tag, FFretteBodyPartContext& Context, const float ClampedDelta) const
+void UFretteBodyPartInstance::CheckDeltaRules(const FGameplayTag Tag, FFretteBodyPartContext& Context, const int ClampedDelta) const
 {
-	if (ClampedDelta >= MinValueDelta)
+	int PositiveClampedValue = abs(ClampedDelta);
+
+	if (PositiveClampedValue >= MinValueDelta)
 	{
-		Context.ValueDelta = ClampedDelta;
+		Context.ValueDelta = PositiveClampedValue;
 		CheckAndApplyRules(EBodyPartEventType::DeltaValue, Tag, Context);
 	}
 }
