@@ -17,15 +17,16 @@ class FRETTE_API UFretteBodyPartComponent : public UActorComponent
 public:
 	UFretteBodyPartComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	UFretteBodyPartInstance* FindBodyPart(FGameplayTag BodyPartTag);
+	UFretteBodyPartInstance* FindBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag);
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
-	void AddValueFromHit(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag,
+	void AddValueFromBodyPartTag(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag,
 		int Value,
-		UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag EffectTag);
+		UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
+	void AddValueFromBoneName(FName BoneName, int Value, FGameplayTag ValueType);
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
-	void AddValueToAllParts(int Value, FGameplayTag EffectTag);
+	void AddValueToAllParts(int Value, UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
 
 	UFUNCTION()
 	void OnRep_BodyParts();

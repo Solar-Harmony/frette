@@ -75,7 +75,7 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 
 	for (auto BoneTag : Config->AffectedBones)
 	{
-		BodyPartComponent->AddValueFromHit(BoneTag, -DamageAmount, TAG_BodyPartValues_Health);
+		BodyPartComponent->AddValueFromBodyPartTag(BoneTag, -DamageAmount, TAG_BodyPartValues_Health);
 	}
 
 }
