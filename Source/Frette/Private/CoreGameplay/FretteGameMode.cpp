@@ -73,7 +73,7 @@ void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerChar
 {
 	if (bPlayerCollectedObjective)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("You have already collected the objective!"));
+		UFretteNotificationsComponent::Notify(PlayerCharacter, INVTEXT("You have already collected the objective! Go to the extract point."));
 		return;
 	}
 	
@@ -104,7 +104,7 @@ void AFretteGameMode::CheckVictory(const AFrettePlayerCharacter* PlayerCharacter
 	{
 		AFretteGameState* State = GetGameState<AFretteGameState>();
 		State->GameOutcome = EGameOutcome::Victory;	
-		UFretteNotificationsComponent::Notify(PlayerCharacter, INVTEXT("GG YOU WON"));
+		UFretteNotificationsComponent::NotifyAll(PlayerCharacter, INVTEXT("GG YOU WON"));
 	}
 }
 

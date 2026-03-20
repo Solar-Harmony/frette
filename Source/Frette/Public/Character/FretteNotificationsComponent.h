@@ -23,9 +23,6 @@ public:
 	UFUNCTION(BlueprintCallable, Client, Reliable)
 	void Send(const FText& Message);
 	
-	UFUNCTION(BlueprintCallable, NetMulticast, Reliable)
-	void SendToEveryone(const FText& Message);
-	
 	// Callbacks for UI viewmodel to bind to
 	FOnAddPlayerNotification OnAddNotification;
 	FOnRemovePlayerNotification OnRemoveNotification;
