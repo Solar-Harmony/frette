@@ -1,6 +1,7 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputComponent.h"
+#include "Character/FretteNotificationsComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Equipment/FretteEquipmentComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
@@ -25,11 +26,14 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	Camera->bEnableFirstPersonFieldOfView = true;
 	Camera->bEnableFirstPersonScale = true;
 
-	PlayerInventory = CreateDefaultSubobject<UFretteInventoryComponent>("Equipment Inventory");
+	PlayerInventory = CreateDefaultSubobject<UFretteInventoryComponent>("Inventory Component");
 	PlayerInventory->SetIsReplicated(true);
 
-	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment"));
+	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment Component"));
 	EquipmentComponent->SetIsReplicated(true);
+	
+	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("Notifications Component"));
+	NotificationsComponent->SetIsReplicated(true);
 }
 
 //Client side

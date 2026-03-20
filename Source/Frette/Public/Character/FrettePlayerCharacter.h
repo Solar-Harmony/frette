@@ -8,6 +8,8 @@
 
 class UCameraComponent;
 class UInventoryComponent;
+class UFretteInventoryComponent;
+class UFretteNotificationsComponent;
 
 UCLASS()
 class AFrettePlayerCharacter : public AFretteBaseCharacter
@@ -34,6 +36,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
+	
+	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -55,6 +59,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
 
 private:
 	virtual void InitAbilityActorInfo() override;

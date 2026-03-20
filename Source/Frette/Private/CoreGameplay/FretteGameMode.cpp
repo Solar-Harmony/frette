@@ -1,6 +1,7 @@
 #include "CoreGameplay/FretteGameMode.h"
 
 #include "EngineUtils.h"
+#include "Character/FretteNotificationsComponent.h"
 #include "Components/FretteGameplayStatics.h"
 #include "CoreGameplay/FretteClue.h"
 #include "CoreGameplay/FretteClueTemplateSet.h"
@@ -83,16 +84,15 @@ void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerChar
 		UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
 		Inventory->AddItem(MainObjective->ObjectiveItemData);
 		MainObjective->SetActorHiddenInGame(true);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("YOU HAVE FOUND THE OBJECTIVE! BRING IT BACK TO THE EXTRACTION POINT TO WIN!"));
+		UFretteNotificationsComponent::NotifyAll(PlayerCharacter, INVTEXT("YOU HAVE FOUND THE OBJECTIVE! BRING IT BACK TO THE EXTRACTION POINT TO WIN!"));
 	}
 	else if (Dist <= MainObjective->NearObjectiveRadiusCm)
 	{
-		// TODO: Give the player some UI feedback that they are close
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("You are near the objective! But not close enough to collect it."));
+		UFretteNotificationsComponent::Notify(PlayerCharacter, INVTEXT("You are near the objective! Search around to find it."));
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("You are too far from the objective."));
+		UFretteNotificationsComponent::Notify(PlayerCharacter, INVTEXT("You dig the earth around, but find nothing."));
 	}
 }
 
@@ -104,7 +104,7 @@ void AFretteGameMode::CheckVictory(const AFrettePlayerCharacter* PlayerCharacter
 	{
 		AFretteGameState* State = GetGameState<AFretteGameState>();
 		State->GameOutcome = EGameOutcome::Victory;	
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, TEXT("GG you won"));
+		UFretteNotificationsComponent::Notify(PlayerCharacter, INVTEXT("GG YOU WON"));
 	}
 }
 
