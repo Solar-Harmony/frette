@@ -34,7 +34,7 @@ protected:
 		// call use on the item
 		if (ItemVM != nullptr)
 		{
-			ItemVM->Ptr->Use();
+			ItemVM->OwningInventory->UseItem(ItemVM->ItemID);
 		}
 		
 		const int32 NewSlotIdx = FindFirstFreeSlot(ItemVM, SlotVM->IsCompatibleWithAnything());

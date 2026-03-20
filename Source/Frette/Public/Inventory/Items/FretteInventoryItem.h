@@ -16,6 +16,7 @@ class FRETTE_API UFretteInventoryItem : public UObject
 	GENERATED_BODY()
 	
 	friend class UFretteInventoryItemDataAsset;
+	friend class UFretteInventoryComponent;
 
 public:
 	constexpr static int32 InvalidID = -1;
@@ -23,20 +24,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	int32 Id = InvalidID;
 	
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void Use();
+	bool HasValidID() const { return Id != InvalidID; }
 	
 	UFretteInventoryItemDataAsset* GetUntypedData() const { return Data; }
-	
-	virtual void Use_Implementation() {}
-	
 	UFretteInventoryComponent* GetOwningInventory() const;
 	AFretteBaseCharacter* GetOwningPlayer() const;
-
-	bool HasValidID() const { return Id != InvalidID; }
-
+	
 	virtual bool IsSupportedForNetworking() const override { return true; }
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -45,6 +39,9 @@ public:
 	}
 	
 private:
+	void Use() { Use_Implementation(); }
+	virtual void Use_Implementation() {}
+	
 	UPROPERTY(Replicated)
 	UFretteInventoryItemDataAsset* Data = nullptr;	
 };

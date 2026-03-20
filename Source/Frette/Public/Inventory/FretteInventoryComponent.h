@@ -82,8 +82,8 @@ public:
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
 	bool IsItemValid(const UFretteInventoryItem* Item) const { return Inventory.IsValidItem(Item); }
 
-	UFUNCTION(BlueprintCallable, Category="Frette|Inventory")
-	void SelectItem(int32 ItemId);
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
+	void UseItem(int32 ItemId);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
 	void AddItem(UFretteInventoryItemDataAsset* ItemData);
