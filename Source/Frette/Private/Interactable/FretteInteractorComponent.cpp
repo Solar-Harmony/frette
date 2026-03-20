@@ -54,14 +54,6 @@ void UFretteInteractorComponent::BeginPlay()
 		if (IsValid(InteractWidgetInstance))
 		{
 			InteractWidgetInstance->AddToViewport();
-			
-			FVector2D ViewportSize;
-			GEngine->GameViewport->GetViewportSize(ViewportSize);
-
-			InteractWidgetInstance->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
-			InteractWidgetInstance->SetPositionInViewport(ViewportSize
-				* FVector2D(0.5f, 0.35f));
-			
 			InteractWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}

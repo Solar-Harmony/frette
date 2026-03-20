@@ -56,6 +56,18 @@ public:
 
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
 	bool HasItem(int32 Id) const { return Inventory.HasEntry(Id); }
+	
+	// Whether the item has at least one item of type. Always returns false if called on client.
+	template<typename T>
+	bool HasItemOfType() const
+	{
+		if (GetOwner()->HasAuthority())
+		{
+			return Inventory.GetItemByClass(T::StaticClass()) != nullptr;
+		}	
+		
+		return false;
+	}
 
 	template <typename T>
 	const T* GetItem(int32 Id) const { return Cast<T>(GetItem(Id)); }
@@ -70,8 +82,8 @@ public:
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
 	bool IsItemValid(const UFretteInventoryItem* Item) const { return Inventory.IsValidItem(Item); }
 
-	UFUNCTION(BlueprintCallable, Category="Frette|Inventory")
-	void SelectItem(int32 ItemId);
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
+	void UseItem(int32 ItemId);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Frette|Inventory")
 	void AddItem(UFretteInventoryItemDataAsset* ItemData);

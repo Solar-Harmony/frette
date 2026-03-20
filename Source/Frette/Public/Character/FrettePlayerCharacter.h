@@ -8,6 +8,8 @@
 
 class UCameraComponent;
 class UInventoryComponent;
+class UFretteInventoryComponent;
+class UFretteNotificationsComponent;
 
 UCLASS()
 class AFrettePlayerCharacter : public AFretteBaseCharacter
@@ -15,7 +17,7 @@ class AFrettePlayerCharacter : public AFretteBaseCharacter
 	GENERATED_BODY()
 
 public:
-	UFretteEquipmentComponent* GetEquipmentComponent() const { return Equipment; }
+	UFretteEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
 	
 	AFrettePlayerCharacter();
 	virtual void PossessedBy(AController* NewController) override;
@@ -34,6 +36,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
+	
+	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -48,13 +52,16 @@ protected:
 	FRotator SmoothedControlRotation;
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
-	float LookSmoothingSpeed = 20.f;
+	float LookSmoothingSpeed = 20.0f;
 
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UFretteEquipmentComponent> Equipment;
-
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFretteEquipmentComponent> EquipmentComponent;
+	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
 
 private:
 	virtual void InitAbilityActorInfo() override;

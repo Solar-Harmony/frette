@@ -39,6 +39,8 @@ struct FFretteInventoryList : public FFastArraySerializer
 	bool HasEntry(int32 ItemId) const;
 	UFretteInventoryItem* GetItemById(int32 ItemId) const;
 	UFretteInventoryItem* GetItemByIndex(int32 Idx) const;
+	UFretteInventoryItem* GetItemByClass(const TSubclassOf<UFretteInventoryItem> ItemClass) const;
+	TArray<UFretteInventoryItem*> GetItemsByClass(const TSubclassOf<UFretteInventoryItem> ItemClass) const;
 	void AddEntry(UFretteInventoryItem* ItemToAdd);
 	void ChangeEntry(UFretteInventoryItem* ItemToChange);
 	void RemoveEntry(int32 ItemId);
