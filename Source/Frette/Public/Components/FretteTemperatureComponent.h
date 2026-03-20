@@ -14,12 +14,13 @@ class FRETTE_API UFretteTemperatureComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere)
 	float TimeBetweenTemperatureChange = 3.f;
 	//TODO: Devrais avoir une liste de modifiers qui ajoute ou réduise a la température
 	//Donc le feu pourrais ajouter un tag feu qui donne 50 degres de chaleur
 	// et on retire un modifier avec le tag feu quand on quitte le range du feu
 	//Devras être setter par les éléments dans le monde
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite);
 	int TargetTemperature = -20;
 
 protected:
@@ -38,5 +39,5 @@ protected:
 	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
 
 	FTimerHandle TemperatureTickHandle;
-	int CurrentTemperatureStacks = 0;
+	int CurrentTemperature = 0;
 };

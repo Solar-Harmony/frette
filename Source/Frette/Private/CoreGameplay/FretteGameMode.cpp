@@ -1,9 +1,11 @@
 #include "CoreGameplay/FretteGameMode.h"
 
 #include "EngineUtils.h"
+#include "Character/FretteNotificationsComponent.h"
 #include "Components/FretteGameplayStatics.h"
 #include "CoreGameplay/FretteClue.h"
 #include "CoreGameplay/FretteClueTemplateSet.h"
+#include "CoreGameplay/FretteGameState.h"
 #include "CoreGameplay/FretteLandmark.h"
 #include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
@@ -14,7 +16,9 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	
 	Info.ObjectiveName = MainObjective->DisplayName;
 	
-	const EClueType PickedType = PickNextClueType();
+	const EClueType PickedType = bPlayerCollectedObjective
+		? EClueType::Dud
+		: PickNextClueType();
 	
 	if (PickedType == EClueType::Dud)
 	{
@@ -63,6 +67,50 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 		
 	UE_LOG(LogFrette, Log, TEXT("Clue generated. Leads to landmark: %s, is near objective: %d"), *POI->GetName(), bIsPrimaryClue);
 	return Template->GenerateClueText(Info);
+}
+
+void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerCharacter)
+{
+	if (bPlayerCollectedObjective)
+	{
+		UFretteNotificationsComponent::Notify(PlayerCharacter, INVTEXT("You have already collected the objective! Go to the extract point."));
+		return;
+	}
+	
+	const float Dist = FVector::Dist(PlayerCharacter->GetActorLocation(), MainObjective->GetActorLocation());
+	if (Dist <= MainObjective->RightOnObjectiveRadiusCm)
+	{
+		bPlayerCollectedObjective = true;
+		UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
+		Inventory->AddItem(MainObjective->ObjectiveItemData);
+		MainObjective->SetCollected(true);
+		UFretteNotificationsComponent::NotifyAll(PlayerCharacter, INVTEXT("YOU HAVE FOUND THE OBJECTIVE! BRING IT BACK TO THE EXTRACTION POINT TO WIN!"));
+	}
+	else if (Dist <= MainObjective->NearObjectiveRadiusCm)
+	{
+		UFretteNotificationsComponent::Notify(PlayerCharacter, INVTEXT("You are near the objective! Search around to find it."));
+	}
+	else
+	{
+		UFretteNotificationsComponent::Notify(PlayerCharacter, INVTEXT("You dig the earth around, but find nothing."));
+	}
+}
+
+void AFretteGameMode::CheckVictory(const AFrettePlayerCharacter* PlayerCharacter) const
+{
+	const UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
+	const bool bHasTreasure = Inventory->HasItemOfType<UFretteObjectiveItem>();
+	if (bHasTreasure)
+	{
+		AFretteGameState* State = GetGameState<AFretteGameState>();
+		State->GameOutcome = EGameOutcome::Victory;	
+		UFretteNotificationsComponent::NotifyAll(PlayerCharacter, INVTEXT("GG YOU WON"));
+	}
+}
+
+bool AFretteGameMode::IsGameEnded() const
+{
+	return GetGameState<AFretteGameState>()->GameOutcome != EGameOutcome::InProgress;
 }
 
 void AFretteGameMode::BeginPlay()

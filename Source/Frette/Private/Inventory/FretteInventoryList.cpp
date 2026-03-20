@@ -24,6 +24,34 @@ UFretteInventoryItem* FFretteInventoryList::GetItemByIndex(int32 Idx) const
 	return Entries[Idx].Item;
 }
 
+UFretteInventoryItem* FFretteInventoryList::GetItemByClass(const TSubclassOf<UFretteInventoryItem> ItemClass) const
+{
+	for (const FFretteInventoryListEntry& Entry : Entries)
+	{
+		if (IsValid(Entry.Item) && Entry.Item->IsA(ItemClass))
+		{
+			return Entry.Item;
+		}
+	}
+	
+	return nullptr;
+}
+
+TArray<UFretteInventoryItem*> FFretteInventoryList::GetItemsByClass(const TSubclassOf<UFretteInventoryItem> ItemClass) const
+{
+	TArray<UFretteInventoryItem*> Items;
+	
+	for (const FFretteInventoryListEntry& Entry : Entries)
+	{
+		if (IsValid(Entry.Item) && Entry.Item->IsA(ItemClass))
+		{
+			Items.Add(Entry.Item);
+		}
+	}
+	
+	return Items;
+}
+
 void FFretteInventoryList::AddEntry(UFretteInventoryItem* ItemToAdd)
 {
 	check(Owner.IsValid());

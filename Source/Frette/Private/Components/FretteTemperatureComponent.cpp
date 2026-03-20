@@ -29,12 +29,12 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
-		if (!BodyPartComponent || CurrentTemperatureStacks == TargetTemperature)
+		if (!BodyPartComponent || CurrentTemperature == TargetTemperature)
 			return;
 
-		const int StackDelta = TargetTemperature > CurrentTemperatureStacks ? 1 : -1;
+		const int StackDelta = TargetTemperature > CurrentTemperature ? 1 : -1;
 
-		CurrentTemperatureStacks += StackDelta;
+		CurrentTemperature += StackDelta;
 
 		BodyPartComponent->AddValueToAllParts(StackDelta, TemperatureEffectTag);
 	}

@@ -28,7 +28,7 @@ UFretteInventoryItem* UFretteInventoryComponent::GetItemByIndexEditor(int32 Idx)
 	return Inventory.GetItemByIndex(Idx);
 }
 
-void UFretteInventoryComponent::SelectItem(int32 ItemId)
+void UFretteInventoryComponent::UseItem_Implementation(int32 ItemId)
 {
 	UFretteInventoryItem* ItemToSelect = GetItem(ItemId);
 	require(ItemToSelect, "Inventory: Cannot select item #%d because it was not found in this inventory.", ItemId);
