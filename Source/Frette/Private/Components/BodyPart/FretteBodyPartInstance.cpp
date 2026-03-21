@@ -117,30 +117,20 @@ void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventT
 
 	for (const FFretteEffectRuleEntry& RuleEntry : *Rules)
 	{
-		if (!RuleEntry.Rule || RuleEntry.Effects.Num() == 0)
+		if (!RuleEntry.Rule || RuleEntry.Effects.Num() == 0 && RuleEntry.Abilities.Num() == 0)
 			continue;
 
 		if (RuleEntry.Rule->CheckIfTriggers(Context))
 		{
 			ApplyGameplayEffects(RuleEntry.Effects);
+			ApplyGameplayAbilities(RuleEntry.Abilities);
 		}
 		else if (RuleEntry.Rule->bHasTriggered && !RuleEntry.Rule->CheckCondition(Context))
 		{
 			RuleEntry.Rule->Reset();
 			RemoveGameplayEffects(RuleEntry.Effects);
+			RemoveGameplayAbilities(RuleEntry.Abilities);
 		}
-	}
-}
-
-void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const
-{
-	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
-
-	for (TSubclassOf Effect : Effects)
-	{
-		OwnerASC->RemoveActiveGameplayEffectBySourceEffect(Effect, OwnerASC, 1);
-
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Removed effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
 	}
 }
 
@@ -157,7 +147,63 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 
 		OwnerASC->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
 
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT("Applied effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow,
+			FString::Printf(TEXT("Applied effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
+	}
+}
+
+void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const
+{
+	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
+
+	for (TSubclassOf Effect : Effects)
+	{
+		OwnerASC->RemoveActiveGameplayEffectBySourceEffect(Effect, OwnerASC, 1);
+
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,
+			FString::Printf(TEXT("Removed effect %s from body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
+	}
+}
+
+void UFretteBodyPartInstance::ApplyGameplayAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities) const
+{
+	UAbilitySystemComponent* OwnerASC =
+		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
+
+	for (const TSubclassOf<UGameplayAbility>& AbilityClass : Abilities)
+	{
+		if (!AbilityClass)
+			continue;
+
+		FGameplayEventData EventData;
+		EventData.Instigator = OwnerCharacter;
+
+		FGameplayAbilitySpec Spec(AbilityClass, 1);
+		OwnerASC->GiveAbilityAndActivateOnce(Spec, &EventData);
+
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,
+			FString::Printf(TEXT("Applied ability %s"), *AbilityClass->GetName()));
+	}
+}
+
+//On va chercher l'habileté par classe pour ne pas avoir a garder un liste des handles des habiletés appliqué
+//Fait basically la même chose que le RemoveActiveGameplayEffectBySourceEffect
+void UFretteBodyPartInstance::RemoveGameplayAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities) const
+{
+	UAbilitySystemComponent* OwnerASC =
+		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
+
+	for (const TSubclassOf<UGameplayAbility>& AbilityClass : Abilities)
+	{
+		FGameplayAbilitySpec* Spec = OwnerASC->FindAbilitySpecFromClass(AbilityClass);
+
+		if (Spec)
+		{
+			OwnerASC->ClearAbility(Spec->Handle);
+
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,
+				FString::Printf(TEXT("Removed ability %s"), *AbilityClass->GetName()));
+		}
 	}
 }
 
@@ -180,6 +226,7 @@ void UFretteBodyPartInstance::BuildRuleLookup()
 		FFretteEffectRuleEntry InstancedEntry;
 		InstancedEntry.Rule = RuleInstance;
 		InstancedEntry.Effects = RuleEntry.Effects;
+		InstancedEntry.Abilities = RuleEntry.Abilities;
 
 		EventTypeToRulesMap.FindOrAdd(RuleInstance->GetRelatedEvent())
 		                   .FindOrAdd(RuleInstance->TagType)

@@ -7,6 +7,7 @@
 
 class UFretteBodyPartEffectRule;
 class UGameplayEffect;
+class UGameplayAbility;
 
 //Je sais pas trop si je devrais juste avoir les effect a déclancher directement dans la regle
 USTRUCT(BlueprintType)
@@ -19,6 +20,9 @@ struct FFretteEffectRuleEntry
 
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<UGameplayEffect>> Effects;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<UGameplayAbility>> Abilities;
 };
 
 USTRUCT(BlueprintType)

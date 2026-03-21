@@ -3,7 +3,10 @@
 #include "GameplayTagContainer.h"
 #include "Net/UnrealNetwork.h"
 
-UFretteBodyPartComponent::UFretteBodyPartComponent() {}
+UFretteBodyPartComponent::UFretteBodyPartComponent()
+{
+	SetIsReplicatedByDefault(true);
+}
 
 void UFretteBodyPartComponent::BeginPlay()
 {
@@ -31,6 +34,8 @@ void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPa
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+			FString::Printf(TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString()));
 		if (BodyPartTag.IsValid())
 		{
 			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))

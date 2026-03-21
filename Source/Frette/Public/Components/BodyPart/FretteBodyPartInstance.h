@@ -28,6 +28,8 @@ class FRETTE_API UFretteBodyPartInstance : public UObject
 	GENERATED_BODY()
 
 public:
+	virtual bool IsSupportedForNetworking() const override { return true; }
+
 	FGameplayTag GetBodyPartTag() const { return SourceData->BodyPartTag; }
 
 	void Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner);
@@ -44,6 +46,8 @@ public:
 private:
 	void ApplyGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const;
 	void RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const;
+	void ApplyGameplayAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities) const;
+	void RemoveGameplayAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities) const;
 	void BuildRuleLookup();
 	void SetMinDeltaValueThreshold();
 	float ClampDelta(int Value, FGameplayTag Tag);
@@ -69,5 +73,7 @@ private:
 	//ou des stack de statusEffect de manière fréquente (Cold stacks) et je voullais pas avoir a passer a travers
 	//tous les regles de déclanchement a chaque fois
 	TMap<EBodyPartEventType, TMap<FGameplayTag, TArray<FFretteEffectRuleEntry>>> EventTypeToRulesMap;
+
+	TMap<TSubclassOf<UGameplayAbility>, FGameplayAbilitySpecHandle> GrantedAbilityHandles;
 
 };
