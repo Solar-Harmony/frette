@@ -1,5 +1,6 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
+#include "BodySetupCore.h"
 #include "EnhancedInputComponent.h"
 #include "Character/FretteNotificationsComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -118,6 +119,57 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 	SubToAttributeChanges();
 }
 
+void AFrettePlayerCharacter::SetIsDead(bool bNewIsDead)
+{
+	if (!HasAuthority())
+		return;
+
+	if (bIsDead == bNewIsDead)
+		return;
+
+	bIsDead = bNewIsDead;
+
+	if (bIsDead)
+		HandleDeath();
+
+}
+
+void AFrettePlayerCharacter::OnRep_IsDead()
+{
+	if (bIsDead)
+		HandleDeath();
+}
+
+void AFrettePlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ThisClass, bIsDead);
+	UE_LOG(LogTemp, Warning, TEXT("GetLifetimeReplicatedProps called on FrettePlayerCharacter"));
+
+}
+
+void AFrettePlayerCharacter::HandleDeath()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	GetMesh()->SetAnimInstanceClass(nullptr);
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+	GetMesh()->bPauseAnims = true;
+	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
+	GetCharacterMovement()->DisableMovement();
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->DisableInput(PlayerController);
+	}
+
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
+		GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
+	}, 0.05f, false);
+}
+
 void AFrettePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -125,4 +177,14 @@ void AFrettePlayerCharacter::BeginPlay()
 	//Fixes weird rotation at the beginning of the game
 	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 
+	TArray<USkeletalMeshComponent*> SkelMeshes;
+	GetComponents<USkeletalMeshComponent>(SkelMeshes);
+
+	for (USkeletalMeshComponent* SkelMesh : SkelMeshes)
+	{
+		if (SkelMesh->GetName() == TEXT("Body"))
+			BodyMesh = SkelMesh;
+		else if (SkelMesh->GetName() == TEXT("Face"))
+			FaceMesh = SkelMesh;
+	}
 }

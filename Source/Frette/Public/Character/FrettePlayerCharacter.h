@@ -22,7 +22,7 @@ class AFrettePlayerCharacter : public AFretteBaseCharacter
 
 public:
 	UFretteEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
-	
+
 	AFrettePlayerCharacter();
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
@@ -36,11 +36,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
 
+	UFUNCTION(BlueprintCallable)
+	void SetIsDead(bool bNewIsDead);
+
 	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) override;
 
 	UFUNCTION(BlueprintCallable)
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
-	
+
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -50,6 +53,11 @@ public:
 	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
+	UFUNCTION()
+	void OnRep_IsDead();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	void HandleDeath();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
 
@@ -66,12 +74,21 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFretteEquipmentComponent> EquipmentComponent;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_IsDead)
+	bool bIsDead = false;
+
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> BodyMesh;
+
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> FaceMesh;
 
 private:
 	virtual void InitAbilityActorInfo() override;
