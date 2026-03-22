@@ -17,6 +17,8 @@ class AFrettePlayerState;
 
 AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
+	SetReplicatingMovement(true);
+
 	FPMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("First Person Mesh"));
 
 	FPMesh->SetupAttachment(GetMesh());
@@ -160,12 +162,4 @@ void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathV
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
 		PlayerController->DisableInput(PlayerController);
-}
-
-void AFrettePlayerCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//Fixes weird rotation at the beginning of the game
-	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 }

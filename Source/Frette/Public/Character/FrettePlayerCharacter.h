@@ -61,8 +61,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USkeletalMeshComponent> FPMesh;
 
-	virtual void BeginPlay() override;
-
 	UPROPERTY(BlueprintReadOnly)
 	FRotator SmoothedControlRotation;
 
