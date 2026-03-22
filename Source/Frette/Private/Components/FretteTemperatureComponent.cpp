@@ -5,7 +5,6 @@
 UFretteTemperatureComponent::UFretteTemperatureComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	SetIsReplicatedByDefault(true);
 }
 
 void UFretteTemperatureComponent::BeginPlay()

@@ -65,7 +65,7 @@ void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag 
 	CheckAccumulatedValueRules(Tag, Context, CurrentValue);
 }
 
-float UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Tag)
+int UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Tag)
 {
 	const int AccumulatedValue = FindOrAddAccumulatedValue(Tag);
 	const int NewValue = AccumulatedValue + Value;

@@ -40,7 +40,11 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	NotificationsComponent->SetIsReplicated(true);
 
 	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
+	BodyPartComponent->SetIsReplicated(true);
+
 	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
+	BodyTemperatureComponent->SetIsReplicated(true);
+
 }
 
 //Client side
@@ -130,38 +134,32 @@ void AFrettePlayerCharacter::SetIsDead(bool bNewIsDead)
 	bIsDead = bNewIsDead;
 
 	if (bIsDead)
-		HandleDeath();
+		Multicast_HandleDeath(GetCharacterMovement()->Velocity);
 
-}
-
-void AFrettePlayerCharacter::OnRep_IsDead()
-{
-	if (bIsDead)
-		HandleDeath();
 }
 
 void AFrettePlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ThisClass, bIsDead);
-	UE_LOG(LogTemp, Warning, TEXT("GetLifetimeReplicatedProps called on FrettePlayerCharacter"));
 }
 
-void AFrettePlayerCharacter::HandleDeath()
+void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity)
 {
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+
+	bUseControllerRotationYaw = false;
+
+	GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	GetMesh()->Stop();
 	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
-	GetCharacterMovement()->DisableMovement();
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
+	GetMesh()->SetPhysicsLinearVelocity(DeathVelocity, false, FName("pelvis"));
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
-	{
 		PlayerController->DisableInput(PlayerController);
-	}
-
-	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
 }
 
 void AFrettePlayerCharacter::BeginPlay()
@@ -170,15 +168,4 @@ void AFrettePlayerCharacter::BeginPlay()
 
 	//Fixes weird rotation at the beginning of the game
 	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
-
-	TArray<USkeletalMeshComponent*> SkelMeshes;
-	GetComponents<USkeletalMeshComponent>(SkelMeshes);
-
-	for (USkeletalMeshComponent* SkelMesh : SkelMeshes)
-	{
-		if (SkelMesh->GetName() == TEXT("Body"))
-			BodyMesh = SkelMesh;
-		else if (SkelMesh->GetName() == TEXT("Face"))
-			FaceMesh = SkelMesh;
-	}
 }

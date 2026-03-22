@@ -53,10 +53,7 @@ public:
 	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
-	UFUNCTION()
-	void OnRep_IsDead();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	void HandleDeath();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
@@ -81,14 +78,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
 
-	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_IsDead)
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_HandleDeath(FVector DeathVelocity);
+
+	UPROPERTY(EditAnywhere)
 	bool bIsDead = false;
-
-	UPROPERTY()
-	TObjectPtr<USkeletalMeshComponent> BodyMesh;
-
-	UPROPERTY()
-	TObjectPtr<USkeletalMeshComponent> FaceMesh;
 
 private:
 	virtual void InitAbilityActorInfo() override;

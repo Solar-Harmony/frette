@@ -3,10 +3,7 @@
 #include "GameplayTagContainer.h"
 #include "Net/UnrealNetwork.h"
 
-UFretteBodyPartComponent::UFretteBodyPartComponent()
-{
-	SetIsReplicatedByDefault(true);
-}
+UFretteBodyPartComponent::UFretteBodyPartComponent() {}
 
 void UFretteBodyPartComponent::BeginPlay()
 {
