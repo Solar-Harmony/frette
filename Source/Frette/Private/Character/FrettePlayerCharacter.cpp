@@ -145,16 +145,13 @@ void AFrettePlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimePr
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ThisClass, bIsDead);
 	UE_LOG(LogTemp, Warning, TEXT("GetLifetimeReplicatedProps called on FrettePlayerCharacter"));
-
 }
 
 void AFrettePlayerCharacter::HandleDeath()
 {
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	GetMesh()->SetAnimInstanceClass(nullptr);
-	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
-	GetMesh()->bPauseAnims = true;
+	GetMesh()->Stop();
 	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
 	GetCharacterMovement()->DisableMovement();
 
@@ -164,10 +161,7 @@ void AFrettePlayerCharacter::HandleDeath()
 		PlayerController->DisableInput(PlayerController);
 	}
 
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
-		GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
-	}, 0.05f, false);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
 }
 
 void AFrettePlayerCharacter::BeginPlay()

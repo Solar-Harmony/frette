@@ -55,6 +55,7 @@ private:
 	void CheckAccumulatedValueRules(FGameplayTag Tag, FFretteBodyPartContext& Context, int CurrentValue) const;
 	const TArray<FFretteEffectRuleEntry>* GetRulesForEvent(const EBodyPartEventType EventType, const FGameplayTag& EffectTag) const;
 	TArray<FFretteEffectRuleEntry> GetRulesForEvent(const EBodyPartEventType EventType) const;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY()
 	TObjectPtr<UFretteBodyPartData> SourceData;
