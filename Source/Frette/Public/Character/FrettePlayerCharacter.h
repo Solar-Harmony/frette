@@ -15,6 +15,8 @@ class UInventoryComponent;
 class UFretteInventoryComponent;
 class UFretteNotificationsComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDied, AFrettePlayerCharacter*, Character);
+
 UCLASS()
 class AFrettePlayerCharacter : public AFretteBaseCharacter
 {
@@ -36,6 +38,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerJump();
 
+	bool GetIsDead() const { return bIsDead; }
+
+	UPROPERTY()
+	FOnPlayerDied OnPlayerDied;
+
 	UFUNCTION(BlueprintCallable)
 	void SetIsDead(bool bNewIsDead);
 
@@ -53,8 +60,6 @@ public:
 	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
 

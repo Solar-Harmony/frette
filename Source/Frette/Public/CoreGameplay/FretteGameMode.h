@@ -19,35 +19,36 @@ UCLASS()
 class AFretteGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	// Picks a clue, notifies clients
 	FText GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template);
-	
+
 	// Checks if player is close enough to collect the objective
 	void ProbeForObjective(const AFrettePlayerCharacter* PlayerCharacter);
-	
+
 	// Checks if the player meets condition to win the game
 	void CheckVictory(const AFrettePlayerCharacter* PlayerCharacter) const;
-	
+
 	bool IsGameEnded() const;
-	
+
 protected:
 	virtual void BeginPlay() override;
+
 	AFretteMainObjective* GetMainObjective() const { return MainObjective; }
 
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<AFretteMainObjective> MainObjective;
-	
+
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<AFretteLandmark>> NearLandmarks;
-	
+
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<AFretteLandmark>> FarLandmarks;
-	
+
 	bool bPlayerCollectedObjective = false;
-	
+
 	int32 NumCluesPlaced = 0;
 	int32 NumCluesFound = 0;
 	int32 NumPrimaryCluesFound = 0;
@@ -56,10 +57,20 @@ private:
 	const float DudClueRatioTarget = 0.1f;
 	// Both ratio targets start at 0.0, this is the steepness of the exponent curve ramping them up
 	const float ClueRatioRampSteepness = 0.25f;
-	
+
 	EClueType PickNextClueType() const;
-	
+
 	// Returns a random landmark, which can never be picked again (sampling without replacement).
 	// @param bNearObjective Whether we pick from the landmarks near the treasure (primary, quest hints) or away (secondary, POIs)
 	AFretteLandmark* GetRandomLandmark(bool bNearObjective);
+
+	virtual void RestartPlayer(AController* NewPlayer) override;
+
+	UPROPERTY()
+	TArray<TObjectPtr<AFrettePlayerCharacter>> Players;
+
+	UFUNCTION()
+	void OnPlayerDied(AFrettePlayerCharacter* PlayerCharacter);
+	
+	bool GetIfAllPlayersDead() const;
 };

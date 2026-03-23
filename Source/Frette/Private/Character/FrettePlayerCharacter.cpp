@@ -46,7 +46,6 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
 	BodyTemperatureComponent->SetIsReplicated(true);
-
 }
 
 //Client side
@@ -136,18 +135,14 @@ void AFrettePlayerCharacter::SetIsDead(bool bNewIsDead)
 	bIsDead = bNewIsDead;
 
 	if (bIsDead)
+	{
 		Multicast_HandleDeath(GetCharacterMovement()->Velocity);
-
-}
-
-void AFrettePlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+		OnPlayerDied.Broadcast(this);
+	}
 }
 
 void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity)
 {
-
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
 
