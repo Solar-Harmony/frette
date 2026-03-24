@@ -22,7 +22,6 @@ public class FretteUI : ModuleRules
                 "SlateCore", 
                 "UMG",
                 "ModelViewViewModel",
-                "ModelViewViewModelBlueprint",
                 "GameplayTags",
                 "Frette",
             }
