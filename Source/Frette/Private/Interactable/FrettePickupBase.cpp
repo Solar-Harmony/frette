@@ -11,10 +11,6 @@ AFrettePickupBase::AFrettePickupBase()
 	bReplicates = true;
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item"));
-	StaticMesh->SetSimulatePhysics(false);
-	StaticMesh->SetCollisionProfileName(TEXT("BlockAll"));
-	StaticMesh->SetEnableGravity(true);
-	StaticMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
 	SetRootComponent(StaticMesh);
 	
 	Interactable = CreateDefaultSubobject<UFretteInteractableComponent>(TEXT("Interactable Component"));
@@ -73,4 +69,8 @@ void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* Loaded
 	UStaticMesh* Mesh = Cast<UStaticMesh>(LoadedObject);
 	require(IsValid(Mesh), "Failed to load mesh for item '%s'.", GetNameSafe(ItemData))
 	StaticMesh->SetStaticMesh(Mesh);
+	StaticMesh->SetSimulatePhysics(false);
+	StaticMesh->SetCollisionProfileName(TEXT("BlockAll"));
+	StaticMesh->SetEnableGravity(true);
+	StaticMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
 }
