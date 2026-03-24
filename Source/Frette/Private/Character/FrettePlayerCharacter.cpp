@@ -124,7 +124,7 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 	SubToAttributeChanges();
 }
 
-void AFrettePlayerCharacter::SetIsDead(bool bNewIsDead)
+void AFrettePlayerCharacter::SetIsDead(const bool bNewIsDead)
 {
 	if (!HasAuthority())
 		return;
@@ -148,7 +148,6 @@ void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathV
 
 	bUseControllerRotationYaw = false;
 
-	GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	GetMesh()->Stop();
 	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);

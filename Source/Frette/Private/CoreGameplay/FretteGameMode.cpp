@@ -218,6 +218,7 @@ AFretteLandmark* AFretteGameMode::GetRandomLandmark(bool bNearObjective)
 	return Item;
 }
 
+//Risque d'avoir des problemes si jamais on détruit et recréer des pawns
 void AFretteGameMode::RestartPlayer(AController* NewPlayer)
 {
 	Super::RestartPlayer(NewPlayer);
