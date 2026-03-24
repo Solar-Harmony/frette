@@ -5,12 +5,6 @@
 #include "Inventory/Items/FretteSlottableItem.h"
 #include "FretteEquipmentComponent.generated.h"
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Head);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Chest);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Legs);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Feet);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_BodyPart_Hand);
-
 class AFrettePlayerState;
 
 UCLASS()
@@ -26,7 +20,7 @@ public:
 	
 	UFUNCTION(Server, Reliable)
 	void EquipItem(UFretteSlottableItem* Item) const;
-	
+
 	UFUNCTION(Server, Reliable)
 	void UnequipItem(UFretteSlottableItem* Item) const;
 };

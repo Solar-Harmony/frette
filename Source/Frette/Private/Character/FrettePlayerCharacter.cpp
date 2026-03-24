@@ -3,9 +3,12 @@
 #include "EnhancedInputComponent.h"
 #include "Character/FretteNotificationsComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/FretteTemperatureComponent.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Equipment/FretteEquipmentComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Inventory/FretteInventoryComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/FrettePlayerState.h"
 
@@ -31,9 +34,12 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment Component"));
 	EquipmentComponent->SetIsReplicated(true);
-	
+
 	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("Notifications Component"));
 	NotificationsComponent->SetIsReplicated(true);
+
+	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
+	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
 }
 
 //Client side

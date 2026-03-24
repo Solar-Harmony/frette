@@ -20,4 +20,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FRuntimeFloatCurve DamageCurve;
+
+	UPROPERTY(EditAnywhere, Meta = (Categories = "Frette.BodyPart"))
+	TArray<FGameplayTag> AffectedBones;
 };

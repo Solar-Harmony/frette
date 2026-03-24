@@ -2,6 +2,8 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Character/FretteBaseCharacter.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
+#include "Components/BodyPart/FretteBodyPartTags.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Effect_Movement_FallDamage, "Effect.Movement.FallDamage");
 
@@ -63,10 +65,17 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 
 	const float DamageAmount = Config->DamageCurve.GetRichCurveConst()->Eval(FMath::Abs(DistanceFallen));
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Fall damage: %f"), DamageAmount));
+
 	NewHandle.Data->SetSetByCallerMagnitude(TAG_Effect_Movement_FallDamage, -DamageAmount);
 
 	ensureMsgf(NewHandle.IsValid(), TEXT("Probably need to set the DamageEffect in the Config"));
 
-	//TODO: Les dégats vont devoir être appliqué aux jambes plutot qu'au character en général
-	ASC->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), ASC);
+	UFretteBodyPartComponent* BodyPartComponent = Cast<UFretteBodyPartComponent>(OwnerCharacter->GetComponentByClass(UFretteBodyPartComponent::StaticClass()));
+
+	for (auto BoneTag : Config->AffectedBones)
+	{
+		BodyPartComponent->AddValueFromBodyPartTag(BoneTag, -DamageAmount, TAG_BodyPartValues_Health);
+	}
+
 }

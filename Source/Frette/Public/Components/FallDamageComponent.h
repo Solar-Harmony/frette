@@ -37,6 +37,6 @@ protected:
 
 	float FallStartHeight = 0.f;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Frette")
 	TObjectPtr<UFallDamageDataAsset> Config;
 };

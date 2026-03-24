@@ -8,8 +8,8 @@
 
 AFretteBaseCharacter::AFretteBaseCharacter()
 {
-	//@TODO: retirer le component ajouter sur le blueprint quand le character est pas locked
-	//CreateDefaultSubobject<UFallDamageComponent>(TEXT("FallDamageComponent"));
+	PrimaryActorTick.bCanEverTick = true;
+	FallDamageComponent = CreateDefaultSubobject<UFallDamageComponent>(TEXT("FallDamageComponent"));
 }
 
 void AFretteBaseCharacter::ApplyStartupEffects()
