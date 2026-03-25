@@ -10,6 +10,7 @@ AFretteBaseCharacter::AFretteBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	FallDamageComponent = CreateDefaultSubobject<UFallDamageComponent>(TEXT("FallDamageComponent"));
+	SetReplicates(true);
 }
 
 void AFretteBaseCharacter::ApplyStartupEffects()

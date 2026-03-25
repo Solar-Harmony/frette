@@ -3,10 +3,7 @@
 #include "GameplayTagContainer.h"
 #include "Net/UnrealNetwork.h"
 
-UFretteBodyPartComponent::UFretteBodyPartComponent()
-{
-	SetIsReplicatedByDefault(true);
-}
+UFretteBodyPartComponent::UFretteBodyPartComponent() {}
 
 void UFretteBodyPartComponent::BeginPlay()
 {
@@ -19,6 +16,7 @@ void UFretteBodyPartComponent::BeginPlay()
 			UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
 			Instance->Initialize(Data, Cast<AFretteBaseCharacter>(GetOwner()));
 			BodyPartInstances.Add(Instance);
+
 			AddReplicatedSubObject(Instance);
 		}
 	}

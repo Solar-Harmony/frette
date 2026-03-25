@@ -50,11 +50,12 @@ private:
 	void RemoveGameplayAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities) const;
 	void BuildRuleLookup();
 	void SetMinDeltaValueThreshold();
-	float ClampDelta(int Value, FGameplayTag Tag);
+	int ClampDelta(int Value, FGameplayTag Tag);
 	void CheckDeltaRules(FGameplayTag Tag, FFretteBodyPartContext& Context, int ClampedDelta) const;
 	void CheckAccumulatedValueRules(FGameplayTag Tag, FFretteBodyPartContext& Context, int CurrentValue) const;
 	const TArray<FFretteEffectRuleEntry>* GetRulesForEvent(const EBodyPartEventType EventType, const FGameplayTag& EffectTag) const;
 	TArray<FFretteEffectRuleEntry> GetRulesForEvent(const EBodyPartEventType EventType) const;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY()
 	TObjectPtr<UFretteBodyPartData> SourceData;

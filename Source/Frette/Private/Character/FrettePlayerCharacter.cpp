@@ -1,5 +1,6 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
+#include "BodySetupCore.h"
 #include "EnhancedInputComponent.h"
 #include "Character/FretteNotificationsComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -16,6 +17,8 @@ class AFrettePlayerState;
 
 AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
+	SetReplicatingMovement(true);
+
 	FPMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("First Person Mesh"));
 
 	FPMesh->SetupAttachment(GetMesh());
@@ -39,7 +42,10 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	NotificationsComponent->SetIsReplicated(true);
 
 	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
+	BodyPartComponent->SetIsReplicated(true);
+
 	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
+	BodyTemperatureComponent->SetIsReplicated(true);
 }
 
 //Client side
@@ -118,11 +124,36 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 	SubToAttributeChanges();
 }
 
-void AFrettePlayerCharacter::BeginPlay()
+void AFrettePlayerCharacter::SetIsDead(const bool bNewIsDead)
 {
-	Super::BeginPlay();
+	if (!HasAuthority())
+		return;
 
-	//Fixes weird rotation at the beginning of the game
-	GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	if (bIsDead == bNewIsDead)
+		return;
 
+	bIsDead = bNewIsDead;
+
+	if (bIsDead)
+	{
+		Multicast_HandleDeath(GetCharacterMovement()->Velocity);
+		OnPlayerDied.Broadcast(this);
+	}
+}
+
+void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity)
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+
+	bUseControllerRotationYaw = false;
+
+	GetMesh()->Stop();
+	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
+	GetMesh()->SetPhysicsLinearVelocity(DeathVelocity, false, FName("pelvis"));
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+		PlayerController->DisableInput(PlayerController);
 }

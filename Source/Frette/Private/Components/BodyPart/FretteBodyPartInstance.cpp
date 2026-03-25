@@ -2,6 +2,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Components/BodyPart/FretteBodyPartContext.h"
 #include "Components/BodyPart/EffectRules/FretteDeltaValueRule.h"
+#include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
 
 void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner)
@@ -65,7 +66,7 @@ void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag 
 	CheckAccumulatedValueRules(Tag, Context, CurrentValue);
 }
 
-float UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Tag)
+int UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Tag)
 {
 	const int AccumulatedValue = FindOrAddAccumulatedValue(Tag);
 	const int NewValue = AccumulatedValue + Value;
@@ -136,10 +137,12 @@ void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventT
 
 void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGameplayEffect>> Effects) const
 {
+	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
+
+	ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component."));
+
 	for (const auto& Effect : Effects)
 	{
-		UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
-
 		FGameplayEffectContextHandle EffectContext = OwnerASC->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
 
@@ -156,6 +159,8 @@ void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplay
 {
 	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
+	ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component."));
+
 	for (TSubclassOf Effect : Effects)
 	{
 		OwnerASC->RemoveActiveGameplayEffectBySourceEffect(Effect, OwnerASC, 1);
@@ -169,6 +174,8 @@ void UFretteBodyPartInstance::ApplyGameplayAbilities(const TArray<TSubclassOf<UG
 {
 	UAbilitySystemComponent* OwnerASC =
 		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
+
+	ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component."));
 
 	for (const TSubclassOf<UGameplayAbility>& AbilityClass : Abilities)
 	{
@@ -192,6 +199,8 @@ void UFretteBodyPartInstance::RemoveGameplayAbilities(const TArray<TSubclassOf<U
 {
 	UAbilitySystemComponent* OwnerASC =
 		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
+
+	ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component."));
 
 	for (const TSubclassOf<UGameplayAbility>& AbilityClass : Abilities)
 	{

@@ -13,13 +13,13 @@
 FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template)
 {
 	FFretteClueInfo Info;
-	
+
 	Info.ObjectiveName = MainObjective->DisplayName;
-	
+
 	const EClueType PickedType = bPlayerCollectedObjective
 		? EClueType::Dud
 		: PickNextClueType();
-	
+
 	if (PickedType == EClueType::Dud)
 	{
 		Info.Type = EClueType::Dud;
@@ -27,7 +27,7 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 		NumCluesFound++;
 		return Template->GenerateClueText(Info);
 	}
-	
+
 	const bool bIsPrimaryClue = PickedType == EClueType::MainObjective;
 	const AFretteLandmark* POI = GetRandomLandmark(bIsPrimaryClue);
 	if (POI == nullptr)
@@ -35,15 +35,15 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 		UE_LOG(LogFrette, Warning, TEXT("Failed to generate clue: no more landmarks available!"));
 		return Template->GenerateClueText(Info);
 	}
-	
+
 	Info.Type = bIsPrimaryClue ? EClueType::MainObjective : EClueType::PointOfInterest;
 	Info.LandmarkName = POI->DisplayName;
 	Info.LandmarkDescription = POI->Description;
 	Info.LandmarkLoot = POI->ThingOfInterest;
-		
+
 	const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
 	const ECardinalDirection CardinalDirection = UFretteGameplayStatics::DirVectorToCardinal(Direction);
-	
+
 	// temporary of course
 	static const FText Names[] =
 	{
@@ -58,13 +58,13 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	};
 
 	Info.CardinalDirection = Names[static_cast<uint8>(CardinalDirection)];
-	
+
 	if (bIsPrimaryClue)
 	{
 		NumPrimaryCluesFound++;
 	}
 	NumCluesFound++;
-		
+
 	UE_LOG(LogFrette, Log, TEXT("Clue generated. Leads to landmark: %s, is near objective: %d"), *POI->GetName(), bIsPrimaryClue);
 	return Template->GenerateClueText(Info);
 }
@@ -76,7 +76,7 @@ void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerChar
 		UFretteNotificationsComponent::Notify(PlayerCharacter, INVTEXT("You have already collected the objective! Go to the extract point."));
 		return;
 	}
-	
+
 	const float Dist = FVector::Dist(PlayerCharacter->GetActorLocation(), MainObjective->GetActorLocation());
 	if (Dist <= MainObjective->RightOnObjectiveRadiusCm)
 	{
@@ -103,7 +103,7 @@ void AFretteGameMode::CheckVictory(const AFrettePlayerCharacter* PlayerCharacter
 	if (bHasTreasure)
 	{
 		AFretteGameState* State = GetGameState<AFretteGameState>();
-		State->GameOutcome = EGameOutcome::Victory;	
+		State->GameOutcome = EGameOutcome::Victory;
 		UFretteNotificationsComponent::NotifyAll(PlayerCharacter, INVTEXT("GG YOU WON"));
 	}
 }
@@ -116,25 +116,25 @@ bool AFretteGameMode::IsGameEnded() const
 void AFretteGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	for (TActorIterator<AFretteMainObjective> It(GetWorld()); It; ++It)
 	{
 		require(MainObjective == nullptr, "Multiple main objectives found in the level! There should be only one.");
 		MainObjective = *It;
 	}
-	
+
 	require(IsValid(MainObjective), "No main objective found in the level! Make sure to place one in the level.");
-	
+
 	const FVector2D ObjectiveLocation2D(MainObjective->GetActorLocation());
 	const float NearObjectiveRadiusSq = FMath::Square(MainObjective->NearObjectiveRadiusCm);
-	
+
 	for (TActorIterator<AFretteLandmark> It(GetWorld()); It; ++It)
 	{
 		AFretteLandmark* Landmark = *It;
-		
+
 		const FVector2D LandmarkLocation2D(Landmark->GetActorLocation());
 		const float DistanceToObjectiveSq = FVector2D::DistSquared(LandmarkLocation2D, ObjectiveLocation2D);
-		
+
 		if (DistanceToObjectiveSq <= NearObjectiveRadiusSq)
 		{
 			Landmark->bIsNearMainObjective = true;
@@ -145,15 +145,15 @@ void AFretteGameMode::BeginPlay()
 			FarLandmarks.Add(Landmark);
 		}
 	}
-	
+
 	for (TActorIterator<AFretteClue> It(GetWorld()); It; ++It)
 	{
 		NumCluesPlaced++;
 	}
-	
+
 	require(NearLandmarks.Num() > 0, "No landmarks placed within the objective's radius. Primary clues won't be possible.");
 	require(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.");
-	
+
 	const int32 TotalLandmarks = NearLandmarks.Num() + FarLandmarks.Num();
 	require(NumCluesPlaced <= TotalLandmarks, "%d clues placed but only %d total landmarks exist.", NumCluesPlaced, TotalLandmarks);
 }
@@ -201,7 +201,7 @@ EClueType AFretteGameMode::PickNextClueType() const
 		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Primary (P_primary=%f, P_dud=%f, P_Secondary=%f, ramp=%f)"), NumCluesFound + 1, NumCluesPlaced, PrimaryProbability, DudProbability, SecondaryProbability, Ramp);
 		return EClueType::MainObjective;
 	}
-	
+
 	UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Secondary (P_primary=%f, P_dud=%f, P_Secondary=%f, ramp=%f)"), NumCluesFound + 1, NumCluesPlaced, PrimaryProbability, DudProbability, SecondaryProbability, Ramp);
 	return EClueType::PointOfInterest;
 }
@@ -211,9 +211,44 @@ AFretteLandmark* AFretteGameMode::GetRandomLandmark(bool bNearObjective)
 	auto& Array = bNearObjective ? NearLandmarks : FarLandmarks;
 	if (Array.IsEmpty())
 		return nullptr;
-	
+
 	const int32 Idx = FMath::RandRange(0, Array.Num() - 1);
 	AFretteLandmark* Item = Array[Idx];
 	Array.RemoveAtSwap(Idx);
 	return Item;
+}
+
+//Risque d'avoir des problemes si jamais on détruit et recréer des pawns
+void AFretteGameMode::RestartPlayer(AController* NewPlayer)
+{
+	Super::RestartPlayer(NewPlayer);
+
+	AFrettePlayerCharacter* PlayerCharacter = Cast<AFrettePlayerCharacter>(NewPlayer->GetPawn());
+
+	if (PlayerCharacter)
+	{
+		Players.Add(PlayerCharacter);
+		PlayerCharacter->OnPlayerDied.AddDynamic(this, &AFretteGameMode::OnPlayerDied);
+	}
+}
+
+void AFretteGameMode::OnPlayerDied(AFrettePlayerCharacter* PlayerCharacter)
+{
+	if (GetIfAllPlayersDead())
+	{
+		AFretteGameState* State = GetGameState<AFretteGameState>();
+		State->GameOutcome = EGameOutcome::Defeat;
+		UFretteNotificationsComponent::NotifyAll(PlayerCharacter, INVTEXT("YOU LOST"));
+	}
+}
+
+bool AFretteGameMode::GetIfAllPlayersDead() const
+{
+	for (const auto Player : Players)
+	{
+		if (!Player->GetIsDead())
+			return false;
+	}
+
+	return true;
 }
