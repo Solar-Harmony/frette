@@ -16,6 +16,7 @@ void UFretteBodyPartComponent::BeginPlay()
 			UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
 			Instance->Initialize(Data, Cast<AFretteBaseCharacter>(GetOwner()));
 			BodyPartInstances.Add(Instance);
+
 			AddReplicatedSubObject(Instance);
 		}
 	}
