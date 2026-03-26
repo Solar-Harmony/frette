@@ -22,6 +22,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void AddBodyPartTemperatureModifier(int NewTargetTemperature, FGameplayTag BodyPartTag);
+	void AddBodyPartTemperatureModifier(int NewTargetTemperature, FName BoneName);
 
 protected:
 	UFretteTemperatureComponent();

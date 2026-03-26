@@ -11,6 +11,7 @@
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "PhysicsEngine/PhysicsAsset.h"
 #include "Player/FrettePlayerState.h"
 
 class AFrettePlayerState;
@@ -46,6 +47,18 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
 	BodyTemperatureComponent->SetIsReplicated(true);
+}
+
+void AFrettePlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	MeshComponent->bMultiBodyOverlap = true;
+	MeshComponent->SetGenerateOverlapEvents(true);
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	MeshComponent->SetAllBodiesSimulatePhysics(false);
+	MeshComponent->RecreatePhysicsState();
 }
 
 //Client side

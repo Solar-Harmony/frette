@@ -60,6 +60,16 @@ void UFretteTemperatureComponent::AddBodyPartTemperatureModifier(const int NewTa
 	}
 }
 
+void UFretteTemperatureComponent::AddBodyPartTemperatureModifier(const int NewTargetTemperature, const FName BoneName)
+{
+	FGameplayTag BodyPartTag = BodyPartComponent->GetBodyPartFromBoneName(BoneName);
+
+	if (int* CurrentValue = BodyPartTemperatureTargets.Find(BodyPartTag))
+	{
+		*CurrentValue += NewTargetTemperature;
+	}
+}
+
 void UFretteTemperatureComponent::AddToAmbientTemperature(const int NewAmbientTemperature)
 {
 	AmbientTemperature += NewAmbientTemperature;
