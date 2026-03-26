@@ -13,6 +13,21 @@ void UFretteTemperatureComponent::BeginPlay()
 	SetComponentTickInterval(TimeBetweenTemperatureChange);
 
 	BodyPartComponent = GetOwner()->GetComponentByClass<UFretteBodyPartComponent>();
+
+	for (const TObjectPtr<UFretteBodyPartData>& Data : BodyPartComponent->BodyPartData)
+	{
+		if (!Data)
+			continue;
+
+		UFretteBodyPartData* LoadedData = Data.Get();
+		if (!LoadedData)
+			continue;
+
+		if (LoadedData->BodyPartTag.IsValid())
+		{
+			BodyPartTemperatureTargets.Add(LoadedData->BodyPartTag, 0);
+		}
+	}
 }
 
 void UFretteTemperatureComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -22,20 +37,37 @@ void UFretteTemperatureComponent::TickComponent(float DeltaTime, enum ELevelTick
 	OnTemperatureTick();
 }
 
-//Le target temperature devras être par partie du corps selon les vetement équippé
-//TODO: Il faudrais peut-être un tempereature target par bodypart vu que des éffets pourrais affecter une bodypart spécifique
-//Marcher dans l'eau/neige qui refroidis les parties qui touche ceux-ci par exemple
 void UFretteTemperatureComponent::OnTemperatureTick()
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
-		if (!BodyPartComponent || CurrentTemperature == TargetTemperature)
+		if (!BodyPartComponent)
 			return;
 
-		const int StackDelta = TargetTemperature > CurrentTemperature ? 1 : -1;
+		for (const auto BodyPartTemperatureTarget : BodyPartTemperatureTargets)
+		{
+			const int CurrentBodyPartTemperature = BodyPartComponent->GetValueFromBodyPart(BodyPartTemperatureTarget.Key, TemperatureEffectTag);
+			const int TargetTemperature = BodyPartTemperatureTarget.Value + AmbientTemperature;
+			if (CurrentBodyPartTemperature == TargetTemperature)
+				continue;
 
-		CurrentTemperature += StackDelta;
+			//Pourrais ajouter un modifier pour rendre le changement soit plus rapide ou plus lent
+			const int Delta = TargetTemperature > CurrentBodyPartTemperature ? 1 : -1;
 
-		BodyPartComponent->AddValueToAllParts(StackDelta, TemperatureEffectTag);
+			BodyPartComponent->AddValueFromBodyPartTag(BodyPartTemperatureTarget.Key, Delta, TemperatureEffectTag);
+		}
 	}
+}
+
+void UFretteTemperatureComponent::AddBodyPartTemperatureModifier(const int NewTargetTemperature, const FGameplayTag BodyPartTag)
+{
+	if (int* CurrentValue = BodyPartTemperatureTargets.Find(BodyPartTag))
+	{
+		*CurrentValue += NewTargetTemperature;
+	}
+}
+
+void UFretteTemperatureComponent::AddToAmbientTemperature(const int NewAmbientTemperature)
+{
+	AmbientTemperature += NewAmbientTemperature;
 }
