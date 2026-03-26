@@ -16,16 +16,9 @@ void UFretteTemperatureComponent::BeginPlay()
 
 	for (const TObjectPtr<UFretteBodyPartData>& Data : BodyPartComponent->BodyPartData)
 	{
-		if (!Data)
-			continue;
-
-		UFretteBodyPartData* LoadedData = Data.Get();
-		if (!LoadedData)
-			continue;
-
-		if (LoadedData->BodyPartTag.IsValid())
+		if (Data->BodyPartTag.IsValid())
 		{
-			BodyPartTemperatureTargets.Add(LoadedData->BodyPartTag, 0);
+			BodyPartTemperatureTargets.Add(Data->BodyPartTag, 0);
 		}
 	}
 }
@@ -51,7 +44,7 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 			if (CurrentBodyPartTemperature == TargetTemperature)
 				continue;
 
-			//Pourrais ajouter un modifier pour rendre le changement soit plus rapide ou plus lent
+			//Pourrais ajouter un modifier pour rendre le changement soit plus rapide ou plus lent sans avoir a changer la tick interval
 			const int Delta = TargetTemperature > CurrentBodyPartTemperature ? 1 : -1;
 
 			BodyPartComponent->AddValueFromBodyPartTag(BodyPartTemperatureTarget.Key, Delta, TemperatureEffectTag);
