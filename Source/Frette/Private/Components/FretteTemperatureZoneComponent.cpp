@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 
+//Pas sur de l'autorité / multiplayer
 UFretteTemperatureZoneComponent::UFretteTemperatureZoneComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -13,12 +14,6 @@ UFretteTemperatureZoneComponent::UFretteTemperatureZoneComponent()
 void UFretteTemperatureZoneComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (!GetOwner()->HasAuthority())
-	{
-		SetComponentTickEnabled(false);
-		return;
-	}
 
 	SetComponentTickInterval(1.f);
 
@@ -119,9 +114,6 @@ TArray<FName> UFretteTemperatureZoneComponent::GetAffectedBonesFromSkelMesh(
 void UFretteTemperatureZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!GetOwner()->HasAuthority())
-		return;
-
 	ACharacter* Character = Cast<ACharacter>(OtherActor);
 	if (!Character)
 		return;
@@ -137,9 +129,6 @@ void UFretteTemperatureZoneComponent::OnOverlapBegin(UPrimitiveComponent* Overla
 void UFretteTemperatureZoneComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (!GetOwner()->HasAuthority())
-		return;
-
 	ACharacter* Character = Cast<ACharacter>(OtherActor);
 	if (!Character)
 		return;
