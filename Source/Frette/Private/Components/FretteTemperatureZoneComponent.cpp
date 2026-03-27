@@ -40,31 +40,31 @@ void UFretteTemperatureZoneComponent::TemperatureZoneTick()
 		if (!Character)
 			continue;
 
-		UFretteTemperatureComponent* TempComp =
+		UFretteTemperatureComponent* TemperatureComponent =
 			Character->FindComponentByClass<UFretteTemperatureComponent>();
 
-		if (!TempComp)
+		if (!TemperatureComponent)
 			continue;
 
-		TArray<FName> CurrentBones =
+		TArray<FName> BonesCurrentlyInZone =
 			GetAffectedBonesFromSkelMesh(Character->GetMesh());
 
 		TSet<FName>& ActiveBones = ActiveBonesPerCharacter.FindOrAdd(Character).Bones;
 
-		for (const FName& Bone : CurrentBones)
+		for (const FName& Bone : BonesCurrentlyInZone)
 		{
 			if (!ActiveBones.Contains(Bone))
 			{
 				ActiveBones.Add(Bone);
-				TempComp->AddBodyPartTemperatureModifier(TemperatureChange, Bone);
+				TemperatureComponent->AddBodyPartTemperatureModifier(TemperatureChange, Bone);
 			}
 		}
 
 		for (auto It = ActiveBones.CreateIterator(); It; ++It)
 		{
-			if (!CurrentBones.Contains(*It))
+			if (!BonesCurrentlyInZone.Contains(*It))
 			{
-				TempComp->AddBodyPartTemperatureModifier(-TemperatureChange, *It);
+				TemperatureComponent->AddBodyPartTemperatureModifier(-TemperatureChange, *It);
 				It.RemoveCurrent();
 			}
 		}
@@ -99,9 +99,12 @@ TArray<FName> UFretteTemperatureZoneComponent::GetAffectedBonesFromSkelMesh(
 		if (!BodySetup)
 			continue;
 
+		//Met la position du bone en relation avec la zone
 		const FVector WorldPos = Body->GetUnrealWorldTransform().GetLocation();
 		const FVector LocalPos = ZoneTransform.InverseTransformPositionNoScale(WorldPos);
 
+		//Comme l'étendu de la zone est la même des deux coté plutot que vérifier si la position est aussi >= -ZoneExtent 
+		//je vérifie juste si la valeur absolue de la position est inférieur a l'étendu
 		if (FMath::Abs(LocalPos.X) <= ZoneExtent.X &&
 			FMath::Abs(LocalPos.Y) <= ZoneExtent.Y &&
 			FMath::Abs(LocalPos.Z) <= ZoneExtent.Z)
@@ -116,13 +119,16 @@ TArray<FName> UFretteTemperatureZoneComponent::GetAffectedBonesFromSkelMesh(
 void UFretteTemperatureZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!GetOwner()->HasAuthority())
+		return;
+
 	ACharacter* Character = Cast<ACharacter>(OtherActor);
 	if (!Character)
 		return;
 
 	OverlappingCharacters.Add(Character);
 
-	if (OverlappingCharacters.Num() == 1)
+	if (!OverlappingCharacters.IsEmpty())
 	{
 		SetComponentTickEnabled(true);
 	}
@@ -131,6 +137,9 @@ void UFretteTemperatureZoneComponent::OnOverlapBegin(UPrimitiveComponent* Overla
 void UFretteTemperatureZoneComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (!GetOwner()->HasAuthority())
+		return;
+
 	ACharacter* Character = Cast<ACharacter>(OtherActor);
 	if (!Character)
 		return;
@@ -151,7 +160,7 @@ void UFretteTemperatureZoneComponent::OnOverlapEnd(UPrimitiveComponent* Overlapp
 		ActiveBonesPerCharacter.Remove(Character);
 	}
 
-	if (OverlappingCharacters.Num() == 0)
+	if (OverlappingCharacters.IsEmpty())
 	{
 		SetComponentTickEnabled(false);
 	}
