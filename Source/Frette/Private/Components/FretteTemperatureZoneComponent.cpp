@@ -86,23 +86,25 @@ TArray<FName> UFretteTemperatureZoneComponent::GetAffectedBonesFromSkelMesh(
 	if (!SkelMesh)
 		return AffectedBones;
 
-	const FBox ZoneBox = OverlapShape->Bounds.GetBox();
+	//Le plus simple que j'ai trouvé vus que je ne réussi pas a get les bones directement avec l'event d'overlap
+	const FTransform ZoneTransform = OverlapShape->GetComponentTransform();
+	const FVector ZoneExtent = OverlapShape->GetCollisionShape().GetExtent();
 
 	for (const FBodyInstance* Body : SkelMesh->Bodies)
 	{
-		if (!Body)
-			continue;
-
-		if (!Body->IsValidBodyInstance())
+		if (!Body || !Body->IsValidBodyInstance())
 			continue;
 
 		UBodySetup* BodySetup = Body->GetBodySetup();
 		if (!BodySetup)
 			continue;
 
-		FVector Center = Body->GetUnrealWorldTransform().GetLocation();
+		const FVector WorldPos = Body->GetUnrealWorldTransform().GetLocation();
+		const FVector LocalPos = ZoneTransform.InverseTransformPositionNoScale(WorldPos);
 
-		if (ZoneBox.IsInsideOrOn(Center))
+		if (FMath::Abs(LocalPos.X) <= ZoneExtent.X &&
+			FMath::Abs(LocalPos.Y) <= ZoneExtent.Y &&
+			FMath::Abs(LocalPos.Z) <= ZoneExtent.Z)
 		{
 			AffectedBones.AddUnique(BodySetup->BoneName);
 		}
