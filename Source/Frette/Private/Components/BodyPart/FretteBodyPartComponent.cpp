@@ -3,11 +3,16 @@
 #include "GameplayTagContainer.h"
 #include "Net/UnrealNetwork.h"
 
-UFretteBodyPartComponent::UFretteBodyPartComponent() {}
+UFretteBodyPartComponent::UFretteBodyPartComponent()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+}
 
 void UFretteBodyPartComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetComponentTickInterval(2.0f);
 
 	if (GetOwnerRole() == ROLE_Authority)
 	{
@@ -62,7 +67,7 @@ FGameplayTag UFretteBodyPartComponent::GetBodyPartFromBoneName(const FName BoneN
 	return FGameplayTag();
 }
 
-UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayTag BodyPartTag)
+UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayTag BodyPartTag) const
 {
 	for (TObjectPtr BodyPart : BodyPartInstances)
 	{
@@ -73,6 +78,16 @@ UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayT
 	UE_LOG(LogTemp, Error, TEXT("Body part with tag %s not found!"), *BodyPartTag.ToString());
 
 	return nullptr;
+}
+
+void UFretteBodyPartComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGameplayTag ValueType) const
+{
+	return FindBodyPart(BodyPartTag)->FindOrAddAccumulatedValue(ValueType);
 }
 
 void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag ValueType)

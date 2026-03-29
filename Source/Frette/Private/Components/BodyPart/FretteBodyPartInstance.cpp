@@ -50,6 +50,11 @@ void UFretteBodyPartInstance::SetMinDeltaValueThreshold()
 
 void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag Tag)
 {
+	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
+
+	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
+		return;
+
 	FFretteBodyPartContext Context = FFretteBodyPartContext();
 
 	const float ClampedDelta = ClampDelta(Value, Tag);
@@ -139,7 +144,8 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 {
 	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
-	ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component."));
+	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
+		return;
 
 	for (const auto& Effect : Effects)
 	{
@@ -159,7 +165,8 @@ void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplay
 {
 	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
-	ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component."));
+	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
+		return;
 
 	for (TSubclassOf Effect : Effects)
 	{
@@ -175,7 +182,8 @@ void UFretteBodyPartInstance::ApplyGameplayAbilities(const TArray<TSubclassOf<UG
 	UAbilitySystemComponent* OwnerASC =
 		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
-	ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component."));
+	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
+		return;
 
 	for (const TSubclassOf<UGameplayAbility>& AbilityClass : Abilities)
 	{
@@ -200,7 +208,8 @@ void UFretteBodyPartInstance::RemoveGameplayAbilities(const TArray<TSubclassOf<U
 	UAbilitySystemComponent* OwnerASC =
 		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 
-	ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component."));
+	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
+		return;
 
 	for (const TSubclassOf<UGameplayAbility>& AbilityClass : Abilities)
 	{

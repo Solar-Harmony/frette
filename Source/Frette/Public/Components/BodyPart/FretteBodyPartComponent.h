@@ -17,12 +17,16 @@ class FRETTE_API UFretteBodyPartComponent : public UActorComponent
 public:
 	UFretteBodyPartComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	UFretteBodyPartInstance* FindBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag);
+	UFretteBodyPartInstance* FindBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag) const;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	int GetValueFromBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart"))FGameplayTag BodyPartTag,
+		UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
 	void AddValueFromBodyPartTag(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag,
 		int Value,
 		UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
+
 	void AddValueFromBoneName(FName BoneName, int Value, FGameplayTag ValueType);
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
@@ -33,11 +37,11 @@ public:
 
 	FGameplayTag GetBodyPartFromBoneName(FName BoneName) const;
 
-protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TArray<TObjectPtr<UFretteBodyPartData>> BodyPartData;
+
+protected:
+	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TObjectPtr<UFretteBonesToTagData> BoneTagDataAsset;

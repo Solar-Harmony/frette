@@ -16,6 +16,6 @@ public class FretteTarget : TargetRules
 
 	private void RegisterModulesCreatedByRider()
 	{
-		ExtraModuleNames.AddRange(new string[] { "FretteUI", "FretteEditor", "FretteUIEditor" });
+		ExtraModuleNames.AddRange(new string[] { "FretteUI" });
 	}
 }
