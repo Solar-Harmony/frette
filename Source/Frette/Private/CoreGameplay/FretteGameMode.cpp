@@ -244,7 +244,7 @@ void AFretteGameMode::OnPlayerDied(AFrettePlayerCharacter* PlayerCharacter)
 
 bool AFretteGameMode::GetIfAllPlayersDead() const
 {
-	for (const auto Player : Players)
+	for (const auto& Player : Players)
 	{
 		if (!Player->GetIsDead())
 			return false;
