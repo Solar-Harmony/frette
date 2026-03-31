@@ -14,8 +14,9 @@ class UFretteRangedWeaponItem : public UFretteWeaponItem
 
 public:
 	FRETTE_ITEM_DATA_GETTER(UFretteRangedWeaponDataAsset)
-	
+
 	int GetCurrentAmmo() const { return CurrentClipAmmo; }
+
 	void UseAmmo();
 	void Reload();
 
@@ -25,7 +26,7 @@ protected:
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 		DOREPLIFETIME_CONDITION(UFretteRangedWeaponItem, CurrentClipAmmo, COND_OwnerOnly);
 	}
-	
+
 private:
 	UPROPERTY(Replicated)
 	int CurrentClipAmmo;
@@ -35,24 +36,27 @@ UCLASS()
 class UFretteRangedWeaponDataAsset : public UFretteWeaponItemDataAsset
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(EditDefaultsOnly)
 	int MaxClipAmmo = 30;
-	
+
 	UPROPERTY(EditAnywhere)
 	FRuntimeFloatCurve DistanceDamageFalloff;
-	
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AFretteProjectile> ProjectileType;
-	
+
+	UPROPERTY(EditDefaultsOnly)
+	FTransform ProjectileSpawnTransform;
+
 private:
 	virtual const UClass* GetRuntimeItemClass() const override { return UFretteRangedWeaponItem::StaticClass(); }
-	
+
 	virtual void InitializeItem(UFretteInventoryItem* Item) override
 	{
 		Super::InitializeItem(Item);
-		
+
 		UFretteRangedWeaponItem* RangedWeaponItem = Cast<UFretteRangedWeaponItem>(Item);
 		check(RangedWeaponItem);
 		RangedWeaponItem->Reload();

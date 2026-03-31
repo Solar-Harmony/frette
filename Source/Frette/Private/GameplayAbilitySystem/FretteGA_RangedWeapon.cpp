@@ -6,15 +6,19 @@
 
 void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* WeaponInstance)
 {
-	ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
+	const AActor* WeaponActor = WeaponInstance->SpawnedActor;
 
-	// TODO: Devrait utiliser un socket/muzzle location plutôt que le PawnViewLocation
-	FVector MuzzleLocation = Character->GetPawnViewLocation();
+	const FTransform WeaponWorldTransform = WeaponActor->GetActorTransform();
+	const FTransform ProjectileSpawnTransform = WeaponInstance->GetData()->ProjectileSpawnTransform;
+	const FTransform SpawnWorldTransform = ProjectileSpawnTransform * WeaponWorldTransform;
+	const FVector MuzzleLocation = SpawnWorldTransform.GetLocation();
+	const APawn* InstigatorPawn = WeaponInstance->GetOwningPlayer();
 
-	// Utilise le controller.Rotation pour les IA ce qui n'est peut-être pas ce que l'on veux
-	FRotator AimRotation = Character->GetBaseAimRotation();
+	const AController* Controller = InstigatorPawn ? InstigatorPawn->GetController() : nullptr;
 
-	MuzzleLocation += AimRotation.Vector() * 100.f;
+	ensure(Controller);
+
+	FRotator SpawnRotation = WeaponInstance->GetOwningPlayer()->GetControlRotation();
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Instigator = WeaponInstance->GetOwningPlayer();
@@ -24,9 +28,10 @@ void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* Weap
 	GetWorld()->SpawnActor<AFretteProjectile>(
 		WeaponInstance->GetData()->ProjectileType,
 		MuzzleLocation,
-		AimRotation,
+		SpawnRotation,
 		SpawnParams
 		);
+
 }
 
 UFretteRangedWeaponItem* UFretteGA_RangedWeapon::GetWeaponInstance() const

@@ -1,6 +1,8 @@
 #include "Player/FrettePlayerController.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/HUD.h"
 #include "Input/FretteInputComponent.h"
 #include "Player/FrettePlayerState.h"
 
@@ -25,6 +27,11 @@ void AFrettePlayerController::BeginPlay()
 	{
 		Input->AddMappingContext(DefaultInputContext, 0);
 	}
+
+	if (IsLocalController() && HUDClass)
+	{
+		GetWorld()->GetAuthGameMode()->HUDClass = HUDClass;
+	}
 }
 
 void AFrettePlayerController::Client_OnClueGenerated_Implementation(const FText& ClueText)
@@ -46,7 +53,7 @@ void AFrettePlayerController::SetupInputComponent()
 void AFrettePlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	
+
 	if (IsLocalController())
 	{
 		SetupWidgetsAndViewModels();

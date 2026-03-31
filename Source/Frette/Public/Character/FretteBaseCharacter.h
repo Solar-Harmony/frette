@@ -16,9 +16,12 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 {
 	GENERATED_BODY()
 
+public:
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsAiming = false;
+
 protected:
 	AFretteBaseCharacter();
-
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> AbilitySystemComponent;
 
