@@ -3,6 +3,8 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayEffectTypes.h"
+#include "PhysicsEngine/PhysicsAsset.h"
+#include "PhysicsEngine/SkeletalBodySetup.h"
 
 AFretteProjectile::AFretteProjectile()
 {
@@ -16,7 +18,8 @@ AFretteProjectile::AFretteProjectile()
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-	CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	CollisionComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECR_Block);
 	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
 	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 
@@ -37,6 +40,16 @@ void AFretteProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 {
 	if (HasAuthority() && OtherActor)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Hit component: %s"), *Hit.GetComponent()->GetName()));
+		if (USkeletalMeshComponent* SkelMesh = Cast<USkeletalMeshComponent>(Hit.GetComponent()))
+		{
+			if (SkelMesh->GetPhysicsAsset() && Hit.Item != INDEX_NONE)
+			{
+				USkeletalBodySetup* HitBody = SkelMesh->GetPhysicsAsset()->SkeletalBodySetups[Hit.Item];
+				FName HitPhysBone = HitBody->BoneName;
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Hit bone: %s"), *HitPhysBone.ToString()));
+			}
+		}
 		ApplyDamage(OtherActor, Hit);
 		Destroy();
 	}
