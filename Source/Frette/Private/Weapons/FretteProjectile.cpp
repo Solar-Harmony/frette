@@ -3,6 +3,8 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayEffectTypes.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
+#include "Components/BodyPart/FretteBodyPartTags.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "PhysicsEngine/SkeletalBodySetup.h"
 
@@ -18,7 +20,11 @@ AFretteProjectile::AFretteProjectile()
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	//Doit ignorer le collider du cylindre du joueur
 	CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+
+	//Mais pas les colliders des meshes
 	CollisionComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECR_Block);
 	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
 	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
@@ -40,42 +46,28 @@ void AFretteProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 {
 	if (HasAuthority() && OtherActor)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Hit component: %s"), *Hit.GetComponent()->GetName()));
 		if (USkeletalMeshComponent* SkelMesh = Cast<USkeletalMeshComponent>(Hit.GetComponent()))
 		{
 			if (SkelMesh->GetPhysicsAsset() && Hit.Item != INDEX_NONE)
 			{
-				USkeletalBodySetup* HitBody = SkelMesh->GetPhysicsAsset()->SkeletalBodySetups[Hit.Item];
-				FName HitPhysBone = HitBody->BoneName;
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Hit bone: %s"), *HitPhysBone.ToString()));
+				UFretteBodyPartComponent* BodyPart = OtherActor->GetComponentByClass<UFretteBodyPartComponent>();
+				if (!BodyPart)
+				{
+					Destroy();
+					return;
+				}
+
+				const USkeletalBodySetup* HitBody = SkelMesh->GetPhysicsAsset()->SkeletalBodySetups[Hit.Item];
+				const FName HitPhysBone = HitBody->BoneName;
+				ApplyDamage(BodyPart, HitPhysBone);
 			}
 		}
-		ApplyDamage(OtherActor, Hit);
-		Destroy();
 	}
+
+	Destroy();
 }
 
-void AFretteProjectile::ApplyDamage(AActor* Target, const FHitResult& Hit)
+void AFretteProjectile::ApplyDamage(UFretteBodyPartComponent* BodyPartComponent, const FName HitBoneName)
 {
-
-	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
-
-	if (!TargetASC)
-	{
-		Destroy();
-		return;
-	}
-
-	UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetInstigator());
-	check(SourceASC && DamageEffectClass);
-
-	FGameplayEffectContextHandle EffectContext = SourceASC->MakeEffectContext();
-	EffectContext.AddHitResult(Hit);
-
-	FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(
-		DamageEffectClass, 1, EffectContext);
-
-	check(SpecHandle.IsValid())
-
-	SourceASC->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), TargetASC);
+	BodyPartComponent->AddValueFromBoneName(HitBoneName, -DamageAmount, TAG_BodyPartValues_Health);
 }
