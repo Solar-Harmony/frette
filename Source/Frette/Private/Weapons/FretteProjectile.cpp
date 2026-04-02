@@ -7,6 +7,7 @@
 #include "Components/BodyPart/FretteBodyPartTags.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "PhysicsEngine/SkeletalBodySetup.h"
+#include "Util/FretteCollisionChannels.h"
 
 AFretteProjectile::AFretteProjectile()
 {
@@ -25,7 +26,7 @@ AFretteProjectile::AFretteProjectile()
 	CollisionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
 	//Mais pas les colliders des meshes
-	CollisionComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECR_Block);
+	CollisionComponent->SetCollisionResponseToChannel(ECC_CharacterMesh, ECR_Block);
 	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
 	CollisionComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 
@@ -44,26 +45,28 @@ void AFretteProjectile::BeginPlay()
 
 void AFretteProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (HasAuthority() && OtherActor)
+	if (!HasAuthority() || !OtherActor)
 	{
-		if (USkeletalMeshComponent* SkelMesh = Cast<USkeletalMeshComponent>(Hit.GetComponent()))
-		{
-			if (SkelMesh->GetPhysicsAsset() && Hit.Item != INDEX_NONE)
-			{
-				UFretteBodyPartComponent* BodyPart = OtherActor->GetComponentByClass<UFretteBodyPartComponent>();
-				if (!BodyPart)
-				{
-					Destroy();
-					return;
-				}
-
-				const USkeletalBodySetup* HitBody = SkelMesh->GetPhysicsAsset()->SkeletalBodySetups[Hit.Item];
-				const FName HitPhysBone = HitBody->BoneName;
-				ApplyDamage(BodyPart, HitPhysBone);
-			}
-		}
+		Destroy();
+		return;
 	}
 
+	UFretteBodyPartComponent* BodyPart = OtherActor->GetComponentByClass<UFretteBodyPartComponent>();
+	if (!BodyPart)
+	{
+		Destroy();
+		return;
+	}
+	USkeletalMeshComponent* SkelMesh = Cast<USkeletalMeshComponent>(Hit.GetComponent());
+	if (!SkelMesh || !SkelMesh->GetPhysicsAsset() || Hit.Item == INDEX_NONE)
+	{
+		Destroy();
+		return;
+	}
+
+	const USkeletalBodySetup* HitBody = SkelMesh->GetPhysicsAsset()->SkeletalBodySetups[Hit.Item];
+	const FName HitPhysBone = HitBody->BoneName;
+	ApplyDamage(BodyPart, HitPhysBone);
 	Destroy();
 }
 

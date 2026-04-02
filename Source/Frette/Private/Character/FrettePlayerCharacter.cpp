@@ -9,6 +9,7 @@
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Player/FrettePlayerState.h"
+#include "Util/FretteCollisionChannels.h"
 
 class AFrettePlayerState;
 
@@ -58,12 +59,12 @@ void AFrettePlayerCharacter::BeginPlay()
 	MeshComponent->SetAllBodiesSimulatePhysics(false);
 	MeshComponent->RecreatePhysicsState();
 
-	GetMesh()->SetCollisionObjectType(ECC_GameTraceChannel2);
+	GetMesh()->SetCollisionObjectType(ECC_CharacterMesh);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
-	GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_CharacterMesh, ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_CharacterMesh, ECR_Ignore);
 
 }
 
