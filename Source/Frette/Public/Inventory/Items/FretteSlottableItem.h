@@ -15,10 +15,10 @@ class UFretteSlottableItem : public UFretteInventoryItem
 
 public:
 	FRETTE_ITEM_DATA_GETTER(UFretteSlottableItemDataAsset)
-	
+
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	int32 SlotID = -1;
-	
+
 	virtual void OnEquipped();
 	virtual void OnUnequipped();
 
@@ -38,12 +38,15 @@ class UFretteSlottableItemDataAsset : public UFretteInventoryItemDataAsset
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (Categories = "Frette.BodyPart"))
 	FGameplayTag ItemSlotTag;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	FFretteAbilitySet GrantedAbilities;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FFretteGameplayEffectConfig> GrantedEffects;
-	
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UAnimInstance> AnimLayer;
+
 	virtual const UClass* GetRuntimeItemClass() const override { return UFretteSlottableItem::StaticClass(); }
 };
