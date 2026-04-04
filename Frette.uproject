@@ -89,6 +89,14 @@
 		{
 			"Name": "PCGNiagaraInterop",
 			"Enabled": true
+		},
+		{
+			"Name": "Water",
+			"Enabled": true
+		},
+		{
+			"Name": "PCGWaterInterop",
+			"Enabled": true
 		}
 	]
 }
