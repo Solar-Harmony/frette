@@ -36,9 +36,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerLook(FVector2D LookAxis);
 
-	UFUNCTION(BlueprintCallable)
-	void DoPlayerJump();
-
 	bool GetIsDead() const { return bIsDead; }
 
 	UPROPERTY()
