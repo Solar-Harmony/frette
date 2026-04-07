@@ -17,10 +17,17 @@ public:
 	{
 		SetIsReplicatedByDefault(true);
 	}
-	
+
 	UFUNCTION(Server, Reliable)
 	void EquipItem(UFretteSlottableItem* Item) const;
 
 	UFUNCTION(Server, Reliable)
 	void UnequipItem(UFretteSlottableItem* Item) const;
+
+	//J'ai besoin que cela run sur le client aussi pour le animation layer
+	UFUNCTION(Client, Reliable)
+	void Client_OnItemEquipped(UFretteSlottableItem* Item) const;
+
+	UFUNCTION(Client, Reliable)
+	void Client_OnItemUnequipped(UFretteSlottableItem* Item) const;
 };
