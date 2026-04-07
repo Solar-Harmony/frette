@@ -102,11 +102,6 @@ void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 	AddControllerPitchInput(LookAxis.Y);
 }
 
-void AFrettePlayerCharacter::DoPlayerJump()
-{
-	Jump();
-}
-
 //Set la position de la caméra a la position du socket de tête du mesh (pour les animations)
 //Et smooth la rotation pour avoir moins de jitter de petit movement de la souris
 void AFrettePlayerCharacter::CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult)
