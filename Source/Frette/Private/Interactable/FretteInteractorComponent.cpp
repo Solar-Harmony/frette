@@ -65,19 +65,20 @@ void UFretteInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	UpdateInteractableTarget();
 }
 
-void UFretteInteractorComponent::Interact() const
+void UFretteInteractorComponent::Interact()
 {
 	if (CurrentHoveredActor.GetObject())
 	{
-		const UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
+		UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
 		if (IsValid(Interactable))
 		{
+			CurrentInteractable = Interactable;
 			Server_Interact(Interactable->GetOwner()); // TODO: Suboptimal
 		}
 	}
 }
 
-void UFretteInteractorComponent::Server_Interact_Implementation(AActor* Interactable) const
+void UFretteInteractorComponent::Server_Interact_Implementation(AActor* Interactable)
 {
 	// TODO: the server should validate by raycasting again, to prevent cheating
 	require(IsValid(Interactable));
@@ -87,7 +88,34 @@ void UFretteInteractorComponent::Server_Interact_Implementation(AActor* Interact
 
 	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
 	require(IsValid(Interactor));
+
 	InteractableComponent->OnInteract.Broadcast(Interactor);
+}
+
+void UFretteInteractorComponent::EndInteract()
+{
+	if (!CurrentInteractable)
+		return;
+
+	const UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
+	if (IsValid(Interactable))
+	{
+		CurrentInteractable = nullptr;
+		Server_EndInteract(Interactable->GetOwner());
+	}
+}
+
+void UFretteInteractorComponent::Server_EndInteract_Implementation(AActor* Interactable)
+{
+	require(IsValid(Interactable));
+
+	const UFretteInteractableComponent* InteractableComponent = Interactable->GetComponentByClass<UFretteInteractableComponent>();
+	require(IsValid(InteractableComponent))
+
+	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
+	require(IsValid(Interactor));
+
+	InteractableComponent->OnInteractEnd.Broadcast(Interactor);
 }
 
 void UFretteInteractorComponent::UpdateInteractableTarget()

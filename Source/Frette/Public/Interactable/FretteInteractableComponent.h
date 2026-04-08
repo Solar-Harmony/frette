@@ -10,6 +10,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEndHover);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, AFrettePlayerCharacter*, Instigator);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteractEnd, AFrettePlayerCharacter*, Instigator);
+
 UCLASS(ClassGroup=(Frette), meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFretteInteractableComponent : public UActorComponent
 {
@@ -28,6 +30,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInteract OnInteract;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnInteract OnInteractEnd;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	TObjectPtr<UStaticMeshComponent> Mesh;
