@@ -27,6 +27,10 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 		NumCluesFound++;
 		return Template->GenerateClueText(Info);
 	}
+	else if (PickedType == EClueType::MainObjective)
+	{
+		LastPrimaryClueFoundTime = GetWorld()->GetTimeSeconds();
+	}
 
 	const bool bIsPrimaryClue = PickedType == EClueType::MainObjective;
 	const AFretteLandmark* POI = GetRandomLandmark(bIsPrimaryClue);
@@ -116,6 +120,7 @@ bool AFretteGameMode::IsGameEnded() const
 void AFretteGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	LastPrimaryClueFoundTime = GetWorld()->GetTimeSeconds();
 
 	for (TActorIterator<AFretteMainObjective> It(GetWorld()); It; ++It)
 	{
@@ -161,48 +166,67 @@ void AFretteGameMode::BeginPlay()
 EClueType AFretteGameMode::PickNextClueType() const
 {
 	// this exists to suppress the chance of getting a primary clue early-game
-	const float Ramp = 1.0f - FMath::Exp(-NumCluesFound * ClueRatioRampSteepness);
-
+	const float Ramp = powf(float(NumCluesFound + 1) / NumCluesPlaced, RampDegree);
+	
+	// past a certain number of clues found or even when too much time has passed since the
+	// last primary clue found, we want to start biasing the probabilities heavily
+	const float TimeSinceLastPrimary = GetWorld()->GetTimeSeconds() - LastPrimaryClueFoundTime;
+	const float AfterThreshold = fmax(0.0f, NumCluesFound + 1.f - (BiasThresholdRatio * NumCluesPlaced));
+	const float ThresholdForce = AfterThreshold / (NumCluesPlaced * (1.0f - BiasThresholdRatio));
+	const float TimeForce = FMath::Clamp(TimeSinceLastPrimary / TimeThreshold, 0.f, 1.f);
+	// We want to reduce the force if primary clues have already been found
+	const float BiasForce = fmax(ThresholdForce, TimeForce) / (NumPrimaryCluesFound + 1.f);
+	
 	const float DudExpectation = DudClueRatioTarget * (NumCluesFound + 1);
 	const float DudDeficit = fmax(0.0f, DudExpectation - NumDudCluesFound);
-	const float DudProbability = DudDeficit / (NumCluesFound + 1);
+	float DudProbability = DudDeficit / (NumCluesFound + 1);
+	DudProbability = FMath::Lerp(DudProbability, 0.f, BiasForce);
+	
+	UE_LOG(LogFrette, Log, TEXT("============================================= Clue gen ==========================================="));
+	UE_LOG(LogFrette, Log, TEXT("Clue gen: NumCluesFound[%d] NumPrimaryCluesFound[%d] NumDudCluesFound[%d]"), NumCluesFound, NumPrimaryCluesFound, NumDudCluesFound);
+	UE_LOG(LogFrette, Log, TEXT("Clue gen: Ramp[%f] TimeSinceLastPrimary[%f/%f] ThresholdForce[%f] TimeForce[%f] BiasForce[%f]"), Ramp, TimeSinceLastPrimary, TimeThreshold, ThresholdForce, TimeForce, BiasForce);
+	UE_LOG(LogFrette, Log, TEXT("Clue gen: DudDeficit[%f] DudProbability[%f]"), DudDeficit, DudProbability);
 
 	float Choice = FMath::FRand();
 
 	if (Choice < DudProbability)
 	{
-		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Dud (P_dud=%f, ramp=%f, deficit=%f)"), NumCluesFound + 1, NumCluesPlaced, DudProbability, Ramp, DudDeficit);
+		UE_LOG(LogFrette, Log, TEXT("Clue gen: Clue %d/%d -> Dud"), NumCluesFound + 1, NumCluesPlaced);
 		return EClueType::Dud;
 	}
-
+	
 	if (NearLandmarks.IsEmpty())
 	{
-		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Secondary (all primary landmarks exhausted)"), NumCluesFound + 1, NumCluesPlaced);
+		UE_LOG(LogFrette, Log, TEXT("Clue gen: Clue %d/%d -> Secondary (all primary landmarks exhausted)"), NumCluesFound + 1, NumCluesPlaced);
 		return EClueType::PointOfInterest;
 	}
 
 	if (FarLandmarks.IsEmpty())
 	{
-		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Primary (all secondary landmarks exhausted)"), NumCluesFound + 1, NumCluesPlaced);
+		UE_LOG(LogFrette, Log, TEXT("Clue gen: Clue %d/%d -> Primary (all secondary landmarks exhausted)"), NumCluesFound + 1, NumCluesPlaced);
 		return EClueType::MainObjective;
 	}
-
-	const float PrimaryExpectation = PrimaryCluesRatioTarget * (NumCluesFound + 1) * Ramp;
+	
+	const float PrimaryExpectation = PrimaryCluesRatioTarget * (NumCluesFound + 1);
 	const float PrimaryDeficit = fmax(0.0f, PrimaryExpectation - NumPrimaryCluesFound);
-	const float PrimaryProbability = PrimaryDeficit / (NumCluesFound + 1);
+	float PrimaryProbability = PrimaryDeficit / (NumCluesFound + 1);
+	PrimaryProbability = FMath::Lerp(PrimaryProbability, 1.0, BiasForce) * Ramp;
 
 	// This is done implicitly by the checks, but needed for logs
 	const float SecondaryProbability = 1.0f - DudProbability - PrimaryProbability;
+	
+	UE_LOG(LogFrette, Log, TEXT("Clue gen: PrimaryDeficit[%f] PrimaryProbability[%f]"), PrimaryDeficit, PrimaryProbability);
+	UE_LOG(LogFrette, Log, TEXT("Clue gen: Secondary[%f]"), SecondaryProbability);
 
 	Choice -= DudProbability;
 
 	if (Choice < PrimaryProbability)
 	{
-		UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Primary (P_primary=%f, P_dud=%f, P_Secondary=%f, ramp=%f)"), NumCluesFound + 1, NumCluesPlaced, PrimaryProbability, DudProbability, SecondaryProbability, Ramp);
+		UE_LOG(LogFrette, Log, TEXT("Clue gen: Clue %d/%d -> Primary"), NumCluesFound + 1, NumCluesPlaced);
 		return EClueType::MainObjective;
 	}
 
-	UE_LOG(LogFrette, Log, TEXT("Clue %d/%d -> Secondary (P_primary=%f, P_dud=%f, P_Secondary=%f, ramp=%f)"), NumCluesFound + 1, NumCluesPlaced, PrimaryProbability, DudProbability, SecondaryProbability, Ramp);
+	UE_LOG(LogFrette, Log, TEXT("Clue gen: Clue %d/%d -> Secondary"), NumCluesFound + 1, NumCluesPlaced);
 	return EClueType::PointOfInterest;
 }
 

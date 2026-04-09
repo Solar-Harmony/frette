@@ -53,10 +53,18 @@ private:
 	int32 NumCluesFound = 0;
 	int32 NumPrimaryCluesFound = 0;
 	int32 NumDudCluesFound = 0;
+	
+	// The secondary ratio is the rest
 	const float PrimaryCluesRatioTarget = 0.3f;
-	const float DudClueRatioTarget = 0.1f;
-	// Both ratio targets start at 0.0, this is the steepness of the exponent curve ramping them up
-	const float ClueRatioRampSteepness = 0.25f;
+	const float DudClueRatioTarget = 0.15f;
+	
+	// Greater than 1 will make the ramp concave up more and more
+	const float RampDegree = 1.3f;
+	
+	const float BiasThresholdRatio = 0.5f;
+	const float TimeThreshold = 60.f * 7.f; // 7 minutes without finding a primary clue will max out the bias
+	
+	float LastPrimaryClueFoundTime = 0.0f;
 
 	EClueType PickNextClueType() const;
 
