@@ -1,8 +1,8 @@
 #include "Components/BodyPart/FretteBodyPartInstance.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Character/FretteBaseCharacter.h"
 #include "Components/BodyPart/FretteBodyPartContext.h"
 #include "Components/BodyPart/EffectRules/FretteDeltaValueRule.h"
-#include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
 
 void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner)

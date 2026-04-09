@@ -2,8 +2,6 @@
 #include "AbilitySystemComponent.h"
 #include "Character/FretteNotificationsComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/FretteTemperatureComponent.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Equipment/FretteEquipmentComponent.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
@@ -40,12 +38,6 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("Notifications Component"));
 	NotificationsComponent->SetIsReplicated(true);
-
-	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
-	BodyPartComponent->SetIsReplicated(true);
-
-	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
-	BodyTemperatureComponent->SetIsReplicated(true);
 }
 
 void AFrettePlayerCharacter::BeginPlay()

@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "Components/FallDamageComponent.h"
+#include "Components/FretteTemperatureComponent.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Equipment/FretteEquipmentComponent.h"
 #include "GameFramework/Character.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
@@ -19,6 +21,12 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 public:
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsAiming = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
 	AFretteBaseCharacter();

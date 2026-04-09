@@ -11,6 +11,12 @@ AFretteBaseCharacter::AFretteBaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	FallDamageComponent = CreateDefaultSubobject<UFallDamageComponent>(TEXT("FallDamageComponent"));
 	SetReplicates(true);
+
+	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
+	BodyPartComponent->SetIsReplicated(true);
+
+	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
+	BodyTemperatureComponent->SetIsReplicated(true);
 }
 
 void AFretteBaseCharacter::ApplyStartupEffects()

@@ -3,12 +3,13 @@
 #include "CoreMinimal.h"
 #include "FretteBodyPartData.h"
 #include "FretteBodyPartEffectRule.h"
-#include "Character/FretteBaseCharacter.h"
+#include "Abilities/GameplayAbilityTypes.h"
 #include "UObject/Object.h"
 #include "FretteBodyPartInstance.generated.h"
 
 struct FGameplayTag;
 class UFretteBodyPartData;
+class AFretteBaseCharacter;
 
 USTRUCT()
 struct FFretteAccumulatedValueEntry

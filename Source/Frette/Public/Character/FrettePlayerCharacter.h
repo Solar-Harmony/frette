@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
 
 #include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
@@ -53,12 +52,6 @@ public:
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
 
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;
