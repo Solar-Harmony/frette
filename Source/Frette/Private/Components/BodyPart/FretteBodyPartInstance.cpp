@@ -123,7 +123,7 @@ void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventT
 
 	for (const FFretteEffectRuleEntry& RuleEntry : *Rules)
 	{
-		if (!RuleEntry.Rule || RuleEntry.Effects.Num() == 0 && RuleEntry.Abilities.Num() == 0)
+		if (!RuleEntry.Rule || (RuleEntry.Effects.Num() == 0 && RuleEntry.Abilities.Num() == 0))
 			continue;
 
 		if (RuleEntry.Rule->CheckIfTriggers(Context))
