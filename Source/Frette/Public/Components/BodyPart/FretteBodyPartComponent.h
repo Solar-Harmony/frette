@@ -31,6 +31,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
 	void AddValueToAllParts(int Value, UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
+	
+	// Retrieves the value specified attribute for either the Head or Torso, whichever is lowest.
+	UFUNCTION(BlueprintPure, Category = "Frette|Body Part")
+	float GetNormalizedCriticalValue(UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTag) const;
 
 	UFUNCTION()
 	void OnRep_BodyParts();

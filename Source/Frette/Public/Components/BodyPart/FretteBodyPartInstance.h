@@ -39,6 +39,8 @@ public:
 
 	UPROPERTY(ReplicatedUsing=OnRep_AccumulatedValues)
 	TArray<FFretteAccumulatedValueEntry> AccumulatedValues;
+	
+	UFretteBodyPartData* GetSourceData() const { return SourceData; }
 
 	UFUNCTION()
 	void OnRep_AccumulatedValues();

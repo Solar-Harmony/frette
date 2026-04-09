@@ -1,6 +1,7 @@
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 
 #include "GameplayTagContainer.h"
+#include "Components/BodyPart/FretteBodyPartTags.h"
 #include "Net/UnrealNetwork.h"
 
 UFretteBodyPartComponent::UFretteBodyPartComponent()
@@ -100,6 +101,23 @@ void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag ValueT
 				Instance->AddValueByTag(Value, ValueType);
 		}
 	}
+}
+
+float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag) const
+{
+	UFretteBodyPartInstance* Head = FindBodyPart(TAG_BodyPart_Head);
+	UFretteBodyPartInstance* Torso = FindBodyPart(TAG_BodyPart_Torso);
+	
+	const float HeadCurrent = Head->FindOrAddAccumulatedValue(ValueTag);
+	const float TorsoCurrent = Torso->FindOrAddAccumulatedValue(ValueTag);
+	const UFretteBodyPartData* Data = Head->GetSourceData();
+	const float HeadMax = Data->GetMaxValueForType(ValueTag);
+	const float TorsoMax = Data->GetMaxValueForType(ValueTag);
+	
+	const float HeadNormalized = HeadCurrent / HeadMax;
+	const float TorsoNormalized = TorsoCurrent / TorsoMax;
+	
+	return FMath::Min(HeadNormalized, TorsoNormalized);
 }
 
 void UFretteBodyPartComponent::OnRep_BodyParts() {}
