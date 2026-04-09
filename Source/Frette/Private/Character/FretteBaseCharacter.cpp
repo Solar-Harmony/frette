@@ -6,6 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
+void AFretteBaseCharacter::Die() {}
+
 AFretteBaseCharacter::AFretteBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;

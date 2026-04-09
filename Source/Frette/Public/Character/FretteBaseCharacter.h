@@ -28,6 +28,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
+	UFUNCTION(BlueprintCallable)
+	virtual void Die();
+
 protected:
 	AFretteBaseCharacter();
 	UPROPERTY()

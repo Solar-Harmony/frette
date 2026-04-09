@@ -140,21 +140,13 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 	SubToAttributeChanges();
 }
 
-void AFrettePlayerCharacter::SetIsDead(const bool bNewIsDead)
+void AFrettePlayerCharacter::Die()
 {
 	if (!HasAuthority())
 		return;
 
-	if (bIsDead == bNewIsDead)
-		return;
-
-	bIsDead = bNewIsDead;
-
-	if (bIsDead)
-	{
-		Multicast_HandleDeath(GetCharacterMovement()->Velocity);
-		OnPlayerDied.Broadcast(this);
-	}
+	Multicast_HandleDeath(GetCharacterMovement()->Velocity);
+	OnPlayerDied.Broadcast(this);
 }
 
 void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity)

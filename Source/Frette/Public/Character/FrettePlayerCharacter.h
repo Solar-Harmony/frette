@@ -43,8 +43,7 @@ public:
 	UPROPERTY()
 	FOnPlayerDied OnPlayerDied;
 
-	UFUNCTION(BlueprintCallable)
-	void SetIsDead(bool bNewIsDead);
+	virtual void Die() override;
 
 	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) override;
 
