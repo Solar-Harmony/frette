@@ -46,6 +46,7 @@ void AFrettePlayerController::SetupInputComponent()
 	UFretteInputComponent* FretteInputComponent = CastChecked<UFretteInputComponent>(InputComponent);
 	FretteInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased);
 	FretteInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ThisClass::OnInteractPressed);
+	FretteInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &ThisClass::OnInteractReleased);
 }
 
 // this is needed by the listen server, because since it is both client and server
@@ -63,6 +64,11 @@ void AFrettePlayerController::OnPossess(APawn* InPawn)
 void AFrettePlayerController::OnInteractPressed()
 {
 	Interactor->Interact();
+}
+
+void AFrettePlayerController::OnInteractReleased()
+{
+	Interactor->EndInteract();
 }
 
 void AFrettePlayerController::AbilityInputTagPressed(FGameplayTag InputTag)

@@ -67,4 +67,5 @@ private:
 	TObjectPtr<UFretteInteractorComponent> Interactor;
 
 	void OnInteractPressed();
+	void OnInteractReleased();
 };
