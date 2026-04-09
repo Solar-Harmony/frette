@@ -16,12 +16,13 @@ class UFretteWeaponItem : public UFretteSlottableItem
 public:
 	UFUNCTION()
 	virtual void OnEquipped() override;
-	
-protected:
+
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	TObjectPtr<AActor> SpawnedActor;
-	
+
+protected:
 	virtual void SpawnEquipmentActor(const UFretteWeaponItemDataAsset* ItemData);
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -33,7 +34,7 @@ UCLASS(Abstract, BlueprintType)
 class UFretteWeaponItemDataAsset : public UFretteSlottableItemDataAsset
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> ActorToSpawn;
@@ -43,6 +44,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FTransform AttachTransform;
-	
+
 	virtual const UClass* GetRuntimeItemClass() const override { return UFretteWeaponItem::StaticClass(); }
 };

@@ -61,6 +61,7 @@ public:
 	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
+	virtual void Tick(float DeltaSeconds) override;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> Camera;
 

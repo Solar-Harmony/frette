@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameplayEffect.h"
 #include "Components/SphereComponent.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "FretteProjectile.generated.h"
@@ -20,8 +21,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* CollisionComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category="Frette|Damage")
-	TSubclassOf<UGameplayEffect> DamageEffectClass;
+	UPROPERTY(EditDefaultsOnly, meta= (ClampMin=0), Category="Frette|Damage")
+	int DamageAmount = 10;
 
 protected:
 	virtual void BeginPlay() override;
@@ -31,6 +32,6 @@ protected:
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
 		const FHitResult& Hit);
 
-	void ApplyDamage(AActor* Target, const FHitResult& Hit);
+	void ApplyDamage(UFretteBodyPartComponent* BodyPartComponent, FName HitBoneName);
 
 };

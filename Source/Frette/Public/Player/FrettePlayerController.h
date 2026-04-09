@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "FrettePlayerState.h"
 #include "GameplayTagContainer.h"
+#include "InputAction.h"
 #include "GameFramework/PlayerController.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "Input/FretteInputConfig.h"
-#include "InputAction.h"
 #include "Interactable/FretteInteractorComponent.h"
 #include "FrettePlayerController.generated.h"
 
@@ -18,17 +18,17 @@ UCLASS()
 class FRETTE_API AFrettePlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnClientReceiveNewClue OnClientReceiveNewClue;
-	
+
 	UFUNCTION(Client, Reliable)
 	void Client_OnClueGenerated(const FText& ClueText);
 
 protected:
 	virtual void SetupInputComponent() override;
-	
+
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;
 
@@ -37,9 +37,12 @@ protected:
 
 private:
 	AFrettePlayerController();
-	
+
 	virtual void BeginPlay() override;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category = "Frette|HUD")
+	TSubclassOf<AHUD> HUDClass;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Frette")
 	TObjectPtr<class UInputMappingContext> DefaultInputContext;
 
@@ -59,7 +62,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> InteractAction;
-	
+
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UFretteInteractorComponent> Interactor;
 

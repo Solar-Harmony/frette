@@ -1,7 +1,5 @@
 #include "Character/FrettePlayerCharacter.h"
 #include "AbilitySystemComponent.h"
-#include "BodySetupCore.h"
-#include "EnhancedInputComponent.h"
 #include "Character/FretteNotificationsComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/FretteTemperatureComponent.h"
@@ -10,14 +8,15 @@
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "Inventory/FretteInventoryComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "PhysicsEngine/PhysicsAsset.h"
 #include "Player/FrettePlayerState.h"
+#include "Util/FretteCollisionChannels.h"
 
 class AFrettePlayerState;
 
 AFrettePlayerCharacter::AFrettePlayerCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	SetReplicatingMovement(true);
 
 	FPMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("First Person Mesh"));
@@ -59,6 +58,14 @@ void AFrettePlayerCharacter::BeginPlay()
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	MeshComponent->SetAllBodiesSimulatePhysics(false);
 	MeshComponent->RecreatePhysicsState();
+
+	GetMesh()->SetCollisionObjectType(ECC_CharacterMesh);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_CharacterMesh, ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_CharacterMesh, ECR_Ignore);
+
 }
 
 //Client side
@@ -104,23 +111,27 @@ void AFrettePlayerCharacter::DoPlayerJump()
 //Et smooth la rotation pour avoir moins de jitter de petit movement de la souris
 void AFrettePlayerCharacter::CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult)
 {
-	FRotator TargetRotation = GetControlRotation();
-	TargetRotation.Pitch = FRotator::NormalizeAxis(TargetRotation.Pitch);
-
-	SmoothedControlRotation.Pitch = FRotator::NormalizeAxis(SmoothedControlRotation.Pitch);
-
-	SmoothedControlRotation = FMath::RInterpTo(
-		SmoothedControlRotation,
-		TargetRotation,
-		DeltaTime,
-		LookSmoothingSpeed
-		);
-
 	FTransform HeadTransform = GetMesh()->GetSocketTransform(FName("head"), RTS_World);
 
 	OutResult.Location = HeadTransform.GetLocation();
 	OutResult.Rotation = SmoothedControlRotation;
 	OutResult.FOV = Camera->FieldOfView;
+}
+
+void AFrettePlayerCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	FRotator TargetRotation = GetControlRotation();
+	TargetRotation.Pitch = FRotator::NormalizeAxis(TargetRotation.Pitch);
+	SmoothedControlRotation.Pitch = FRotator::NormalizeAxis(SmoothedControlRotation.Pitch);
+
+	SmoothedControlRotation = FMath::RInterpTo(
+		SmoothedControlRotation,
+		TargetRotation,
+		DeltaSeconds,
+		LookSmoothingSpeed
+		);
 }
 
 //Je suis pas trop sur de ce qui devrait être appeler juste du coté serveur ou juste du coté client mais pour l'instant
