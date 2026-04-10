@@ -13,6 +13,14 @@ USTRUCT(BlueprintType)
 struct FFretteBodyPartChangeEvent
 {
 	GENERATED_BODY()
+	
+	FFretteBodyPartChangeEvent() = default;
+	
+	FFretteBodyPartChangeEvent(FGameplayTag InBodyPartTag, FGameplayTag InValueTag, int InNewValue, int InValueDelta)
+		: BodyPartTag(InBodyPartTag)
+		, ValueTypeTag(InValueTag)
+		, NewValue(InNewValue)
+		, ValueDelta(InValueDelta) {}
 
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag BodyPartTag;
@@ -21,10 +29,10 @@ struct FFretteBodyPartChangeEvent
 	FGameplayTag ValueTypeTag;
 	
 	UPROPERTY(BlueprintReadOnly)
-	int NewValue;
+	int NewValue = 0;
 	
 	UPROPERTY(BlueprintReadOnly)
-	int ValueDelta;
+	int ValueDelta = 0;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBodyPartValueChanged, const FFretteBodyPartChangeEvent&, ChangeEvent);

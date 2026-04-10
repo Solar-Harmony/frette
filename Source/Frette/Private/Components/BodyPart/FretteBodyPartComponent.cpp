@@ -45,12 +45,9 @@ void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPa
 		{
 			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
 			{
-				FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
-				FFretteBodyPartChangeEvent ChangeEvent;
-				ChangeEvent.BodyPartTag = BodyPartTag;
-				ChangeEvent.ValueTypeTag = ValueType;
-				ChangeEvent.NewValue = Result.AccumulatedValue;
-				ChangeEvent.ValueDelta = Value; // TODO: Doesnt handle clamping
+				const FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
+				// FIXME: Not using a proper value delta, also not sure about the way i do it
+				const FFretteBodyPartChangeEvent ChangeEvent(BodyPartTag, ValueType, Result.AccumulatedValue, Value);
 				Client_NotifyBodyPartChange(ChangeEvent);
 			}
 		}

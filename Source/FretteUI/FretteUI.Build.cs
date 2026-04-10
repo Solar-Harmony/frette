@@ -16,14 +16,15 @@ public class FretteUI : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
+                "CommonUI",
                 "CoreUObject",
                 "Engine",
+                "Frette",
+                "GameplayTags",
+                "ModelViewViewModel",
                 "Slate",
                 "SlateCore", 
-                "UMG",
-                "ModelViewViewModel",
-                "GameplayTags",
-                "Frette",
+                "UMG"
             }
         );
     }
