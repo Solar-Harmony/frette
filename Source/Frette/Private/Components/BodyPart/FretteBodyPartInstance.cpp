@@ -1,5 +1,6 @@
 #include "Components/BodyPart/FretteBodyPartInstance.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Components/BodyPart/FretteBodyPartContext.h"
 #include "Components/BodyPart/EffectRules/FretteDeltaValueRule.h"
 #include "Frette/Frette.h"
@@ -48,27 +49,25 @@ void UFretteBodyPartInstance::SetMinDeltaValueThreshold()
 	}
 }
 
-void UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag Tag)
+FFretteBodyPartContext UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag Tag)
 {
-	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
-
+	const UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
-		return;
-
-	FFretteBodyPartContext Context = FFretteBodyPartContext();
+		return FFretteBodyPartContext();
 
 	const float ClampedDelta = ClampDelta(Value, Tag);
-
 	if (ClampedDelta == 0.f)
-		return;
+		return FFretteBodyPartContext();
 
-	int CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
-
+	const int CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
+	
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("%s %s: %d"), *GetBodyPartTag().ToString(), *Tag.ToString(), CurrentValue));
 
+	FFretteBodyPartContext Context;
 	CheckDeltaRules(Tag, Context, ClampedDelta);
-
 	CheckAccumulatedValueRules(Tag, Context, CurrentValue);
+	
+	return Context;
 }
 
 int UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Tag)
@@ -281,7 +280,8 @@ void UFretteBodyPartInstance::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UFretteBodyPartInstance, AccumulatedValues);
-
+	DOREPLIFETIME(UFretteBodyPartInstance, SourceData);
+	DOREPLIFETIME(UFretteBodyPartInstance, OwnerCharacter);
 }
 
 void UFretteBodyPartInstance::OnRep_AccumulatedValues() {}

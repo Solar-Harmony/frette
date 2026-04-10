@@ -9,6 +9,26 @@
 
 class UFretteBodyPartData;
 
+USTRUCT(BlueprintType)
+struct FFretteBodyPartChangeEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTag BodyPartTag;
+
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTag ValueTypeTag;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int NewValue;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int ValueDelta;
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBodyPartValueChanged, const FFretteBodyPartChangeEvent&, ChangeEvent);
+
 UCLASS(meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFretteBodyPartComponent : public UActorComponent
 {
@@ -38,14 +58,20 @@ public:
 
 	UFUNCTION()
 	void OnRep_BodyParts();
+	
+	UFUNCTION(Client, Reliable)
+	void Client_NotifyBodyPartChange(const FFretteBodyPartChangeEvent& ChangeEvent);
 
 	FGameplayTag GetBodyPartFromBoneName(FName BoneName) const;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TArray<TObjectPtr<UFretteBodyPartData>> BodyPartData;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Frette|Body Part")
+	FOnBodyPartValueChanged OnBodyPartValueChanged;
 
 protected:
-	virtual void BeginPlay() override;
+	virtual void ReadyForReplication() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TObjectPtr<UFretteBonesToTagData> BoneTagDataAsset;

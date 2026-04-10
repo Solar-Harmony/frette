@@ -6,25 +6,26 @@
 
 UFretteBodyPartComponent::UFretteBodyPartComponent()
 {
+	SetIsReplicatedByDefault(true);
 	PrimaryComponentTick.bCanEverTick = true;
+	bReplicateUsingRegisteredSubObjectList = true;
+	SetComponentTickInterval(2.0f);
 }
 
-void UFretteBodyPartComponent::BeginPlay()
+void UFretteBodyPartComponent::ReadyForReplication()
 {
-	Super::BeginPlay();
-
-	SetComponentTickInterval(2.0f);
-
-	if (GetOwnerRole() == ROLE_Authority)
+	Super::ReadyForReplication();
+	
+	if (GetOwnerRole() != ROLE_Authority)
+		return;
+	
+	for (const auto& Data : BodyPartData)
 	{
-		for (const auto& Data : BodyPartData)
-		{
-			UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
-			Instance->Initialize(Data, Cast<AFretteBaseCharacter>(GetOwner()));
-			BodyPartInstances.Add(Instance);
+		UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
+		Instance->Initialize(Data, Cast<AFretteBaseCharacter>(GetOwner()));
+		BodyPartInstances.Add(Instance);
 
-			AddReplicatedSubObject(Instance);
-		}
+		AddReplicatedSubObject(Instance);
 	}
 }
 
@@ -44,7 +45,13 @@ void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPa
 		{
 			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
 			{
-				BodyPart->AddValueByTag(Value, ValueType);
+				FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
+				FFretteBodyPartChangeEvent ChangeEvent;
+				ChangeEvent.BodyPartTag = BodyPartTag;
+				ChangeEvent.ValueTypeTag = ValueType;
+				ChangeEvent.NewValue = Result.AccumulatedValue;
+				ChangeEvent.ValueDelta = Value; // TODO: Doesnt handle clamping
+				Client_NotifyBodyPartChange(ChangeEvent);
 			}
 		}
 	}
@@ -121,3 +128,8 @@ float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag
 }
 
 void UFretteBodyPartComponent::OnRep_BodyParts() {}
+
+void UFretteBodyPartComponent::Client_NotifyBodyPartChange_Implementation(const FFretteBodyPartChangeEvent& ChangeEvent)
+{
+	OnBodyPartValueChanged.Broadcast(ChangeEvent);
+}
