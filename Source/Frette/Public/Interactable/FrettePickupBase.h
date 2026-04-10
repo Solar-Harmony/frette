@@ -20,8 +20,9 @@ class FRETTE_API AFrettePickupBase : public AActor, public IFretteInteractableIn
 	
 public:	
 	AFrettePickupBase();
+	virtual void OnConstruction(const FTransform& Transform) override;
 	
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
 	TObjectPtr<UFretteInventoryItemDataAsset> ItemData;
 	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
@@ -35,10 +36,9 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void OnPickUp(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem);
-	
+
 protected:
 	virtual void BeginPlay() override;
-	virtual void OnConstruction(const FTransform& Transform) override;
 	
 	// overridable native implementation
 	virtual void OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem) {}
