@@ -8,7 +8,7 @@ bool UFretteBodyPartsGameplayEffectComponent::CanGameplayEffectApply(const FActi
 	return Cast<AFrettePlayerCharacter>(Owner) != nullptr;
 }
 
-void UFretteBodyPartsGameplayEffectComponent::OnGameplayEffectApplied(FActiveGameplayEffectsContainer& ActiveGEContainer, FGameplayEffectSpec& GESpec, FPredictionKey& PredictionKey) const
+void UFretteBodyPartsGameplayEffectComponent::OnGameplayEffectExecuted(FActiveGameplayEffectsContainer& ActiveGEContainer, FGameplayEffectSpec& GESpec, FPredictionKey& PredictionKey) const
 {
 	const AFrettePlayerCharacter* Owner = CastChecked<AFrettePlayerCharacter>(ActiveGEContainer.Owner->GetOwnerActor());
 	UFretteBodyPartComponent* BodyParts = Owner->BodyPartComponent;
