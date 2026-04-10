@@ -79,3 +79,5 @@ void AFretteBaseCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data)
 		MovementComp->MaxWalkSpeed = Data.NewValue;
 	}
 }
+
+void AFretteBaseCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity) {}

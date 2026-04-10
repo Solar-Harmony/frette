@@ -64,4 +64,8 @@ protected:
 	virtual void InitAbilityActorInfo();
 	void SubToAttributeChanges();
 	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
+
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_HandleDeath(FVector DeathVelocity);
+
 };

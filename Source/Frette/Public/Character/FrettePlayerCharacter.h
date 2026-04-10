@@ -75,8 +75,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_HandleDeath(FVector DeathVelocity);
+	virtual void Multicast_HandleDeath_Implementation(FVector FinalVelocity) override;
 
 	UPROPERTY(EditAnywhere)
 	bool bIsDead = false;
