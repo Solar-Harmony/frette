@@ -16,3 +16,20 @@ AFretteBaseCharacter* UFretteInventoryItem::GetOwningPlayer() const
 {
 	return Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
 }
+
+void UFretteInventoryItem::Use()
+{
+	AFretteBaseCharacter* Character = Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
+	if (!Character->HasAuthority())
+		return;
+
+	if (UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character))
+	{
+		for (const FFretteGameplayEffectConfig& EffectConfig : Data->EffectsAppliedOnUse)
+		{
+			ASC->ApplyEffect(EffectConfig, this);
+		}
+	}
+	
+	Use_Implementation();
+}

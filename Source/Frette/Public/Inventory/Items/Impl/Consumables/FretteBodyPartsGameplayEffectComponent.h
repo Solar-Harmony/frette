@@ -15,7 +15,7 @@ struct FFretteBodyPartGameplayEffectConfig
     UPROPERTY(EditDefaultsOnly, meta=(Categories="Frette.BodyPart"))
     FGameplayTag BodyPart;
 
-    UPROPERTY(EditDefaultsOnly, meta=(Categories="Frette.BodyPartValue"))
+    UPROPERTY(EditDefaultsOnly, meta=(Categories="Frette.BodyPartValues"))
     FGameplayTag Attribute;
 };
 

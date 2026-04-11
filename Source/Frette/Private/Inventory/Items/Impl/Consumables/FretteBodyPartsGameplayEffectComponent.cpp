@@ -1,16 +1,17 @@
 #include "Inventory/Items/Impl/Consumables/FretteBodyPartsGameplayEffectComponent.h"
 
 #include "Character/FrettePlayerCharacter.h"
+#include "Player/FrettePlayerState.h"
 
 bool UFretteBodyPartsGameplayEffectComponent::CanGameplayEffectApply(const FActiveGameplayEffectsContainer& ActiveGEContainer, const FGameplayEffectSpec& GESpec) const
 {
-	AActor* Owner = ActiveGEContainer.Owner->GetOwnerActor();
+	AActor* Owner = ActiveGEContainer.Owner->GetAvatarActor();
 	return Cast<AFrettePlayerCharacter>(Owner) != nullptr;
 }
 
 void UFretteBodyPartsGameplayEffectComponent::OnGameplayEffectExecuted(FActiveGameplayEffectsContainer& ActiveGEContainer, FGameplayEffectSpec& GESpec, FPredictionKey& PredictionKey) const
 {
-	const AFrettePlayerCharacter* Owner = CastChecked<AFrettePlayerCharacter>(ActiveGEContainer.Owner->GetOwnerActor());
+	const AFrettePlayerCharacter* Owner = CastChecked<AFrettePlayerCharacter>(ActiveGEContainer.Owner->GetAvatarActor());
 	UFretteBodyPartComponent* BodyParts = Owner->BodyPartComponent;
 	
 	for (const FFretteBodyPartGameplayEffectConfig& Config : BodyPartEffectConfigs)

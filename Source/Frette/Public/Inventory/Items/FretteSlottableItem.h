@@ -18,9 +18,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	int32 SlotID = -1;
-
+	
 	virtual void OnEquipped();
 	virtual void OnUnequipped();
+
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
