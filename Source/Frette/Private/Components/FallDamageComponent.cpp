@@ -4,6 +4,7 @@
 #include "Character/FretteBaseCharacter.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Components/BodyPart/FretteBodyPartTags.h"
+#include "Frette/Frette.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Effect_Movement_FallDamage, "Effect.Movement.FallDamage");
 
@@ -51,31 +52,25 @@ void UFallDamageComponent::OnJumpApexReached()
 
 void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 {
-	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
-
+	ensureMsgf(Config, TEXT("FallDamageComponent missing Config Data Asset"));
 	if (DistanceFallen > Config->MinFallHeight)
 		return;
 
-	ensureMsgf(Config, TEXT("FallDamageComponent missing Config Data Asset"));
-
+	const UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 	FGameplayEffectContextHandle EffectContext = ASC->MakeEffectContext();
 	EffectContext.AddSourceObject(this);
 
 	const FGameplayEffectSpecHandle NewHandle = ASC->MakeOutgoingSpec(Config->FallDamageEffect, 1, EffectContext);
-
-	const float DamageAmount = Config->DamageCurve.GetRichCurveConst()->Eval(FMath::Abs(DistanceFallen));
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Fall damage: %f"), DamageAmount));
-
-	NewHandle.Data->SetSetByCallerMagnitude(TAG_Effect_Movement_FallDamage, -DamageAmount);
-
 	ensureMsgf(NewHandle.IsValid(), TEXT("Probably need to set the DamageEffect in the Config"));
-
+	
+	const float DamageAmount = Config->DamageCurve.GetRichCurveConst()->Eval(FMath::Abs(DistanceFallen));
+	NewHandle.Data->SetSetByCallerMagnitude(TAG_Effect_Movement_FallDamage, -DamageAmount);
+	
 	UFretteBodyPartComponent* BodyPartComponent = Cast<UFretteBodyPartComponent>(OwnerCharacter->GetComponentByClass(UFretteBodyPartComponent::StaticClass()));
-
-	for (auto BoneTag : Config->AffectedBones)
+	for (const FGameplayTag BoneTag : Config->AffectedBones)
 	{
 		BodyPartComponent->AddValueFromBodyPartTag(BoneTag, -DamageAmount, TAG_BodyPartValues_Health);
 	}
-
+	
+	UE_LOG(LogFrette, Verbose, TEXT("%s took %d damage from falling %f cm"), *OwnerCharacter->GetName(), FMath::TruncToInt32(DamageAmount), DistanceFallen);
 }

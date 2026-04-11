@@ -2,6 +2,7 @@
 
 #include "GameplayTagContainer.h"
 #include "Components/BodyPart/FretteBodyPartTags.h"
+#include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
 
 UFretteBodyPartComponent::UFretteBodyPartComponent()
@@ -39,8 +40,8 @@ void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPa
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-			FString::Printf(TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString()));
+		UE_LOG(LogFrette, Verbose, TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
+		
 		if (BodyPartTag.IsValid())
 		{
 			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))

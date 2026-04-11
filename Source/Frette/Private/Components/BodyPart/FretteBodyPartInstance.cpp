@@ -61,8 +61,8 @@ FFretteBodyPartContext UFretteBodyPartInstance::AddValueByTag(const int Value, c
 
 	const int CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
 	
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("%s %s: %d"), *GetBodyPartTag().ToString(), *Tag.ToString(), CurrentValue));
-
+	FRETTE_LOG(Verbose, "%s of %s's %s changed by %f, now %d", *Tag.ToString(), *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), ClampedDelta, CurrentValue);
+	
 	FFretteBodyPartContext Context;
 	CheckDeltaRules(Tag, Context, ClampedDelta);
 	CheckAccumulatedValueRules(Tag, Context, CurrentValue);
@@ -155,8 +155,7 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 
 		OwnerASC->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
 
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow,
-			FString::Printf(TEXT("Applied effect %s to body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
+		FRETTE_LOG(Verbose, "%s's %s received effect '%s'", *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), *Effect->GetName());
 	}
 }
 
@@ -167,12 +166,11 @@ void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplay
 	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
 		return;
 
-	for (TSubclassOf Effect : Effects)
+	for (const TSubclassOf Effect : Effects)
 	{
 		OwnerASC->RemoveActiveGameplayEffectBySourceEffect(Effect, OwnerASC, 1);
 
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,
-			FString::Printf(TEXT("Removed effect %s from body part %s"), *Effect->GetName(), *SourceData->BodyPartTag.ToString()));
+		FRETTE_LOG(Verbose, "%s's %s lost effect '%s'", *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), *Effect->GetName());
 	}
 }
 
@@ -195,8 +193,7 @@ void UFretteBodyPartInstance::ApplyGameplayAbilities(const TArray<TSubclassOf<UG
 		FGameplayAbilitySpec Spec(AbilityClass, 1);
 		OwnerASC->GiveAbilityAndActivateOnce(Spec, &EventData);
 
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,
-			FString::Printf(TEXT("Applied ability %s"), *AbilityClass->GetName()));
+		FRETTE_LOG(Verbose, "%s gained gameplay ability '%s'.", *OwnerCharacter->GetName(), *AbilityClass->GetName());
 	}
 }
 
@@ -218,8 +215,7 @@ void UFretteBodyPartInstance::RemoveGameplayAbilities(const TArray<TSubclassOf<U
 		{
 			OwnerASC->ClearAbility(Spec->Handle);
 
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red,
-				FString::Printf(TEXT("Removed ability %s"), *AbilityClass->GetName()));
+			FRETTE_LOG(Verbose, "%s lost gameplay ability '%s'.", *OwnerCharacter->GetName(), *AbilityClass->GetName());
 		}
 	}
 }
