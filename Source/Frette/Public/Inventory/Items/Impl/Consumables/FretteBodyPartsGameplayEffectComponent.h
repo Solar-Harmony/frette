@@ -4,20 +4,7 @@
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
 #include "GameplayEffectComponent.h"
-#include "GameplayTagContainer.h"
 #include "FretteBodyPartsGameplayEffectComponent.generated.h"
-
-USTRUCT()
-struct FFretteBodyPartGameplayEffectConfig
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditDefaultsOnly, meta=(Categories="Frette.BodyPart"))
-    FGameplayTag BodyPart;
-
-    UPROPERTY(EditDefaultsOnly, meta=(Categories="Frette.BodyPartValues"))
-    FGameplayTag Attribute;
-};
 
 UCLASS()
 class FRETTE_API UFretteBodyPartsGameplayEffectComponent : public UGameplayEffectComponent
@@ -29,6 +16,7 @@ public:
 	virtual void OnGameplayEffectExecuted(FActiveGameplayEffectsContainer& ActiveGEContainer, FGameplayEffectSpec& GESpec, FPredictionKey& PredictionKey) const override;
         
 private:
-    UPROPERTY(EditDefaultsOnly)
-    TArray<FFretteBodyPartGameplayEffectConfig> BodyPartEffectConfigs;
+	// TODO: We need a custom context to provide this or smt
+	UPROPERTY(EditDefaultsOnly, meta=(Categories="Frette.BodyPartValues"))
+	FGameplayTag Attribute;
 };

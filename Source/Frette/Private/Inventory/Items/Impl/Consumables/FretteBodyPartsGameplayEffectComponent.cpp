@@ -1,7 +1,6 @@
 #include "Inventory/Items/Impl/Consumables/FretteBodyPartsGameplayEffectComponent.h"
 
 #include "Character/FrettePlayerCharacter.h"
-#include "Player/FrettePlayerState.h"
 
 bool UFretteBodyPartsGameplayEffectComponent::CanGameplayEffectApply(const FActiveGameplayEffectsContainer& ActiveGEContainer, const FGameplayEffectSpec& GESpec) const
 {
@@ -14,14 +13,10 @@ void UFretteBodyPartsGameplayEffectComponent::OnGameplayEffectExecuted(FActiveGa
 	const AFrettePlayerCharacter* Owner = CastChecked<AFrettePlayerCharacter>(ActiveGEContainer.Owner->GetAvatarActor());
 	UFretteBodyPartComponent* BodyParts = Owner->BodyPartComponent;
 	
-	for (const FFretteBodyPartGameplayEffectConfig& Config : BodyPartEffectConfigs)
+	for (auto Pair : GESpec.SetByCallerTagMagnitudes)
 	{
-		// TODO: We address body part values with 2 tags but SetByCaller uses 1 tag only
-		// so we can only apply either health or temperature on one body part per effect
-		// maybe use a custom context, or accept the limitation
-		const float Value = GESpec.GetSetByCallerMagnitude(Config.BodyPart, true, 0.0f);
-		const int32 IntValue = FMath::TruncToInt32(Value);
-		
-		BodyParts->AddValueFromBodyPartTag(Config.BodyPart, IntValue, Config.Attribute);
+		// TODO: check is Frette.BodyPart
+		const int32 Value = FMath::TruncToInt32(Pair.Value);
+		BodyParts->AddValueFromBodyPartTag(Pair.Key, Value, Attribute);
 	}
 }

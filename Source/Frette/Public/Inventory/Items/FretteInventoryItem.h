@@ -65,7 +65,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UStaticMesh> Mesh;
 	
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, DisplayName="Effects Applied on Item Use")
 	TArray<FFretteGameplayEffectConfig> EffectsAppliedOnUse;
 
 	UFretteInventoryItem* CreateRuntimeItem(UObject* OuterInventory)

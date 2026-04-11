@@ -18,6 +18,12 @@ struct FFretteGameplayEffectConfig
 	
 	UPROPERTY(EditAnywhere)
 	TMap<FGameplayTag, float> Magnitudes;
+	
+	UPROPERTY(EditAnywhere)
+	FGameplayTagContainer ParameterTags;
+	
+	UPROPERTY(EditAnywhere)
+	FGameplayTagContainer GrantedTags;
 };
 
 USTRUCT(BlueprintType)
