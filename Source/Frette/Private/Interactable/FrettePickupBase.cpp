@@ -46,6 +46,8 @@ void AFrettePickupBase::OnConstruction(const FTransform& Transform)
 	
 	require(!ItemData->Mesh.IsNull(), "Pickup actor '%s' has no mesh specified, so it will be invisible during play!", *GetName())
 	
+	Interactable->Message = FText::Format(NSLOCTEXT("Frette", "PickUpMessage", "[E] pick up {0}"), ItemData->DisplayName);
+	
 	// TODO: I've heard that LoadAsync has caveats but dont remember, should recheck when have time
 	ItemData->Mesh.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &AFrettePickupBase::OnItemMeshLoaded));
 }
