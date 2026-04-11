@@ -137,7 +137,11 @@ FActiveGameplayEffectHandle UFretteAbilitySystemComponent::ApplyEffect(const FFr
 		Spec->SetSetByCallerMagnitude(Magnitude.Key, Magnitude.Value);
 	}
 	
-	Spec->DynamicAssetTags.AppendTags(Config.ParameterTags);
+	for (auto Tag : Config.ParameterTags)
+	{
+		Spec->AddDynamicAssetTag(Tag);
+	}
+	
 	Spec->DynamicGrantedTags.AppendTags(Config.GrantedTags);
 	
 	return ApplyGameplayEffectSpecToSelf(*Spec);
