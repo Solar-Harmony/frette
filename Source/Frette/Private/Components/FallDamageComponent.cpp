@@ -72,5 +72,5 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 		BodyPartComponent->AddValueFromBodyPartTag(BoneTag, -DamageAmount, TAG_BodyPartValues_Health);
 	}
 	
-	UE_LOG(LogFrette, Verbose, TEXT("%s took %d damage from falling %f cm"), *OwnerCharacter->GetName(), FMath::TruncToInt32(DamageAmount), DistanceFallen);
+	FRETTE_LOG(Log, "%s took %d damage from falling %f cm", *OwnerCharacter->GetName(), FMath::TruncToInt32(DamageAmount), DistanceFallen);
 }

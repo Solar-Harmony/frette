@@ -38,7 +38,7 @@ void UFretteAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffect
 	Super::PostGameplayEffectExecute(Data);
 	if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{
-		FRETTE_LOG(Verbose, "MaxHealth of %s set to %f", *Data.Target.GetAvatarActor()->GetName(), GetMaxHealth());
+		FRETTE_LOG(Log, "MaxHealth of %s set to %f", *Data.Target.GetAvatarActor()->GetName(), GetMaxHealth());
 	}
 }
 

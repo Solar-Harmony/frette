@@ -40,7 +40,7 @@ void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPa
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
-		UE_LOG(LogFrette, Verbose, TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
+		UE_LOG(LogFrette, Log, TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
 		
 		if (BodyPartTag.IsValid())
 		{

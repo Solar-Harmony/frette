@@ -61,7 +61,7 @@ FFretteBodyPartContext UFretteBodyPartInstance::AddValueByTag(const int Value, c
 
 	const int CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
 	
-	FRETTE_LOG(Verbose, "%s of %s's %s changed by %f, now %d", *Tag.ToString(), *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), ClampedDelta, CurrentValue);
+	FRETTE_LOG(Log, "%s of %s's %s changed by %f, now %d", *Tag.ToString(), *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), ClampedDelta, CurrentValue);
 	
 	FFretteBodyPartContext Context;
 	CheckDeltaRules(Tag, Context, ClampedDelta);
@@ -155,7 +155,7 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 
 		OwnerASC->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
 
-		FRETTE_LOG(Verbose, "%s's %s received effect '%s'", *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), *Effect->GetName());
+		FRETTE_LOG(Log, "%s's %s received effect '%s'", *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), *Effect->GetName());
 	}
 }
 
@@ -170,7 +170,7 @@ void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplay
 	{
 		OwnerASC->RemoveActiveGameplayEffectBySourceEffect(Effect, OwnerASC, 1);
 
-		FRETTE_LOG(Verbose, "%s's %s lost effect '%s'", *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), *Effect->GetName());
+		FRETTE_LOG(Log, "%s's %s lost effect '%s'", *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), *Effect->GetName());
 	}
 }
 
@@ -193,7 +193,7 @@ void UFretteBodyPartInstance::ApplyGameplayAbilities(const TArray<TSubclassOf<UG
 		FGameplayAbilitySpec Spec(AbilityClass, 1);
 		OwnerASC->GiveAbilityAndActivateOnce(Spec, &EventData);
 
-		FRETTE_LOG(Verbose, "%s gained gameplay ability '%s'.", *OwnerCharacter->GetName(), *AbilityClass->GetName());
+		FRETTE_LOG(Log, "%s gained gameplay ability '%s'.", *OwnerCharacter->GetName(), *AbilityClass->GetName());
 	}
 }
 
@@ -215,7 +215,7 @@ void UFretteBodyPartInstance::RemoveGameplayAbilities(const TArray<TSubclassOf<U
 		{
 			OwnerASC->ClearAbility(Spec->Handle);
 
-			FRETTE_LOG(Verbose, "%s lost gameplay ability '%s'.", *OwnerCharacter->GetName(), *AbilityClass->GetName());
+			FRETTE_LOG(Log, "%s lost gameplay ability '%s'.", *OwnerCharacter->GetName(), *AbilityClass->GetName());
 		}
 	}
 }

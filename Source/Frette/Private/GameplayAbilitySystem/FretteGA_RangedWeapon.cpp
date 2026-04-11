@@ -61,5 +61,5 @@ void UFretteGA_RangedWeapon::ApplyCost(const FGameplayAbilitySpecHandle Handle, 
 
 	WeaponInstance->UseAmmo();
 	
-	FRETTE_LOG(Verbose, "%s's %s now has %d ammo left", *ActorInfo->OwnerActor->GetName(), *WeaponInstance->GetData()->GetName(), WeaponInstance->GetCurrentAmmo());
+	FRETTE_LOG(Log, "%s's %s now has %d ammo left", *ActorInfo->OwnerActor->GetName(), *WeaponInstance->GetData()->GetName(), WeaponInstance->GetCurrentAmmo());
 }
