@@ -65,6 +65,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UStaticMesh> Mesh;
 	
+	UPROPERTY(EditDefaultsOnly, Category="Consumable")
+	bool bConsumeOnUse = false;
+	
 	UPROPERTY(EditDefaultsOnly, DisplayName="Effects Applied on Item Use")
 	TArray<FFretteGameplayEffectConfig> EffectsAppliedOnUse;
 

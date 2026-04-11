@@ -22,7 +22,6 @@ public:
 	virtual void OnEquipped();
 	virtual void OnUnequipped();
 
-
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
