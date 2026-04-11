@@ -1,6 +1,7 @@
 #include "GameplayAbilitySystem/FretteGA_RangedWeapon.h"
 
 #include "Character/FretteBaseCharacter.h"
+#include "Frette/Frette.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Weapons/FretteProjectile.h"
 
@@ -59,6 +60,6 @@ void UFretteGA_RangedWeapon::ApplyCost(const FGameplayAbilitySpecHandle Handle, 
 	check(WeaponInstance);
 
 	WeaponInstance->UseAmmo();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,TEXT("Weapon current ammo: ") + FString::FromInt(WeaponInstance->GetCurrentAmmo()));
-
+	
+	FRETTE_LOG(Log, "%s's %s now has %d ammo left", *ActorInfo->OwnerActor->GetName(), *WeaponInstance->GetData()->GetName(), WeaponInstance->GetCurrentAmmo());
 }

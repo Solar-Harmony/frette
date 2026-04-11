@@ -130,14 +130,21 @@ FActiveGameplayEffectHandle UFretteAbilitySystemComponent::ApplyEffect(const FFr
 	FGameplayEffectContextHandle Context = MakeEffectContext();
 	Context.AddSourceObject(SourceObject);
 	
-	const FGameplayEffectSpecHandle Spec = MakeOutgoingSpec(Config.EffectClass, Config.Level, Context);
+	const TSharedPtr<FGameplayEffectSpec> Spec = MakeOutgoingSpec(Config.EffectClass, Config.Level, Context).Data;
 	
 	for (const TPair<FGameplayTag, float>& Magnitude : Config.Magnitudes)
 	{
-		Spec.Data.Get()->SetSetByCallerMagnitude(Magnitude.Key, Magnitude.Value);
+		Spec->SetSetByCallerMagnitude(Magnitude.Key, Magnitude.Value);
 	}
 	
-	return ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+	for (auto Tag : Config.ParameterTags)
+	{
+		Spec->AddDynamicAssetTag(Tag);
+	}
+	
+	Spec->DynamicGrantedTags.AppendTags(Config.GrantedTags);
+	
+	return ApplyGameplayEffectSpecToSelf(*Spec);
 }
 
 UFretteAbilitySystemComponent* UFretteAbilitySystemComponent::Get(class AFretteBaseCharacter* Character)

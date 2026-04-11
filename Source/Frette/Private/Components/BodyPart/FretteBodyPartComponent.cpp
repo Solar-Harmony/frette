@@ -1,29 +1,32 @@
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 
 #include "GameplayTagContainer.h"
+#include "Components/BodyPart/FretteBodyPartTags.h"
+#include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
 
 UFretteBodyPartComponent::UFretteBodyPartComponent()
 {
+	SetIsReplicatedByDefault(true);
 	PrimaryComponentTick.bCanEverTick = true;
+	bReplicateUsingRegisteredSubObjectList = true;
+	SetComponentTickInterval(2.0f);
 }
 
-void UFretteBodyPartComponent::BeginPlay()
+void UFretteBodyPartComponent::ReadyForReplication()
 {
-	Super::BeginPlay();
-
-	SetComponentTickInterval(2.0f);
-
-	if (GetOwnerRole() == ROLE_Authority)
+	Super::ReadyForReplication();
+	
+	if (GetOwnerRole() != ROLE_Authority)
+		return;
+	
+	for (const auto& Data : BodyPartData)
 	{
-		for (const auto& Data : BodyPartData)
-		{
-			UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
-			Instance->Initialize(Data, Cast<AFretteBaseCharacter>(GetOwner()));
-			BodyPartInstances.Add(Instance);
+		UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
+		Instance->Initialize(Data, Cast<AFretteBaseCharacter>(GetOwner()));
+		BodyPartInstances.Add(Instance);
 
-			AddReplicatedSubObject(Instance);
-		}
+		AddReplicatedSubObject(Instance);
 	}
 }
 
@@ -37,13 +40,16 @@ void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPa
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-			FString::Printf(TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString()));
+		UE_LOG(LogFrette, Log, TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
+		
 		if (BodyPartTag.IsValid())
 		{
 			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
 			{
-				BodyPart->AddValueByTag(Value, ValueType);
+				const FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
+				// FIXME: Not using a proper value delta, also not sure about the way i do it
+				const FFretteBodyPartChangeEvent ChangeEvent(BodyPartTag, ValueType, Result.AccumulatedValue, Value);
+				Client_NotifyBodyPartChange(ChangeEvent);
 			}
 		}
 	}
@@ -102,4 +108,26 @@ void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag ValueT
 	}
 }
 
+float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag) const
+{
+	UFretteBodyPartInstance* Head = FindBodyPart(TAG_BodyPart_Head);
+	UFretteBodyPartInstance* Torso = FindBodyPart(TAG_BodyPart_Torso);
+	
+	const float HeadCurrent = Head->FindOrAddAccumulatedValue(ValueTag);
+	const float TorsoCurrent = Torso->FindOrAddAccumulatedValue(ValueTag);
+	const UFretteBodyPartData* Data = Head->GetSourceData();
+	const float HeadMax = Data->GetMaxValueForType(ValueTag);
+	const float TorsoMax = Data->GetMaxValueForType(ValueTag);
+	
+	const float HeadNormalized = HeadCurrent / HeadMax;
+	const float TorsoNormalized = TorsoCurrent / TorsoMax;
+	
+	return FMath::Min(HeadNormalized, TorsoNormalized);
+}
+
 void UFretteBodyPartComponent::OnRep_BodyParts() {}
+
+void UFretteBodyPartComponent::Client_NotifyBodyPartChange_Implementation(const FFretteBodyPartChangeEvent& ChangeEvent)
+{
+	OnBodyPartValueChanged.Broadcast(ChangeEvent);
+}

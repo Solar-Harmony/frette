@@ -46,6 +46,8 @@ void AFrettePickupBase::OnConstruction(const FTransform& Transform)
 	
 	require(!ItemData->Mesh.IsNull(), "Pickup actor '%s' has no mesh specified, so it will be invisible during play!", *GetName())
 	
+	Interactable->Message = FText::Format(NSLOCTEXT("Frette", "PickUpMessage", "[E] pick up {0}"), ItemData->DisplayName);
+	
 	// TODO: I've heard that LoadAsync has caveats but dont remember, should recheck when have time
 	ItemData->Mesh.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &AFrettePickupBase::OnItemMeshLoaded));
 }
@@ -67,10 +69,11 @@ void AFrettePickupBase::Client_OnInteract_Implementation(AFrettePlayerCharacter*
 void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject) const
 {
 	UStaticMesh* Mesh = Cast<UStaticMesh>(LoadedObject);
-	require(IsValid(Mesh), "Failed to load mesh for item '%s'.", GetNameSafe(ItemData))
+	require(IsValid(Mesh), "Failed to load mesh for item '%s'.", GetNameSafe(ItemData));
+	
 	StaticMesh->SetStaticMesh(Mesh);
-	StaticMesh->SetSimulatePhysics(false);
-	StaticMesh->SetCollisionProfileName(TEXT("BlockAll"));
+	StaticMesh->SetSimulatePhysics(true);
+	StaticMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	StaticMesh->SetEnableGravity(true);
 	StaticMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
 }

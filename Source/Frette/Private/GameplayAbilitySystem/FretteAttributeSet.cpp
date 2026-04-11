@@ -1,6 +1,7 @@
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
+#include "Frette/Frette.h"
 #include "GameFramework/Character.h"
 
 #include "Net/UnrealNetwork.h"
@@ -37,7 +38,7 @@ void UFretteAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffect
 	Super::PostGameplayEffectExecute(Data);
 	if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("MaxHealth changed to %f"), GetMaxHealth()));
+		FRETTE_LOG(Log, "MaxHealth of %s set to %f", *Data.Target.GetAvatarActor()->GetName(), GetMaxHealth());
 	}
 }
 

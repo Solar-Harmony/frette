@@ -5,9 +5,21 @@
 void UFretteEquipmentComponent::EquipItem_Implementation(UFretteSlottableItem* Item) const
 {
 	Item->OnEquipped();
+	Client_OnItemEquipped(Item);
 }
 
 void UFretteEquipmentComponent::UnequipItem_Implementation(UFretteSlottableItem* Item) const
+{
+	Item->OnUnequipped();
+	Client_OnItemUnequipped(Item);
+}
+
+void UFretteEquipmentComponent::Client_OnItemEquipped_Implementation(UFretteSlottableItem* Item) const
+{
+	Item->OnEquipped();
+}
+
+void UFretteEquipmentComponent::Client_OnItemUnequipped_Implementation(UFretteSlottableItem* Item) const
 {
 	Item->OnUnequipped();
 }
