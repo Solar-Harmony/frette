@@ -57,14 +57,23 @@ private:
 	// The secondary ratio is the rest
 	const float PrimaryCluesRatioTarget = 0.3f;
 	const float DudClueRatioTarget = 0.15f;
+	const float MinSecondaryProb = 0.05f;
 	
 	// Greater than 1 will make the ramp concave up more and more
-	const float RampDegree = 1.3f;
+	const float RampDegree = 1.2f;
 	
-	const float BiasThresholdRatio = 0.5f;
-	const float TimeThreshold = 60.f * 7.f; // 7 minutes without finding a primary clue will max out the bias
+	const float DesiredGameDuration = 60.f * 20;
+	// No primary clue can ever be given before it has been this amount of time (s) since the last time we got one
+	const float MinTimeBeforePrimaryClue = 20.f; 
+	// [0, 1]: the amount of uncertainty when figuring out the next primary clue times with random
+	const float TimeUncertainty = 0.2f;
 	
+	float MinTimeBeforeNextPrimaryClue;
+	float MaxTimeBeforeNextPrimaryClue;
 	float LastPrimaryClueFoundTime = 0.0f;
+	float GameStartTime = 0.0f;
+	
+	void UpdateTimeBeforeNextPrimaryClue();
 
 	EClueType PickNextClueType() const;
 

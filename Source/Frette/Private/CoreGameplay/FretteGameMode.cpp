@@ -10,6 +10,19 @@
 #include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
 
+void AFretteGameMode::UpdateTimeBeforeNextPrimaryClue()
+{
+	static float MinTimeBeforePrimaryClueUncertainty = TimeUncertainty * MinTimeBeforePrimaryClue;
+	MinTimeBeforeNextPrimaryClue = MinTimeBeforePrimaryClue
+		+ FMath::RandRange(0.f, MinTimeBeforePrimaryClueUncertainty);
+		
+	const float TimeSinceGameStarted = GetWorld()->GetTimeSeconds() - GameStartTime;
+	const float DesiredRemainingGameTime = DesiredGameDuration - TimeSinceGameStarted;
+	const float TimePerPrimaryClue = DesiredRemainingGameTime / NearLandmarks.Num();
+	MaxTimeBeforeNextPrimaryClue = TimePerPrimaryClue
+		+ FMath::RandRange(0.f, TimeUncertainty * TimePerPrimaryClue);
+}
+
 FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template)
 {
 	FFretteClueInfo Info;
@@ -30,6 +43,7 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	else if (PickedType == EClueType::MainObjective)
 	{
 		LastPrimaryClueFoundTime = GetWorld()->GetTimeSeconds();
+		UpdateTimeBeforeNextPrimaryClue();
 	}
 
 	const bool bIsPrimaryClue = PickedType == EClueType::MainObjective;
@@ -121,6 +135,7 @@ void AFretteGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	LastPrimaryClueFoundTime = GetWorld()->GetTimeSeconds();
+	GameStartTime = GetWorld()->GetTimeSeconds();
 
 	for (TActorIterator<AFretteMainObjective> It(GetWorld()); It; ++It)
 	{
@@ -161,30 +176,30 @@ void AFretteGameMode::BeginPlay()
 
 	const int32 TotalLandmarks = NearLandmarks.Num() + FarLandmarks.Num();
 	require(NumCluesPlaced <= TotalLandmarks, "%d clues placed but only %d total landmarks exist.", NumCluesPlaced, TotalLandmarks);
+	
+	UpdateTimeBeforeNextPrimaryClue();
 }
 
 EClueType AFretteGameMode::PickNextClueType() const
 {
 	// this exists to suppress the chance of getting a primary clue early-game
-	const float Ramp = powf(float(NumCluesFound + 1) / NumCluesPlaced, RampDegree);
+	const float Ramp = FMath::Pow(float(NumCluesFound + 1) / NumCluesPlaced, RampDegree);
 	
-	// past a certain number of clues found or even when too much time has passed since the
-	// last primary clue found, we want to start biasing the probabilities heavily
 	const float TimeSinceLastPrimary = GetWorld()->GetTimeSeconds() - LastPrimaryClueFoundTime;
-	const float AfterThreshold = fmax(0.0f, NumCluesFound + 1.f - (BiasThresholdRatio * NumCluesPlaced));
-	const float ThresholdForce = AfterThreshold / (NumCluesPlaced * (1.0f - BiasThresholdRatio));
-	const float TimeForce = FMath::Clamp(TimeSinceLastPrimary / TimeThreshold, 0.f, 1.f);
-	// We want to reduce the force if primary clues have already been found
-	const float BiasForce = fmax(ThresholdForce, TimeForce) / (NumPrimaryCluesFound + 1.f);
+	const float TimeForce = FMath::Clamp(
+		(TimeSinceLastPrimary - MinTimeBeforeNextPrimaryClue) / (MaxTimeBeforeNextPrimaryClue - MinTimeBeforeNextPrimaryClue),
+		0.f, 1.f);
+	// Do we want to reduce the force if primary clues have already been found?
 	
 	const float DudExpectation = DudClueRatioTarget * (NumCluesFound + 1);
-	const float DudDeficit = fmax(0.0f, DudExpectation - NumDudCluesFound);
+	const float DudDeficit = FMath::Max(0.0f, DudExpectation - NumDudCluesFound);
 	float DudProbability = DudDeficit / (NumCluesFound + 1);
-	DudProbability = FMath::Lerp(DudProbability, 0.f, BiasForce);
+	DudProbability = FMath::Lerp(DudProbability, 0.f, TimeForce);
 	
 	UE_LOG(LogFrette, Log, TEXT("============================================= Clue gen ==========================================="));
 	UE_LOG(LogFrette, Log, TEXT("Clue gen: NumCluesFound[%d] NumPrimaryCluesFound[%d] NumDudCluesFound[%d]"), NumCluesFound, NumPrimaryCluesFound, NumDudCluesFound);
-	UE_LOG(LogFrette, Log, TEXT("Clue gen: Ramp[%f] TimeSinceLastPrimary[%f/%f] ThresholdForce[%f] TimeForce[%f] BiasForce[%f]"), Ramp, TimeSinceLastPrimary, TimeThreshold, ThresholdForce, TimeForce, BiasForce);
+	UE_LOG(LogFrette, Log, TEXT("Clue gen: Ramp[%f] GameTime[%f/%f] TimeSinceLastPrimary[%f] MinTimeBeforeNextPrimaryClue[%f] MaxTimeBeforeNextPrimaryClue[%f] TimeForce[%f]"),
+		Ramp, (GetWorld()->GetTimeSeconds() - GameStartTime), DesiredGameDuration, TimeSinceLastPrimary, MinTimeBeforeNextPrimaryClue, MaxTimeBeforeNextPrimaryClue, TimeForce);
 	UE_LOG(LogFrette, Log, TEXT("Clue gen: DudDeficit[%f] DudProbability[%f]"), DudDeficit, DudProbability);
 
 	float Choice = FMath::FRand();
@@ -208,9 +223,21 @@ EClueType AFretteGameMode::PickNextClueType() const
 	}
 	
 	const float PrimaryExpectation = PrimaryCluesRatioTarget * (NumCluesFound + 1);
-	const float PrimaryDeficit = fmax(0.0f, PrimaryExpectation - NumPrimaryCluesFound);
+	const float PrimaryDeficit = FMath::Max(0.0f, PrimaryExpectation - NumPrimaryCluesFound);
 	float PrimaryProbability = PrimaryDeficit / (NumCluesFound + 1);
-	PrimaryProbability = FMath::Lerp(PrimaryProbability, 1.0, BiasForce) * Ramp;
+	// We do not make it strictly impossible to get a primary clue when the time force is 0 to make luckiness possible (0.05)
+	PrimaryProbability = FMath::Lerp(
+		FMath::Lerp(0.05, PrimaryProbability, TimeForce),
+		1.0, TimeForce) * Ramp;
+	PrimaryProbability = FMath::Min(PrimaryProbability, 1.0f - DudProbability);
+	
+	// The lerping is done a bit differently for the dud and primary probs so let's scale things
+	const float Total = DudProbability + PrimaryProbability + MinSecondaryProb;
+	if (Total > 1.0f)
+	{
+		PrimaryProbability /= Total;
+		DudProbability /= Total;
+	}
 
 	// This is done implicitly by the checks, but needed for logs
 	const float SecondaryProbability = 1.0f - DudProbability - PrimaryProbability;
