@@ -44,7 +44,9 @@ class FRETTE_API UFretteBodyPartComponent : public UActorComponent
 
 public:
 	UFretteBodyPartComponent();
+	virtual void ReadyForReplication() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	UFretteBodyPartInstance* FindBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag) const;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	int GetValueFromBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart"))FGameplayTag BodyPartTag,
@@ -60,12 +62,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
 	void AddValueToAllParts(int Value, UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
 	
-	// Retrieves the value specified attribute for either the Head or Torso, whichever is lowest.
+	UFretteBodyPartInstance* GetInstanceFromBodyPartTag(FGameplayTag BodyPartTag); 
+	
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Part")
-	float GetNormalizedCriticalValue(UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTag) const;
-
+	float GetNormalizedCriticalValue(UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTag, bool bForFeedback) const;
+	
 	UFUNCTION()
-	void OnRep_BodyParts();
+	void OnRep_BodyPartInstances();
 	
 	UFUNCTION(Client, Reliable)
 	void Client_NotifyBodyPartChange(const FFretteBodyPartChangeEvent& ChangeEvent);
@@ -75,16 +78,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TArray<TObjectPtr<UFretteBodyPartData>> BodyPartData;
 	
-	UPROPERTY(BlueprintAssignable, Category = "Frette|Body Part")
+	UPROPERTY(BlueprintAssignable, Category = "Frette|Body Parts")
 	FOnBodyPartValueChanged OnBodyPartValueChanged;
-
-protected:
-	virtual void ReadyForReplication() override;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TObjectPtr<UFretteBonesToTagData> BoneTagDataAsset;
 
-	UPROPERTY(ReplicatedUsing = OnRep_BodyParts, BlueprintReadOnly)
+protected:
+	UPROPERTY(ReplicatedUsing = OnRep_BodyPartInstances, BlueprintReadOnly)
 	TArray<TObjectPtr<UFretteBodyPartInstance>> BodyPartInstances;
-
+	
+private:
+	UPROPERTY()
+	TMap<FGameplayTag, TObjectPtr<UFretteBodyPartInstance>> BodyPartTagToInstanceMap;
 };

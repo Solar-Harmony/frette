@@ -20,11 +20,12 @@ void UFretteBodyPartComponent::ReadyForReplication()
 	if (GetOwnerRole() != ROLE_Authority)
 		return;
 	
-	for (const auto& Data : BodyPartData)
+	for (UFretteBodyPartData* Data : BodyPartData)
 	{
 		UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
 		Instance->Initialize(Data, Cast<AFretteBaseCharacter>(GetOwner()));
 		BodyPartInstances.Add(Instance);
+		BodyPartTagToInstanceMap.Add(Data->BodyPartTag, Instance);
 
 		AddReplicatedSubObject(Instance);
 	}
@@ -108,24 +109,56 @@ void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag ValueT
 	}
 }
 
-float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag) const
+// TMap cannot be replicated so we make sure to populate it on clients too
+UFretteBodyPartInstance* UFretteBodyPartComponent::GetInstanceFromBodyPartTag(FGameplayTag BodyPartTag)
 {
-	UFretteBodyPartInstance* Head = FindBodyPart(TAG_BodyPart_Head);
-	UFretteBodyPartInstance* Torso = FindBodyPart(TAG_BodyPart_Torso);
+	TObjectPtr<UFretteBodyPartInstance>* Instance = BodyPartTagToInstanceMap.Find(BodyPartTag);
+	if (Instance == nullptr)
+	{
+		FRETTE_LOG(Error, "Body part with tag %s not found!", *BodyPartTag.ToString());
+		return nullptr;
+	}
 	
-	const float HeadCurrent = Head->FindOrAddAccumulatedValue(ValueTag);
-	const float TorsoCurrent = Torso->FindOrAddAccumulatedValue(ValueTag);
-	const UFretteBodyPartData* Data = Head->GetSourceData();
-	const float HeadMax = Data->GetMaxValueForType(ValueTag);
-	const float TorsoMax = Data->GetMaxValueForType(ValueTag);
-	
-	const float HeadNormalized = HeadCurrent / HeadMax;
-	const float TorsoNormalized = TorsoCurrent / TorsoMax;
-	
-	return FMath::Min(HeadNormalized, TorsoNormalized);
+	return *Instance;
 }
 
-void UFretteBodyPartComponent::OnRep_BodyParts() {}
+float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag, bool bForFeedback) const
+{
+	static TArray<float> NormalizedValues;
+	NormalizedValues.Reset(BodyPartInstances.Num());
+	
+	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
+	{
+		const UFretteBodyPartData* Data = Instance->GetBodyPartData();
+		const FFretteBodyPartValueTypeConfig* Config = Data->GetValueTypeConfig(ValueTag);
+		if (Config == nullptr)
+		{
+			FRETTE_LOG(Error, "T cave");
+			continue;
+		}
+		
+		if (!Config->bIsCritical)
+			continue;
+		
+		const float Value = Instance->FindOrAddAccumulatedValue(ValueTag);
+		const float Min = bForFeedback ? Config->FeedbackLowValue : Config->MinValue;
+		const float Max = bForFeedback? Config->FeedbackHighValue : Config->MaxValue;
+		const float Normalized = FMath::Clamp((Value - Min) / (Max - Min), 0.0f, 1.0f);
+		NormalizedValues.Add(Normalized);
+	}
+	
+	return FMath::Min(NormalizedValues);
+}
+
+void UFretteBodyPartComponent::OnRep_BodyPartInstances()
+{
+	BodyPartTagToInstanceMap.Empty(BodyPartInstances.Num());
+	
+	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
+	{
+		BodyPartTagToInstanceMap.Add(Instance->GetBodyPartTag(), Instance);
+	}
+}
 
 void UFretteBodyPartComponent::Client_NotifyBodyPartChange_Implementation(const FFretteBodyPartChangeEvent& ChangeEvent)
 {

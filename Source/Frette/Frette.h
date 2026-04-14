@@ -26,7 +26,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 // require(Condition);
 // require(Condition, "Message with no args.");
 // require(Condition, "Message with args: %d, %s", Arg1, Arg2);
-#define require(...) \
+#define precondition(...) \
 	BOOST_PP_OVERLOAD(FRETTE_PRIVATE_ENSURE_, __VA_ARGS__)(__VA_ARGS__) \
 
 #define FRETTE_PRIVATE_ENSURE_1(Condition) \
