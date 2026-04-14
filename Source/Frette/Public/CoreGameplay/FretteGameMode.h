@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FretteClueGenerationDataAsset.h"
 #include "FretteClueTemplateSet.h"
 #include "CoreGameplay/FretteClue.h"
 #include "GameFramework/GameModeBase.h"
@@ -54,19 +55,8 @@ private:
 	int32 NumPrimaryCluesFound = 0;
 	int32 NumDudCluesFound = 0;
 	
-	// The secondary ratio is the rest
-	const float PrimaryCluesRatioTarget = 0.3f;
-	const float DudClueRatioTarget = 0.15f;
-	const float MinSecondaryProb = 0.05f;
-	
-	// Greater than 1 will make the ramp concave up more and more
-	const float RampDegree = 1.2f;
-	
-	const float DesiredGameDuration = 60.f * 20;
-	// No primary clue can ever be given before it has been this amount of time (s) since the last time we got one
-	const float MinTimeBeforePrimaryClue = 20.f; 
-	// [0, 1]: the amount of uncertainty when figuring out the next primary clue times with random
-	const float TimeUncertainty = 0.2f;
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteClueGenerationDataAsset> Cfg;
 	
 	float MinTimeBeforeNextPrimaryClue;
 	float MaxTimeBeforeNextPrimaryClue;

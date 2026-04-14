@@ -12,15 +12,15 @@
 
 void AFretteGameMode::UpdateTimeBeforeNextPrimaryClue()
 {
-	static float MinTimeBeforePrimaryClueUncertainty = TimeUncertainty * MinTimeBeforePrimaryClue;
-	MinTimeBeforeNextPrimaryClue = MinTimeBeforePrimaryClue
+	static float MinTimeBeforePrimaryClueUncertainty = Cfg->TimeUncertainty * Cfg->MinTimeBeforePrimaryClue;
+	MinTimeBeforeNextPrimaryClue = Cfg->MinTimeBeforePrimaryClue
 		+ FMath::RandRange(0.f, MinTimeBeforePrimaryClueUncertainty);
 		
 	const float TimeSinceGameStarted = GetWorld()->GetTimeSeconds() - GameStartTime;
-	const float DesiredRemainingGameTime = DesiredGameDuration - TimeSinceGameStarted;
+	const float DesiredRemainingGameTime = Cfg->DesiredGameDuration - TimeSinceGameStarted;
 	const float TimePerPrimaryClue = DesiredRemainingGameTime / NearLandmarks.Num();
 	MaxTimeBeforeNextPrimaryClue = TimePerPrimaryClue
-		+ FMath::RandRange(0.f, TimeUncertainty * TimePerPrimaryClue);
+		+ FMath::RandRange(0.f, Cfg->TimeUncertainty * TimePerPrimaryClue);
 }
 
 FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template)
@@ -183,7 +183,7 @@ void AFretteGameMode::BeginPlay()
 EClueType AFretteGameMode::PickNextClueType() const
 {
 	// this exists to suppress the chance of getting a primary clue early-game
-	const float Ramp = FMath::Pow(float(NumCluesFound + 1) / NumCluesPlaced, RampDegree);
+	const float Ramp = FMath::Pow(float(NumCluesFound + 1) / NumCluesPlaced, Cfg->RampDegree);
 	
 	const float TimeSinceLastPrimary = GetWorld()->GetTimeSeconds() - LastPrimaryClueFoundTime;
 	const float TimeForce = FMath::Clamp(
@@ -191,7 +191,7 @@ EClueType AFretteGameMode::PickNextClueType() const
 		0.f, 1.f);
 	// Do we want to reduce the force if primary clues have already been found?
 	
-	const float DudExpectation = DudClueRatioTarget * (NumCluesFound + 1);
+	const float DudExpectation = Cfg->DudClueRatioTarget * (NumCluesFound + 1);
 	const float DudDeficit = FMath::Max(0.0f, DudExpectation - NumDudCluesFound);
 	float DudProbability = DudDeficit / (NumCluesFound + 1);
 	DudProbability = FMath::Lerp(DudProbability, 0.f, TimeForce);
@@ -199,7 +199,7 @@ EClueType AFretteGameMode::PickNextClueType() const
 	UE_LOG(LogFrette, Log, TEXT("============================================= Clue gen ==========================================="));
 	UE_LOG(LogFrette, Log, TEXT("Clue gen: NumCluesFound[%d] NumPrimaryCluesFound[%d] NumDudCluesFound[%d]"), NumCluesFound, NumPrimaryCluesFound, NumDudCluesFound);
 	UE_LOG(LogFrette, Log, TEXT("Clue gen: Ramp[%f] GameTime[%f/%f] TimeSinceLastPrimary[%f] MinTimeBeforeNextPrimaryClue[%f] MaxTimeBeforeNextPrimaryClue[%f] TimeForce[%f]"),
-		Ramp, (GetWorld()->GetTimeSeconds() - GameStartTime), DesiredGameDuration, TimeSinceLastPrimary, MinTimeBeforeNextPrimaryClue, MaxTimeBeforeNextPrimaryClue, TimeForce);
+		Ramp, (GetWorld()->GetTimeSeconds() - GameStartTime), Cfg->DesiredGameDuration, TimeSinceLastPrimary, MinTimeBeforeNextPrimaryClue, MaxTimeBeforeNextPrimaryClue, TimeForce);
 	UE_LOG(LogFrette, Log, TEXT("Clue gen: DudDeficit[%f] DudProbability[%f]"), DudDeficit, DudProbability);
 
 	float Choice = FMath::FRand();
@@ -222,7 +222,7 @@ EClueType AFretteGameMode::PickNextClueType() const
 		return EClueType::MainObjective;
 	}
 	
-	const float PrimaryExpectation = PrimaryCluesRatioTarget * (NumCluesFound + 1);
+	const float PrimaryExpectation = Cfg->PrimaryCluesRatioTarget * (NumCluesFound + 1);
 	const float PrimaryDeficit = FMath::Max(0.0f, PrimaryExpectation - NumPrimaryCluesFound);
 	float PrimaryProbability = PrimaryDeficit / (NumCluesFound + 1);
 	// We do not make it strictly impossible to get a primary clue when the time force is 0 to make luckiness possible (0.05)
@@ -232,7 +232,7 @@ EClueType AFretteGameMode::PickNextClueType() const
 	PrimaryProbability = FMath::Min(PrimaryProbability, 1.0f - DudProbability);
 	
 	// The lerping is done a bit differently for the dud and primary probs so let's scale things
-	const float Total = DudProbability + PrimaryProbability + MinSecondaryProb;
+	const float Total = DudProbability + PrimaryProbability + Cfg->MinSecondaryProb;
 	if (Total > 1.0f)
 	{
 		PrimaryProbability /= Total;
