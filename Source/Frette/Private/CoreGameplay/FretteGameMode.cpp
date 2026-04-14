@@ -99,7 +99,7 @@ void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerChar
 void AFretteGameMode::CheckVictory(const AFrettePlayerCharacter* PlayerCharacter) const
 {
 	const UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
-	const bool bHasTreasure = Inventory->HasItemOfType<UFretteObjectiveItem>();
+	const bool bHasTreasure = Inventory->HasItemOfClass<UFretteObjectiveItem>();
 	if (bHasTreasure)
 	{
 		AFretteGameState* State = GetGameState<AFretteGameState>();

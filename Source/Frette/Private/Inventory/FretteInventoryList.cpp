@@ -37,6 +37,19 @@ UFretteInventoryItem* FFretteInventoryList::GetItemByClass(const TSubclassOf<UFr
 	return nullptr;
 }
 
+UFretteInventoryItem* FFretteInventoryList::GetItemByDataClass(const TSubclassOf<UFretteInventoryItemDataAsset> ItemClass) const
+{
+	for (const FFretteInventoryListEntry& Entry : Entries)
+	{
+		if (IsValid(Entry.Item) && Entry.Item->GetUntypedData()->IsA(ItemClass))
+		{
+			return Entry.Item;
+		}
+	}
+	
+	return nullptr;
+}
+
 TArray<UFretteInventoryItem*> FFretteInventoryList::GetItemsByClass(const TSubclassOf<UFretteInventoryItem> ItemClass) const
 {
 	TArray<UFretteInventoryItem*> Items;

@@ -59,7 +59,7 @@ public:
 	
 	// Whether the item has at least one item of type. Always returns false if called on client.
 	template<typename T>
-	bool HasItemOfType() const
+	bool HasItemOfClass() const
 	{
 		if (GetOwner()->HasAuthority())
 		{
@@ -69,11 +69,33 @@ public:
 		return false;
 	}
 
+	template<typename T>
+	T* GetFirstItemOfClass()
+	{
+		if (GetOwner()->HasAuthority())
+		{
+			return Inventory.GetItemByClass(T::StaticClass());
+		}
+		
+		return nullptr;
+	}
+	
+	UFretteInventoryItem* GetFirstItemFromAsset(TSubclassOf<UFretteInventoryItemDataAsset> AssetClass)
+	{
+		if (GetOwner()->HasAuthority())
+		{
+			return Inventory.GetItemByDataClass(AssetClass);
+		}
+		
+		return nullptr;
+	}
+	
 	template <typename T>
 	const T* GetItem(int32 Id) const { return Cast<T>(GetItem(Id)); }
 
 	UFUNCTION(BlueprintPure, Category="Frette|Inventory")
 	UFretteInventoryItem* GetItem(int32 Id) const { return Inventory.GetItemById(Id); }
+	
 	
 	// This is irrelevant except for debugging the inventory.
 	UFUNCTION(BlueprintCallable, Category="Frette|Inventory", meta = (DevelopmentOnly))
