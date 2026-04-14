@@ -92,9 +92,9 @@ void UFretteBodyPartComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGameplayTag ValueType) const
+int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGameplayTag ValueTypeTag) const
 {
-	return FindBodyPart(BodyPartTag)->FindOrAddAccumulatedValue(ValueType);
+	return FindBodyPart(BodyPartTag)->FindOrAddAccumulatedValue(ValueTypeTag);
 }
 
 void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag ValueType)

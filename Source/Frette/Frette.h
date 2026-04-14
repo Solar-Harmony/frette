@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "boost/preprocessor.hpp"
 #include "Logging/MessageLog.h"
 
@@ -85,6 +86,11 @@ namespace Frette::Private
 	FORCEINLINE const TCHAR* ToTCHAR(const char* CharPtr)
 	{
 		return ANSI_TO_TCHAR(CharPtr);
+	}
+	
+	FORCEINLINE const TCHAR* ToTCHAR(FGameplayTag Tag)
+	{
+		return *Tag.ToString();
 	}
 
 	// fallback case for types that don't use %s

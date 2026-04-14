@@ -49,22 +49,25 @@ public:
 	
 	UFretteBodyPartInstance* FindBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag) const;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	int GetValueFromBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart"))FGameplayTag BodyPartTag,
-		UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType) const;
+	
+	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
+	int GetValueFromBodyPart(
+		UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag,
+		UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTypeTag) const;
 
-	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
+	UFUNCTION(BlueprintCallable, Category = "Frette|Body Parts")
 	void AddValueFromBodyPartTag(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag,
 		int Value,
 		UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
 
 	void AddValueFromBoneName(FName BoneName, int Value, FGameplayTag ValueType);
 
-	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
+	UFUNCTION(BlueprintCallable, Category = "Frette|Body Parts")
 	void AddValueToAllParts(int Value, UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
 	
 	UFretteBodyPartInstance* GetInstanceFromBodyPartTag(FGameplayTag BodyPartTag); 
 	
-	UFUNCTION(BlueprintPure, Category = "Frette|Body Part")
+	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
 	float GetNormalizedCriticalValue(UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTag, bool bForFeedback) const;
 	
 	UFUNCTION()
