@@ -15,8 +15,10 @@ class FRETTE_API UFallDamageComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	virtual void BeginPlay() override;
+	
+protected:
 	void BindMovementEvents();
 	void ApplyFallDamage(float DistanceFallen) const;
 

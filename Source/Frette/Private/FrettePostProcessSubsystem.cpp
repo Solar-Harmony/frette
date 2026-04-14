@@ -1,9 +1,9 @@
 ﻿#include "FrettePostProcessSubsystem.h"
 
+#include "Frette/Frette.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
-#include "Misc/MapErrors.h"
 
 void UFrettePostProcessSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -17,36 +17,26 @@ void UFrettePostProcessSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 
 void UFrettePostProcessSubsystem::OnWorldInitialized()
 {
-	UWorld* World = GetWorld();
-
-	APostProcessVolume* Volume = Cast<APostProcessVolume>(
-		UGameplayStatics::GetActorOfClass(GetWorld(), APostProcessVolume::StaticClass())
-	);
-	if (!IsValid(Volume))
+	const UWorld* World = GetWorld();
+	const APostProcessVolume* Volume = Cast<APostProcessVolume>(UGameplayStatics::GetActorOfClass(GetWorld(), APostProcessVolume::StaticClass()));
+	
+	if (!IsValid(Volume) || !Volume->bUnbound)
 	{
-		FMessageLog("MapCheck").Error()
-			->AddToken(FTextToken::Create(
-				FText::FromString("Missing required UNBOUND PostProcessVolume for UFrettePostProcessSubsystem"
-					  "with the interactable material")
-			));
+		FMessageLog Log("Frette");
+		Log.Error()->AddText(INVTEXT("A PostProcessVolume with Unbound Extents is required for interactible outlines to work."));
+		Log.Notify();
 		return;
 	}
 
-	FString MPCPath = TEXT("/Game/Materials/FretteInteractableMaterialParams.FretteInteractableMaterialParams");
-	UMaterialParameterCollection* MPC = Cast<UMaterialParameterCollection>(
-		StaticLoadObject(UMaterialParameterCollection::StaticClass(), nullptr, *MPCPath)
-		);
-	if (!IsValid(MPC))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PostProcessSubsystem: Failed to load MPC at path: %s"), *MPCPath);
-	}
-	else
-	{
-		OutlineMPCI = World->GetParameterCollectionInstance(MPC);
-	}
+	// TODO: Don't use hardcoded path
+	const FString MPCPath = TEXT("/Game/Materials/FretteInteractableMaterialParams.FretteInteractableMaterialParams");
+	const UMaterialParameterCollection* MPC = Cast<UMaterialParameterCollection>(StaticLoadObject(UMaterialParameterCollection::StaticClass(), nullptr, *MPCPath));
+	require(IsValid(MPC), "Failed to load Material Parameter Collection for interactible outlines! Make sure the asset exists at the specified path.");
+
+	OutlineMPCI = World->GetParameterCollectionInstance(MPC);
 }
 
-void UFrettePostProcessSubsystem::SetOutline(FLinearColor Color, float Thickness, float Alpha)
+void UFrettePostProcessSubsystem::SetOutline(FLinearColor Color, float Thickness, float Alpha) const
 {
 	if (!IsValid(OutlineMPCI))
 		return;

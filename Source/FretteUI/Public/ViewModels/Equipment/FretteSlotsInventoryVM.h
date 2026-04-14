@@ -31,10 +31,12 @@ protected:
 
 		UFretteSlotsInventoryItemVM* ItemVM = SlotVM->ItemVM;
 		
-		// call use on the item
-		if (ItemVM != nullptr)
+		// if the item cannot be equipped, try to Use it
+		// TODO: atm, we assume equippable items cannot be Used (but an amulet, watch?)
+		if (ItemVM->SlotType == FGameplayTag::EmptyTag)
 		{
 			ItemVM->OwningInventory->UseItem(ItemVM->ItemID);
+			return;
 		}
 		
 		const int32 NewSlotIdx = FindFirstFreeSlot(ItemVM, SlotVM->IsCompatibleWithAnything());
@@ -58,7 +60,7 @@ protected:
 		else
 		{
 			EquipmentComponent->EquipItem(Item);
-		}		
+		}
 	}
 	
 private:

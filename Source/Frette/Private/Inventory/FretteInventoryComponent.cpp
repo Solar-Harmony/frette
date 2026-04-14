@@ -30,12 +30,18 @@ UFretteInventoryItem* UFretteInventoryComponent::GetItemByIndexEditor(int32 Idx)
 
 void UFretteInventoryComponent::UseItem_Implementation(int32 ItemId)
 {
-	UFretteInventoryItem* ItemToSelect = GetItem(ItemId);
-	require(ItemToSelect, "Inventory: Cannot select item #%d because it was not found in this inventory.", ItemId);
+	UFretteInventoryItem* ItemToUse = GetItem(ItemId);
+	require(ItemToUse, "Inventory: Cannot select item #%d because it was not found in this inventory.", ItemId);
 
-	ItemToSelect->Use();
-	OnItemSelected.Broadcast(ItemToSelect);
-	K2_OnItemSelected.Broadcast(ItemToSelect);
+	ItemToUse->Use();
+	
+	if (ItemToUse->Data->bConsumeOnUse)
+	{
+		RemoveItem_Implementation(ItemId);
+	}
+	
+	OnItemSelected.Broadcast(ItemToUse);
+	K2_OnItemSelected.Broadcast(ItemToUse);
 }
 
 void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* ItemData)

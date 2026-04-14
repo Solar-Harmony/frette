@@ -9,6 +9,34 @@
 
 class UFretteBodyPartData;
 
+USTRUCT(BlueprintType)
+struct FFretteBodyPartChangeEvent
+{
+	GENERATED_BODY()
+	
+	FFretteBodyPartChangeEvent() = default;
+	
+	FFretteBodyPartChangeEvent(FGameplayTag InBodyPartTag, FGameplayTag InValueTag, int InNewValue, int InValueDelta)
+		: BodyPartTag(InBodyPartTag)
+		, ValueTypeTag(InValueTag)
+		, NewValue(InNewValue)
+		, ValueDelta(InValueDelta) {}
+
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTag BodyPartTag;
+
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTag ValueTypeTag;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int NewValue = 0;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int ValueDelta = 0;
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBodyPartValueChanged, const FFretteBodyPartChangeEvent&, ChangeEvent);
+
 UCLASS(meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFretteBodyPartComponent : public UActorComponent
 {
@@ -31,17 +59,27 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Part")
 	void AddValueToAllParts(int Value, UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
+	
+	// Retrieves the value specified attribute for either the Head or Torso, whichever is lowest.
+	UFUNCTION(BlueprintPure, Category = "Frette|Body Part")
+	float GetNormalizedCriticalValue(UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTag) const;
 
 	UFUNCTION()
 	void OnRep_BodyParts();
+	
+	UFUNCTION(Client, Reliable)
+	void Client_NotifyBodyPartChange(const FFretteBodyPartChangeEvent& ChangeEvent);
 
 	FGameplayTag GetBodyPartFromBoneName(FName BoneName) const;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TArray<TObjectPtr<UFretteBodyPartData>> BodyPartData;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Frette|Body Part")
+	FOnBodyPartValueChanged OnBodyPartValueChanged;
 
 protected:
-	virtual void BeginPlay() override;
+	virtual void ReadyForReplication() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TObjectPtr<UFretteBonesToTagData> BoneTagDataAsset;

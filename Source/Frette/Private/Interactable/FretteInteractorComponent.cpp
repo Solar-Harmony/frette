@@ -140,7 +140,6 @@ void UFretteInteractorComponent::UpdateInteractableTarget()
 	TScriptInterface<IFretteInteractableInterface> NewHovered = nullptr;
 	if (bHit && Hit.GetActor())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("Hit %s"), *Hit.GetActor()->GetName()));
 		if (Hit.GetActor()->Implements<UFretteInteractableInterface>())
 		{
 			NewHovered.SetObject(Hit.GetActor());
