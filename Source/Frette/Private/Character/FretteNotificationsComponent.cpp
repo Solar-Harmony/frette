@@ -31,7 +31,10 @@ void UFretteNotificationsComponent::NotifyAll(const UObject* WorldContextObject,
 
 void UFretteNotificationsComponent::Send_Implementation(const FText& Message)
 {
-	PendingMessages.Enqueue(Message);
+	if (PendingMessages.ContainsByPredicate([&](const FText& PendingMessage) { return PendingMessage.EqualTo(Message); }))
+		return;
+	
+	PendingMessages.Add(Message);
 	OnAddNotification.ExecuteIfBound(Message);
 	
 	FTimerHandle _;
@@ -42,7 +45,8 @@ void UFretteNotificationsComponent::Send_Implementation(const FText& Message)
 
 void UFretteNotificationsComponent::PopNotification()
 {
-	FText Message;
-	PendingMessages.Dequeue(Message);
+	FText Message = PendingMessages[0];
+	PendingMessages.RemoveAtSwap(0);
+	
 	OnRemoveNotification.ExecuteIfBound();
 }
