@@ -48,8 +48,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	UFretteBodyPartInstance* FindBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag) const;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
+
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
 	int GetValueFromBodyPart(
 		UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag,

@@ -82,19 +82,17 @@ UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayT
 			return BodyPart;
 	}
 
-	UE_LOG(LogTemp, Error, TEXT("Body part with tag %s not found!"), *BodyPartTag.ToString());
-
+	FRETTE_LOG(Error, "Body part with tag %s not found!", BodyPartTag);
 	return nullptr;
-}
-
-void UFretteBodyPartComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGameplayTag ValueTypeTag) const
 {
-	return FindBodyPart(BodyPartTag)->FindOrAddAccumulatedValue(ValueTypeTag);
+	UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag);
+	if (BodyPart == nullptr)
+		return 0;
+	
+	return BodyPart->FindOrAddAccumulatedValue(ValueTypeTag);
 }
 
 void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag ValueType)
