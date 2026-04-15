@@ -34,7 +34,7 @@ void AFrettePlayerController::BeginPlay()
 	}
 }
 
-void AFrettePlayerController::Client_OnClueGenerated_Implementation(const FText& ClueText)
+void AFrettePlayerController::Client_OnClueGenerated_Implementation(const FText& ClueText) const
 {
 	OnClientReceiveNewClue.Broadcast(ClueText);
 }
