@@ -4,6 +4,7 @@
 #include "Frette/Frette.h"
 #include "Interactable/FretteInteractableComponent.h"
 #include "Inventory/FretteInventoryComponent.h"
+#include "Inventory/Items/FretteStackableItem.h"
 
 AFrettePickupBase::AFrettePickupBase()
 {
@@ -27,9 +28,25 @@ void AFrettePickupBase::BeginPlay()
 
 void AFrettePickupBase::Server_OnInteract_Implementation(AFrettePlayerCharacter* Interactor)
 {
+	UFretteInventoryItem* AddedItem = nullptr;
 	UFretteInventoryComponent* Inventory = Interactor->GetPlayerInventory();
-	Inventory->AddItem_Implementation(this->ItemData);
-	UFretteInventoryItem* AddedItem = Inventory->GetItem(Inventory->GetNumItems() - 1);
+	
+	if (const auto* StackData = Cast<UFretteStackableItemDataAsset>(this->ItemData))
+	{
+		AddedItem = Inventory->GetFirstItemFromAsset(StackData->GetClass());
+		if (AddedItem != nullptr)
+		{
+			UFretteStackableItem* Stack = Cast<UFretteStackableItem>(AddedItem);
+			Stack->Quantity += StackData->DefaultQuantity; // TODO: prolly not always what we want
+			Inventory->ChangeItem_Implementation(Stack);
+		}
+	}
+	
+	if (AddedItem == nullptr)
+	{
+		Inventory->AddItem_Implementation(this->ItemData);
+		AddedItem = Inventory->GetItem(Inventory->GetNumItems() - 1);		
+	}
 	
 	OnPickUp(Interactor, AddedItem);
 	
@@ -72,6 +89,15 @@ void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* Loaded
 	precondition(IsValid(Mesh), "Failed to load mesh for item '%s'.", GetNameSafe(ItemData));
 	
 	StaticMesh->SetStaticMesh(Mesh);
+
+	for (const auto& Pair : ItemData->OverrideMaterials)
+	{
+		if (UMaterialInterface* Mat = Pair.Value.LoadSynchronous())
+		{
+			StaticMesh->SetMaterial(Pair.Key, Mat);
+		}
+	}
+
 	StaticMesh->SetSimulatePhysics(true);
 	StaticMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	StaticMesh->SetEnableGravity(true);
