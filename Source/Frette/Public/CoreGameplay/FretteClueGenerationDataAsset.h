@@ -20,6 +20,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	float MinSecondaryProb = 0.05f;
 	
+	// Even if we haven't passed the min time before the next primary clue, this probability will still hold
+	UPROPERTY(EditAnywhere)
+	float MinPrimaryProb = 0.05f;
 	
 	// Greater than 1 will make the ramp concave up more and more
 	UPROPERTY(EditAnywhere)
@@ -36,4 +39,8 @@ public:
 	// [0, 1]: the amount of uncertainty when figuring out the next primary clue times with random
 	UPROPERTY(EditAnywhere)
 	float TimeUncertainty = 0.2f;
+	
+	// The min time before the next primary clue will be this ratio of the max time before the next primary clue with random added
+	UPROPERTY(EditAnywhere)
+	float MinTimeRatio = 0.2f;
 };

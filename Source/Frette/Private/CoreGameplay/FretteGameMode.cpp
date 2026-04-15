@@ -12,15 +12,16 @@
 
 void AFretteGameMode::UpdateTimeBeforeNextPrimaryClue()
 {
-	static float MinTimeBeforePrimaryClueUncertainty = Cfg->TimeUncertainty * Cfg->MinTimeBeforePrimaryClue;
-	MinTimeBeforeNextPrimaryClue = Cfg->MinTimeBeforePrimaryClue
-		+ FMath::RandRange(0.f, MinTimeBeforePrimaryClueUncertainty);
-		
 	const float TimeSinceGameStarted = GetWorld()->GetTimeSeconds() - GameStartTime;
 	const float DesiredRemainingGameTime = Cfg->DesiredGameDuration - TimeSinceGameStarted;
 	const float TimePerPrimaryClue = DesiredRemainingGameTime / NearLandmarks.Num();
 	MaxTimeBeforeNextPrimaryClue = TimePerPrimaryClue
 		+ FMath::RandRange(0.f, Cfg->TimeUncertainty * TimePerPrimaryClue);
+	
+	// Let's make the min time a fraction of the max time so they scale together
+	const float MinTimePerPrimaryClue = Cfg->MinTimeRatio * TimePerPrimaryClue;
+	MinTimeBeforeNextPrimaryClue = MinTimePerPrimaryClue
+		+ FMath::RandRange(0.f, Cfg->TimeUncertainty * MinTimePerPrimaryClue);
 }
 
 FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template)
@@ -182,8 +183,10 @@ void AFretteGameMode::BeginPlay()
 
 EClueType AFretteGameMode::PickNextClueType() const
 {
+	const float TimeSinceGameStart = GetWorld()->GetTimeSeconds() - GameStartTime;
+	
 	// this exists to suppress the chance of getting a primary clue early-game
-	const float Ramp = FMath::Pow(float(NumCluesFound + 1) / NumCluesPlaced, Cfg->RampDegree);
+	const float Ramp = FMath::Min(1.f, FMath::Pow(TimeSinceGameStart / (Cfg->DesiredGameDuration * 0.6), Cfg->RampDegree));
 	
 	const float TimeSinceLastPrimary = GetWorld()->GetTimeSeconds() - LastPrimaryClueFoundTime;
 	const float TimeForce = FMath::Clamp(
@@ -199,7 +202,7 @@ EClueType AFretteGameMode::PickNextClueType() const
 	UE_LOG(LogFrette, Log, TEXT("============================================= Clue gen ==========================================="));
 	UE_LOG(LogFrette, Log, TEXT("Clue gen: NumCluesFound[%d] NumPrimaryCluesFound[%d] NumDudCluesFound[%d]"), NumCluesFound, NumPrimaryCluesFound, NumDudCluesFound);
 	UE_LOG(LogFrette, Log, TEXT("Clue gen: Ramp[%f] GameTime[%f/%f] TimeSinceLastPrimary[%f] MinTimeBeforeNextPrimaryClue[%f] MaxTimeBeforeNextPrimaryClue[%f] TimeForce[%f]"),
-		Ramp, (GetWorld()->GetTimeSeconds() - GameStartTime), Cfg->DesiredGameDuration, TimeSinceLastPrimary, MinTimeBeforeNextPrimaryClue, MaxTimeBeforeNextPrimaryClue, TimeForce);
+		Ramp, TimeSinceGameStart, Cfg->DesiredGameDuration, TimeSinceLastPrimary, MinTimeBeforeNextPrimaryClue, MaxTimeBeforeNextPrimaryClue, TimeForce);
 	UE_LOG(LogFrette, Log, TEXT("Clue gen: DudDeficit[%f] DudProbability[%f]"), DudDeficit, DudProbability);
 
 	float Choice = FMath::FRand();
@@ -227,7 +230,7 @@ EClueType AFretteGameMode::PickNextClueType() const
 	float PrimaryProbability = PrimaryDeficit / (NumCluesFound + 1);
 	// We do not make it strictly impossible to get a primary clue when the time force is 0 to make luckiness possible (0.05)
 	PrimaryProbability = FMath::Lerp(
-		FMath::Lerp(0.05, PrimaryProbability, TimeForce),
+		FMath::Lerp(Cfg->MinPrimaryProb, PrimaryProbability, TimeForce),
 		1.0, TimeForce) * Ramp;
 	PrimaryProbability = FMath::Min(PrimaryProbability, 1.0f - DudProbability);
 	
