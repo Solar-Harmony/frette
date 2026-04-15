@@ -28,15 +28,15 @@ public:
 	
 	UPROPERTY()
 	TObjectPtr<UFretteInventoryComponent> OwningInventory;
-
-	void SetFromModel(UFretteSlottableItem* Item)
+	
+	void SetFromModel(const UFretteSlottableItem* Item)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(ItemID, Item->Id);
 		UE_MVVM_SET_PROPERTY_VALUE(DisplayName, Item->GetData()->DisplayName);
 		UE_MVVM_SET_PROPERTY_VALUE(Icon, Item->GetData()->Icon.LoadSynchronous()); // TODO: Use async load.
 		OwningInventory = Item->GetOwningInventory();
 		SlotType = Item->GetData()->ItemSlotTag;
-		Ptr = Item;
+		Ptr = const_cast<UFretteSlottableItem*>(Item);
 	}
 	
 	// TODO: Temp

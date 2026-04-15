@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Inventory/Items/FretteStackableItem.h"
 #include "Inventory/Items/Impl/FretteWeaponItem.h"
 #include "FretteRangedWeaponItem.generated.h"
 
@@ -15,21 +16,22 @@ class UFretteRangedWeaponItem : public UFretteWeaponItem
 public:
 	FRETTE_ITEM_DATA_GETTER(UFretteRangedWeaponDataAsset)
 
-	int GetCurrentAmmo() const { return CurrentClipAmmo; }
-
-	void UseAmmo();
-	void Reload();
+	int GetCurrentAmmo() const { return NumBulletsLoaded; }
+	bool TryUseAmmo();
+	
+	UFUNCTION(BlueprintCallable)
+	int Reload();
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-		DOREPLIFETIME_CONDITION(UFretteRangedWeaponItem, CurrentClipAmmo, COND_OwnerOnly);
+		DOREPLIFETIME_CONDITION(UFretteRangedWeaponItem, NumBulletsLoaded, COND_OwnerOnly);
 	}
 
 private:
 	UPROPERTY(Replicated)
-	int CurrentClipAmmo;
+	int NumBulletsLoaded;
 };
 
 UCLASS()
@@ -43,8 +45,11 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FRuntimeFloatCurve DistanceDamageFalloff;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteStackableItemDataAsset> AmmoType;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EDitDefaultsOnly)
 	TSubclassOf<AFretteProjectile> ProjectileType;
 
 	UPROPERTY(EditDefaultsOnly)

@@ -1,12 +1,30 @@
 #include "Inventory/Items/Impl/Weapons/FretteRangedWeaponItem.h"
-#include "Net/UnrealNetwork.h"
 
-void UFretteRangedWeaponItem::UseAmmo()
+#include "Frette/Frette.h"
+#include "Inventory/FretteInventoryComponent.h"
+
+bool UFretteRangedWeaponItem::TryUseAmmo()
 {
-	CurrentClipAmmo -= 1;
+	if (NumBulletsLoaded <= 0)
+		return false;
+
+	NumBulletsLoaded -= 1;
+	return true;
 }
 
-void UFretteRangedWeaponItem::Reload()
+int UFretteRangedWeaponItem::Reload()
 {
-	CurrentClipAmmo = GetData()->MaxClipAmmo;
+	const TSubclassOf<UFretteStackableItemDataAsset> AmmoClass = GetData()->AmmoType.GetClass();
+	UFretteStackableItem* AmmoItem = Cast<UFretteStackableItem>(GetOwningInventory()->GetFirstItemFromAsset(AmmoClass));
+	if (AmmoItem == nullptr)
+		return 0;
+	
+	const int NumBulletsToLoad = GetData()->MaxClipAmmo;
+	const int NumBulletsDelta = AmmoItem->UpdateQuantity(-NumBulletsToLoad);
+	NumBulletsLoaded = -NumBulletsDelta;
+	
+	GetOwningInventory()->ChangeItem(this);
+	GetOwningInventory()->ChangeItem(AmmoItem);
+	
+	return NumBulletsLoaded;
 }

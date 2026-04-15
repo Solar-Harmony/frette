@@ -162,7 +162,7 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const
 {
 	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
-
+	
 	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
 		return;
 
