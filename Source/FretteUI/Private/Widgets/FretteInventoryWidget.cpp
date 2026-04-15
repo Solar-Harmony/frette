@@ -16,7 +16,7 @@ void UFretteInventoryWidget::InitializeSlotViewmodels() const
 	
 	if (!IsValid(SlotsVM))
 	{
-		FRETTE_LOG(Error, "The SlotsVM was not bound to the inventory correctly!");
+		UE_LOG(LogTemp, Error, TEXT("The SlotsVM was not bound to the inventory correctly!"));
 		return;
 	}
 	
