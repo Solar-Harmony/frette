@@ -13,12 +13,36 @@ UFretteBodyPartComponent::UFretteBodyPartComponent()
 	SetComponentTickInterval(2.0f);
 }
 
+void UFretteBodyPartComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	// the listen server is also a client, and ReadyForReplication executes after the UI widget Constructs there 
+	if (GetWorld()->GetNetMode() == NM_ListenServer)
+	{
+		for (UFretteBodyPartData* Data : BodyPartData)
+		{
+			UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
+			Instance->Initialize(Data, Cast<AFretteBaseCharacter>(GetOwner()));
+			BodyPartInstances.Add(Instance);
+			BodyPartTagToInstanceMap.Add(Data->BodyPartTag, Instance);
+
+			AddReplicatedSubObject(Instance);
+		}
+		
+		OnBodyPartsInitialized.Broadcast();
+	}
+}
+
 void UFretteBodyPartComponent::ReadyForReplication()
 {
 	Super::ReadyForReplication();
 	
 	if (GetOwnerRole() != ROLE_Authority)
 		return;
+	
+	if (!BodyPartInstances.IsEmpty())
+		return;	
 	
 	for (UFretteBodyPartData* Data : BodyPartData)
 	{
@@ -29,6 +53,8 @@ void UFretteBodyPartComponent::ReadyForReplication()
 
 		AddReplicatedSubObject(Instance);
 	}
+	
+	OnBodyPartsInitialized.Broadcast();
 }
 
 void UFretteBodyPartComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -156,6 +182,8 @@ void UFretteBodyPartComponent::OnRep_BodyPartInstances()
 	{
 		BodyPartTagToInstanceMap.Add(Instance->GetBodyPartTag(), Instance);
 	}
+	
+	OnBodyPartsInitialized.Broadcast();
 }
 
 void UFretteBodyPartComponent::Client_NotifyBodyPartChange_Implementation(const FFretteBodyPartChangeEvent& ChangeEvent)

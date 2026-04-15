@@ -36,6 +36,7 @@ struct FFretteBodyPartChangeEvent
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBodyPartValueChanged, const FFretteBodyPartChangeEvent&, ChangeEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBodyPartsInitialized);
 
 UCLASS(meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFretteBodyPartComponent : public UActorComponent
@@ -44,6 +45,7 @@ class FRETTE_API UFretteBodyPartComponent : public UActorComponent
 
 public:
 	UFretteBodyPartComponent();
+	virtual void BeginPlay() override;
 	virtual void ReadyForReplication() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
@@ -68,6 +70,9 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
 	float GetNormalizedCriticalValue(UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTag, bool bForFeedback) const;
+
+	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
+	bool AreBodyPartsInitialized() const { return BodyPartInstances.Num() > 0; }
 	
 	UFUNCTION()
 	void OnRep_BodyPartInstances();
@@ -82,6 +87,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Frette|Body Parts")
 	FOnBodyPartValueChanged OnBodyPartValueChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Frette|Body Parts")
+	FOnBodyPartsInitialized OnBodyPartsInitialized;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TObjectPtr<UFretteBonesToTagData> BoneTagDataAsset;
@@ -94,3 +102,4 @@ private:
 	UPROPERTY()
 	TMap<FGameplayTag, TObjectPtr<UFretteBodyPartInstance>> BodyPartTagToInstanceMap;
 };
+
