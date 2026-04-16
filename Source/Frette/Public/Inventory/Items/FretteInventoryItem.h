@@ -64,9 +64,6 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UStaticMesh> Mesh;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<int32, TSoftObjectPtr<UMaterialInterface>> OverrideMaterials;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Consumable")
 	bool bConsumeOnUse = false;
