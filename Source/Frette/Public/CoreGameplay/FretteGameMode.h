@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FretteClueGenerationDataAsset.h"
 #include "FretteClueTemplateSet.h"
 #include "CoreGameplay/FretteClue.h"
 #include "GameFramework/GameModeBase.h"
@@ -53,10 +54,16 @@ private:
 	int32 NumCluesFound = 0;
 	int32 NumPrimaryCluesFound = 0;
 	int32 NumDudCluesFound = 0;
-	const float PrimaryCluesRatioTarget = 0.3f;
-	const float DudClueRatioTarget = 0.1f;
-	// Both ratio targets start at 0.0, this is the steepness of the exponent curve ramping them up
-	const float ClueRatioRampSteepness = 0.25f;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteClueGenerationDataAsset> Cfg;
+	
+	float MinTimeBeforeNextPrimaryClue;
+	float MaxTimeBeforeNextPrimaryClue;
+	float LastPrimaryClueFoundTime = 0.0f;
+	float GameStartTime = 0.0f;
+	
+	void UpdateTimeBeforeNextPrimaryClue();
 
 	EClueType PickNextClueType() const;
 

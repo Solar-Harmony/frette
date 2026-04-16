@@ -32,7 +32,7 @@ protected:
 
 	//TODO: Temporaire le temps qu'on ai un vrai systeme de calcul de température ambiante selon l'environnement autour du joueur
 	UPROPERTY(EditAnywhere, BlueprintReadWrite);
-	int AmbientTemperature = -20;
+	int AmbientTemperature = 0;
 
 	const FGameplayTag TemperatureEffectTag = TAG_BodyPartValues_Temperature;
 

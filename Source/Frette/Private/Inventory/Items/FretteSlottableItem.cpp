@@ -12,6 +12,9 @@ void UFretteSlottableItem::OnEquipped()
 		Mesh->LinkAnimClassLayers(GetData()->AnimLayer);
 	}
 
+	if (!Character->HasAuthority())
+		return;
+
 	if (UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character))
 	{
 		ASC->GrantAbilities(GetData()->GrantedAbilities.GetAbilityConfigs(), this);
@@ -31,6 +34,9 @@ void UFretteSlottableItem::OnUnequipped()
 	{
 		Mesh->LinkAnimClassLayers(GetData()->AnimLayer);
 	}
+
+	if (!Character->HasAuthority())
+		return;
 
 	if (UFretteAbilitySystemComponent* ASC = UFretteAbilitySystemComponent::Get(Character))
 	{

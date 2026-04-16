@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "FretteInventoryItem.generated.h"
 
@@ -39,7 +40,7 @@ public:
 	}
 	
 private:
-	void Use() { Use_Implementation(); }
+	void Use();
 	virtual void Use_Implementation() {}
 	
 	UPROPERTY(Replicated)
@@ -63,6 +64,15 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UStaticMesh> Mesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TMap<int32, TSoftObjectPtr<UMaterialInterface>> OverrideMaterials;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Consumable")
+	bool bConsumeOnUse = false;
+	
+	UPROPERTY(EditDefaultsOnly, DisplayName="Effects Applied on Item Use")
+	TArray<FFretteGameplayEffectConfig> EffectsAppliedOnUse;
 
 	UFretteInventoryItem* CreateRuntimeItem(UObject* OuterInventory)
 	{

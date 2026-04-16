@@ -37,6 +37,19 @@ UFretteInventoryItem* FFretteInventoryList::GetItemByClass(const TSubclassOf<UFr
 	return nullptr;
 }
 
+UFretteInventoryItem* FFretteInventoryList::GetItemByDataClass(const TSubclassOf<UFretteInventoryItemDataAsset> ItemClass) const
+{
+	for (const FFretteInventoryListEntry& Entry : Entries)
+	{
+		if (IsValid(Entry.Item) && Entry.Item->GetUntypedData()->IsA(ItemClass))
+		{
+			return Entry.Item;
+		}
+	}
+	
+	return nullptr;
+}
+
 TArray<UFretteInventoryItem*> FFretteInventoryList::GetItemsByClass(const TSubclassOf<UFretteInventoryItem> ItemClass) const
 {
 	TArray<UFretteInventoryItem*> Items;
@@ -56,7 +69,7 @@ void FFretteInventoryList::AddEntry(UFretteInventoryItem* ItemToAdd)
 {
 	check(Owner.IsValid());
 	check(Owner->GetOwner()->HasAuthority());
-	require(IsValidItem(ItemToAdd, true));
+	precondition(IsValidItem(ItemToAdd, true));
 
 	FFretteInventoryListEntry& Entry = Entries.AddDefaulted_GetRef();
 	Entry.Item = ItemToAdd;
@@ -72,10 +85,10 @@ void FFretteInventoryList::ChangeEntry(UFretteInventoryItem* ItemToChange)
 {
 	check(Owner.IsValid());
 	check(Owner->GetOwner()->HasAuthority());
-	require(IsValidItem(ItemToChange));
+	precondition(IsValidItem(ItemToChange));
 
 	const int32 Idx = GetIndexById(ItemToChange->Id);
-	require(Idx != INDEX_NONE, "Inventory: Cannot change item #%d because it was not found in this inventory.", ItemToChange->Id);
+	precondition(Idx != INDEX_NONE, "Inventory: Cannot change item #%d because it was not found in this inventory.", ItemToChange->Id);
 
 	FFretteInventoryListEntry& Entry = Entries[Idx];
 	Entry.Item = ItemToChange;
@@ -90,10 +103,10 @@ void FFretteInventoryList::RemoveEntry(int32 ItemId)
 {
 	check(Owner.IsValid());
 	check(Owner->GetOwner()->HasAuthority());
-	require(Entries.Num() > 0, "Inventory: Cannot remove item because inventory is empty.");
+	precondition(Entries.Num() > 0, "Inventory: Cannot remove item because inventory is empty.");
 
 	const int32 Idx = GetIndexById(ItemId);
-	require(Idx != INDEX_NONE, "Inventory: Cannot remove item #%d because it was not found in this inventory.", ItemId);
+	precondition(Idx != INDEX_NONE, "Inventory: Cannot remove item #%d because it was not found in this inventory.", ItemId);
 	
 	const int32 LastIdx = Entries.Num() - 1;
 	UFretteInventoryItem* ItemToRemove = Entries[Idx].Item;
@@ -304,16 +317,16 @@ void UFretteInventoryComponent::ServerDumpInventory_Implementation()
 
 static void ExecDumpInventory(UWorld* World)
 {
-	require(World);
+	precondition(World);
 
 	const APlayerController* PC = World->GetFirstPlayerController();
-	require(PC);
+	precondition(PC);
 
 	const APawn* Pawn = PC->GetPawn();
-	require(Pawn);
+	precondition(Pawn);
 
 	UFretteInventoryComponent* InventoryComp = Pawn->FindComponentByClass<UFretteInventoryComponent>();
-	require(InventoryComp, "DumpInventory: No inventory component found on pawn %s", *Pawn->GetName());
+	precondition(InventoryComp, "DumpInventory: No inventory component found on pawn %s", *Pawn->GetName());
 
 	InventoryComp->DumpInventory();
 }

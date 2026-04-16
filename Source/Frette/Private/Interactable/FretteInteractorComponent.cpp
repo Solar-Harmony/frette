@@ -3,9 +3,9 @@
 #include "FrettePostProcessSubsystem.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/FrettePlayerCharacter.h"
-#include "Interactable/FretteInteractableComponent.h"
 #include "Components/TextBlock.h"
 #include "Frette/Frette.h"
+#include "Interactable/FretteInteractableComponent.h"
 #include "Player/FrettePlayerController.h"
 
 UFretteInteractorComponent::UFretteInteractorComponent()
@@ -43,11 +43,11 @@ UFretteInteractableComponent* UFretteInteractorComponent::GetInteractableCompone
 void UFretteInteractorComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	PlayerController = Cast<AFrettePlayerController>(GetOwner());
 	if (!PlayerController->IsLocalPlayerController())
 		return;
-	
+
 	if (InteractWidgetClass)
 	{
 		InteractWidgetInstance = CreateWidget<UUserWidget>(PlayerController, InteractWidgetClass);
@@ -65,36 +65,64 @@ void UFretteInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	UpdateInteractableTarget();
 }
 
-void UFretteInteractorComponent::Interact() const
+void UFretteInteractorComponent::Interact()
 {
 	if (CurrentHoveredActor.GetObject())
 	{
-		const UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
+		UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
 		if (IsValid(Interactable))
 		{
+			CurrentInteractable = Interactable;
 			Server_Interact(Interactable->GetOwner()); // TODO: Suboptimal
 		}
 	}
 }
 
-void UFretteInteractorComponent::Server_Interact_Implementation(AActor* Interactable) const
+void UFretteInteractorComponent::Server_Interact_Implementation(AActor* Interactable)
 {
 	// TODO: the server should validate by raycasting again, to prevent cheating
-	require(IsValid(Interactable));
-	
+	precondition(IsValid(Interactable));
+
 	const UFretteInteractableComponent* InteractableComponent = Interactable->GetComponentByClass<UFretteInteractableComponent>();
-	require(IsValid(InteractableComponent))
-	
+	precondition(IsValid(InteractableComponent))
+
 	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
-	require(IsValid(Interactor));
+	precondition(IsValid(Interactor));
+
 	InteractableComponent->OnInteract.Broadcast(Interactor);
+}
+
+void UFretteInteractorComponent::EndInteract()
+{
+	if (!CurrentInteractable)
+		return;
+
+	const UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
+	if (IsValid(Interactable))
+	{
+		CurrentInteractable = nullptr;
+		Server_EndInteract(Interactable->GetOwner());
+	}
+}
+
+void UFretteInteractorComponent::Server_EndInteract_Implementation(AActor* Interactable)
+{
+	precondition(IsValid(Interactable));
+
+	const UFretteInteractableComponent* InteractableComponent = Interactable->GetComponentByClass<UFretteInteractableComponent>();
+	precondition(IsValid(InteractableComponent))
+
+	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
+	precondition(IsValid(Interactor));
+
+	InteractableComponent->OnInteractEnd.Broadcast(Interactor);
 }
 
 void UFretteInteractorComponent::UpdateInteractableTarget()
 {
 	if (!IsValid(PlayerController))
 		return;
-	
+
 	FHitResult Hit;
 	FVector WorldLocation;
 	FRotator ViewRotation;
@@ -150,7 +178,7 @@ void UFretteInteractorComponent::UpdateInteractableTarget()
 	if (CurrentHoveredActor.GetObject())
 	{
 		UFretteInteractableComponent* Interactable = GetInteractableComponentFromHover(CurrentHoveredActor);
-		
+
 		if (IsValid(Interactable))
 		{
 			if (IsValid(InteractWidgetInstance) && Interactable->bShowMessage)
@@ -162,18 +190,17 @@ void UFretteInteractorComponent::UpdateInteractableTarget()
 					TextLabel->SetText(Interactable->Message);
 				}
 			}
-		
+
 			if (Interactable->bShowOutline && IsValid(Interactable->Mesh))
 			{
 				GetWorld()->GetGameInstance()
-					->GetSubsystem<UFrettePostProcessSubsystem>()
-					->SetOutline(Interactable->OutlineColor, Interactable->OutlineThickness, Interactable->OutlineAlpha);
+				          ->GetSubsystem<UFrettePostProcessSubsystem>()
+				          ->SetOutline(Interactable->OutlineColor, Interactable->OutlineThickness, Interactable->OutlineAlpha);
 				Interactable->Mesh->SetCustomDepthStencilValue(2);
 				Interactable->Mesh->SetRenderCustomDepth(true);
 			}
-		
+
 			Interactable->OnBeginHover.Broadcast();
 		}
 	}
 }
-

@@ -1,9 +1,11 @@
 #include "Character/FretteNotificationsComponent.h"
 
+#include "Frette/Frette.h"
 #include "GameFramework/PlayerController.h"
 
 void UFretteNotificationsComponent::Notify(const AFrettePlayerCharacter* PlayerCharacter, const FText& Message)
 {
+	precondition(PlayerCharacter != nullptr, "Tried to send notification on null player character");
 	PlayerCharacter->GetNotifications()->Send(Message);
 }
 
@@ -29,7 +31,10 @@ void UFretteNotificationsComponent::NotifyAll(const UObject* WorldContextObject,
 
 void UFretteNotificationsComponent::Send_Implementation(const FText& Message)
 {
-	PendingMessages.Enqueue(Message);
+	if (PendingMessages.ContainsByPredicate([&](const FText& PendingMessage) { return PendingMessage.EqualTo(Message); }))
+		return;
+	
+	PendingMessages.Add(Message);
 	OnAddNotification.ExecuteIfBound(Message);
 	
 	FTimerHandle _;
@@ -40,7 +45,8 @@ void UFretteNotificationsComponent::Send_Implementation(const FText& Message)
 
 void UFretteNotificationsComponent::PopNotification()
 {
-	FText Message;
-	PendingMessages.Dequeue(Message);
+	FText Message = PendingMessages[0];
+	PendingMessages.RemoveAtSwap(0);
+	
 	OnRemoveNotification.ExecuteIfBound();
 }

@@ -35,8 +35,8 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment Component"));
 	EquipmentComponent->SetIsReplicated(true);
-
 	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("Notifications Component"));
+	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("NotificationsComponent_Internal"));
 	NotificationsComponent->SetIsReplicated(true);
 }
 
@@ -92,11 +92,6 @@ void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 {
 	AddControllerYawInput(LookAxis.X * HorizontalLookSensitivity);
 	AddControllerPitchInput(LookAxis.Y * VerticalLookSensitivity);
-}
-
-void AFrettePlayerCharacter::DoPlayerJump()
-{
-	Jump();
 }
 
 //Set la position de la caméra a la position du socket de tête du mesh (pour les animations)
