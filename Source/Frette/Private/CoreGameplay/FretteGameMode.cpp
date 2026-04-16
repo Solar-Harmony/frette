@@ -56,9 +56,9 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	}
 
 	Info.Type = bIsPrimaryClue ? EClueType::MainObjective : EClueType::PointOfInterest;
-	Info.LandmarkName = POI->DisplayName;
-	Info.LandmarkDescription = POI->Description;
-	Info.LandmarkLoot = POI->ThingOfInterest;
+	Info.LandmarkName = UFretteClueTemplateSet::PickRandom(POI->DisplayNames);
+	Info.LandmarkDescription = UFretteClueTemplateSet::PickRandom(POI->Descriptions);
+	Info.LandmarkLoot = INVTEXT("RIEN PANTOUTE (not implemented)");
 
 	const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
 	const ECardinalDirection CardinalDirection = UFretteGameplayStatics::DirVectorToCardinal(Direction);
@@ -152,6 +152,11 @@ void AFretteGameMode::BeginPlay()
 	for (TActorIterator<AFretteLandmark> It(GetWorld()); It; ++It)
 	{
 		AFretteLandmark* Landmark = *It;
+		
+		// exclude generic landmarks like houses
+		// TODO: this breaks SRP and we should use a self-registrating component
+		if (!Landmark->bUsedByClueSystem)
+			continue;
 
 		const FVector2D LandmarkLocation2D(Landmark->GetActorLocation());
 		const float DistanceToObjectiveSq = FVector2D::DistSquared(LandmarkLocation2D, ObjectiveLocation2D);

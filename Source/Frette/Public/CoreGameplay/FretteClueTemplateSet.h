@@ -69,7 +69,7 @@ public:
 	static FText PickRandom(const TArray<FText>& Templates)
 	{
 		if (Templates.Num() == 0)
-			return INVTEXT("No clue templates available");
+			return INVTEXT("<NO TEMPLATE AVAILABLE>");
 		
 		const int32 Index = FMath::RandRange(0, Templates.Num() - 1);
 		return Templates[Index];
