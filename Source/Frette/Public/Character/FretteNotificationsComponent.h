@@ -4,6 +4,8 @@
 #include "FrettePlayerCharacter.h"
 #include "FretteNotificationsComponent.generated.h"
 
+
+
 DECLARE_DELEGATE_OneParam(FOnAddPlayerNotification, const FText& /*NotificationText*/);
 DECLARE_DELEGATE(FOnRemovePlayerNotification);
 
@@ -33,5 +35,5 @@ private:
 	
 	void PopNotification();
 	
-	TQueue<FText> PendingMessages;
+	TArray<FText> PendingMessages;
 };

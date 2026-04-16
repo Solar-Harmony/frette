@@ -31,7 +31,7 @@ UFretteInventoryItem* UFretteInventoryComponent::GetItemByIndexEditor(int32 Idx)
 void UFretteInventoryComponent::UseItem_Implementation(int32 ItemId)
 {
 	UFretteInventoryItem* ItemToUse = GetItem(ItemId);
-	require(ItemToUse, "Inventory: Cannot select item #%d because it was not found in this inventory.", ItemId);
+	precondition(ItemToUse, "Inventory: Cannot select item #%d because it was not found in this inventory.", ItemId);
 
 	ItemToUse->Use();
 	
@@ -46,8 +46,8 @@ void UFretteInventoryComponent::UseItem_Implementation(int32 ItemId)
 
 void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* ItemData)
 {
-	require(IsReadyForReplication() && GetOwner()->HasAuthority());
-	require(IsValid(ItemData), "Inventory: Cannot add item: item data asset is invalid.");
+	precondition(IsReadyForReplication() && GetOwner()->HasAuthority());
+	precondition(IsValid(ItemData), "Inventory: Cannot add item: item data asset is invalid.");
 
 	UFretteInventoryItem* Item = ItemData->CreateRuntimeItem(this);
 	AddReplicatedSubObject(Item);
@@ -56,15 +56,15 @@ void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataA
 
 void UFretteInventoryComponent::ChangeItem_Implementation(UFretteInventoryItem* ItemToChange)
 {
-	require(GetOwner()->HasAuthority());
-	require(Inventory.IsValidItem(ItemToChange), "Inventory: Cannot change item because it is invalid.");
+	precondition(GetOwner()->HasAuthority());
+	precondition(Inventory.IsValidItem(ItemToChange), "Inventory: Cannot change item because it is invalid.");
 	Inventory.ChangeEntry(ItemToChange);
 }
 
 void UFretteInventoryComponent::RemoveItem_Implementation(int32 ItemId)
 {
-	require(GetOwner()->HasAuthority());
-	require(Inventory.HasEntry(ItemId), "Inventory: Cannot remove item #%d because this inventory has no item with that ID.", ItemId);
+	precondition(GetOwner()->HasAuthority());
+	precondition(Inventory.HasEntry(ItemId), "Inventory: Cannot remove item #%d because this inventory has no item with that ID.", ItemId);
 
 	Inventory.RemoveEntry(ItemId);
 }

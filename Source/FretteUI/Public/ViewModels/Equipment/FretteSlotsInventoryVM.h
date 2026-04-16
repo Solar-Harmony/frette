@@ -85,11 +85,12 @@ private:
 	
 	void AddItem(const UFretteInventoryItem* NewItem)
 	{
-		if (!NewItem->IsA<UFretteSlottableItem>())
+		const auto* SlotItem = Cast<UFretteSlottableItem>(NewItem);
+		if (SlotItem == nullptr)
 			return;
 
 		UFretteSlotsInventoryItemVM* ItemVM = NewObject<UFretteSlotsInventoryItemVM>(this);
-		ItemVM->SetFromModel(const_cast<UFretteSlottableItem*>(Cast<UFretteSlottableItem>(NewItem)));
+		ItemVM->SetFromModel(SlotItem);
 		Items.Add(ItemVM);
 		
 		const int32 FreeSlotIdx = FindFirstFreeSlot(ItemVM, false);

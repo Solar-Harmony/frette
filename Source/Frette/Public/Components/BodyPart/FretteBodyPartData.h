@@ -24,23 +24,32 @@ struct FFretteEffectRuleEntry
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<UGameplayAbility>> Abilities;
 };
-
 USTRUCT(BlueprintType)
-struct FFretteValueData
+struct FFretteBodyPartValueTypeConfig
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, Meta = (Categories = "Frette.BodyPartValues"))
 	FGameplayTag Type;
 
+	// Whether this body part is essential to this value type
 	UPROPERTY(EditAnywhere)
-	int MaxValue = 100.f;
-
+	bool bIsCritical = false;
+	
 	UPROPERTY(EditAnywhere)
-	int MinValue = 0.f;
-
+	int MinValue = 0;
+	
 	UPROPERTY(EditAnywhere)
-	int StartValue = 100.f;
+	int StartValue = 100;
+	
+	UPROPERTY(EditAnywhere)
+	int MaxValue = 100;
+	
+	UPROPERTY(EditAnywhere, Category="Feedback")
+	int FeedbackLowValue = 10;
+	
+	UPROPERTY(EditAnywhere, Category="Feedback")
+	int FeedbackHighValue = 50;
 };
 
 UCLASS()
@@ -53,40 +62,47 @@ public:
 	FGameplayTag BodyPartTag;
 
 	UPROPERTY(EditAnywhere)
-	TArray<FFretteValueData> ValueDatas;
+	TArray<FFretteBodyPartValueTypeConfig> ValueDatas;
 
 	UPROPERTY(EditAnywhere)
 	TArray<FFretteEffectRuleEntry> EffectRules;
-
-	int GetMaxValueForType(FGameplayTag Type) const
+	
+	const FFretteBodyPartValueTypeConfig* GetValueTypeConfig(FGameplayTag ValueType) const
 	{
-		for (const FFretteValueData& ValueData : ValueDatas)
+		return ValueDatas.FindByPredicate([&](const FFretteBodyPartValueTypeConfig& Config)
 		{
-			if (Type == ValueData.Type)
-				return ValueData.MaxValue;
-		}
-		return 100;
-	};
+			return Config.Type == ValueType;
+		});
+	}
 
 	int GetMinValueForType(FGameplayTag Type) const
 	{
-		for (const FFretteValueData& ValueData : ValueDatas)
-		{
-			if (Type == ValueData.Type)
-				return ValueData.MinValue;
-		}
-
-		return 0;
-	};
-
+		const auto* Config = GetValueTypeConfig(Type);
+		return Config ? Config->MinValue : 0;
+	}
+	
 	int GetStartValueForType(FGameplayTag Type) const
 	{
-		for (const FFretteValueData& ValueData : ValueDatas)
-		{
-			if (Type == ValueData.Type)
-				return ValueData.StartValue;
-		}
-		return 100;
+		const auto* Config = GetValueTypeConfig(Type);
+		return Config ? Config->StartValue : 100;
 	};
+	
+	int GetMaxValueForType(FGameplayTag Type) const
+	{
+		const auto* Config = GetValueTypeConfig(Type);
+		return Config ? Config->MaxValue : 100;
+	}
+	
+	#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& Event) override
+	{
+		Super::PostEditChangeProperty(Event);
 
+		for (FFretteBodyPartValueTypeConfig& Config : ValueDatas)
+		{
+			Config.FeedbackLowValue = FMath::Clamp(Config.FeedbackLowValue, Config.MinValue, Config.FeedbackHighValue);
+			Config.FeedbackHighValue = FMath::Clamp(Config.FeedbackHighValue, Config.FeedbackLowValue, Config.MaxValue);
+		}
+	}
+	#endif
 };

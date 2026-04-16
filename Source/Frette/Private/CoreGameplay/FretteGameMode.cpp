@@ -118,7 +118,7 @@ void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerChar
 void AFretteGameMode::CheckVictory(const AFrettePlayerCharacter* PlayerCharacter) const
 {
 	const UFretteInventoryComponent* Inventory = PlayerCharacter->GetPlayerInventory();
-	const bool bHasTreasure = Inventory->HasItemOfType<UFretteObjectiveItem>();
+	const bool bHasTreasure = Inventory->HasItemOfClass<UFretteObjectiveItem>();
 	if (bHasTreasure)
 	{
 		AFretteGameState* State = GetGameState<AFretteGameState>();
@@ -140,11 +140,11 @@ void AFretteGameMode::BeginPlay()
 
 	for (TActorIterator<AFretteMainObjective> It(GetWorld()); It; ++It)
 	{
-		require(MainObjective == nullptr, "Multiple main objectives found in the level! There should be only one.");
+		precondition(MainObjective == nullptr, "Multiple main objectives found in the level! There should be only one.");
 		MainObjective = *It;
 	}
 
-	require(IsValid(MainObjective), "No main objective found in the level! Make sure to place one in the level.");
+	precondition(IsValid(MainObjective), "No main objective found in the level! Make sure to place one in the level.");
 
 	const FVector2D ObjectiveLocation2D(MainObjective->GetActorLocation());
 	const float NearObjectiveRadiusSq = FMath::Square(MainObjective->NearObjectiveRadiusCm);
@@ -177,11 +177,11 @@ void AFretteGameMode::BeginPlay()
 		NumCluesPlaced++;
 	}
 
-	require(NearLandmarks.Num() > 0, "No landmarks placed within the objective's radius. Primary clues won't be possible.");
-	require(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.");
+	precondition(NearLandmarks.Num() > 0, "No landmarks placed within the objective's radius. Primary clues won't be possible.");
+	precondition(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.");
 
 	const int32 TotalLandmarks = NearLandmarks.Num() + FarLandmarks.Num();
-	require(NumCluesPlaced <= TotalLandmarks, "%d clues placed but only %d total landmarks exist.", NumCluesPlaced, TotalLandmarks);
+	precondition(NumCluesPlaced <= TotalLandmarks, "%d clues placed but only %d total landmarks exist.", NumCluesPlaced, TotalLandmarks);
 	
 	UpdateTimeBeforeNextPrimaryClue();
 }

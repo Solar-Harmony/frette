@@ -24,7 +24,7 @@ public:
 	FOnClientReceiveNewClue OnClientReceiveNewClue;
 
 	UFUNCTION(Client, Reliable)
-	void Client_OnClueGenerated(const FText& ClueText);
+	void Client_OnClueGenerated(const FText& ClueText) const;
 
 protected:
 	virtual void SetupInputComponent() override;
