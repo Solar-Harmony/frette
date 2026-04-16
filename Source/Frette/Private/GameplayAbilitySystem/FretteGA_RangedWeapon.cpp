@@ -34,7 +34,6 @@ void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* Weap
 		SpawnRotation,
 		SpawnParams
 		);
-
 }
 
 FRotator UFretteGA_RangedWeapon::GetAimRotation(const APawn* InstigatorPawn, const FVector MuzzleLocation) const
@@ -47,7 +46,6 @@ FRotator UFretteGA_RangedWeapon::GetAimRotation(const APawn* InstigatorPawn, con
 	FRotator CameraRotation;
 	PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
-	// Trace from camera to find aim point
 	FHitResult HitResult;
 	FVector TraceEnd = CameraLocation + CameraRotation.Vector() * 50000.f;
 
@@ -63,8 +61,6 @@ FRotator UFretteGA_RangedWeapon::GetAimRotation(const APawn* InstigatorPawn, con
 		);
 
 	FVector AimPoint = bHit ? HitResult.ImpactPoint : TraceEnd;
-	DrawDebugLine(GetWorld(), CameraLocation, AimPoint, FColor::Green, false, 2.f);
-	DrawDebugLine(GetWorld(), MuzzleLocation, AimPoint, FColor::Red, false, 2.f);
 	return (AimPoint - MuzzleLocation).Rotation();
 }
 

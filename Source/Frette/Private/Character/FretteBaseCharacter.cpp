@@ -21,6 +21,15 @@ AFretteBaseCharacter::AFretteBaseCharacter()
 	BodyTemperatureComponent->SetIsReplicated(true);
 }
 
+void AFretteBaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//Force l'update de la position des bones sur le serveur
+	//Fix un problem avec le aim et la position du gun selon le serveur vs client
+	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+}
+
 void AFretteBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
