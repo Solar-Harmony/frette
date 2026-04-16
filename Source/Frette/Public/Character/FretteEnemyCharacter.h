@@ -29,11 +29,12 @@ public:
 
 	float PatrolRadius = 1000.f;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Replicated)
 	bool WaitingAtPatrolPoint = false;
 
 protected:
 	AFretteEnemyCharacter();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void InitAbilityActorInfo() override;
 	virtual void Multicast_HandleDeath_Implementation(FVector FinalVelocity) override;

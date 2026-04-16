@@ -29,6 +29,12 @@ AFretteEnemyCharacter::AFretteEnemyCharacter()
 	AiPerception->SetDominantSense(SightConfig->GetSenseImplementation());
 }
 
+void AFretteEnemyCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFretteEnemyCharacter, WaitingAtPatrolPoint);
+}
+
 void AFretteEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
