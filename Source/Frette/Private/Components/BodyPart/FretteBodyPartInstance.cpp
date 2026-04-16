@@ -280,4 +280,10 @@ void UFretteBodyPartInstance::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	DOREPLIFETIME(UFretteBodyPartInstance, OwnerCharacter);
 }
 
-void UFretteBodyPartInstance::OnRep_AccumulatedValues() {}
+void UFretteBodyPartInstance::OnRep_AccumulatedValues()
+{
+	if (UFretteBodyPartComponent* Comp = Cast<UFretteBodyPartComponent>(GetOuter()))
+	{
+		Comp->OnBodyPartsInitialized.Broadcast();
+	}
+}
