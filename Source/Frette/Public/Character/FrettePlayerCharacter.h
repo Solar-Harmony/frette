@@ -52,6 +52,12 @@ public:
 
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
+	UPROPERTY(EditAnywhere, Category="Frette|Look")
+	float HorizontalLookSensitivity = 1.f;
+
+	UPROPERTY(EditAnywhere, Category="Frette|Look")
+	float VerticalLookSensitivity = 1.f;
+
 protected:
 	virtual void Tick(float DeltaSeconds) override;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

@@ -90,8 +90,8 @@ void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
 
 void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 {
-	AddControllerYawInput(LookAxis.X);
-	AddControllerPitchInput(LookAxis.Y);
+	AddControllerYawInput(LookAxis.X * HorizontalLookSensitivity);
+	AddControllerPitchInput(LookAxis.Y * VerticalLookSensitivity);
 }
 
 void AFrettePlayerCharacter::DoPlayerJump()

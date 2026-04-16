@@ -30,9 +30,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Frette")
 	FVector2f SpawnTimerRandomInterval = FVector2f(5.f, 20.f);
 
-	UPROPERTY(EditAnywhere, Category = "Frette")
-	TObjectPtr<USplineComponent> SpawnedEntitiesPatrolPath;
-
 	int RemainingSpawnedEntities = 0;
 
 	void SpawnEntity();

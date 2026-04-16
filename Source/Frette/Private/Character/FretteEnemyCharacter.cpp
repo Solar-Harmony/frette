@@ -100,16 +100,6 @@ void AFretteEnemyCharacter::Multicast_HandleDeath_Implementation(FVector FinalVe
 	GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	GetMesh()->SetWorldTransform(MeshWorldTransform);
 
-	//TODO: a retirer quand on va avoir d'autre ennemis et d'autre meshs
-	//Sert a essayer d'aider a fix un problem avec le ragdoll du wolf
-	//Je suis pas sur de ce qui cause le problem c'est peut-être le mesh ou le physics asset
-	FVector RootBoneLoc = GetMesh()->GetBoneLocation(FName("wolf_rig"));
-	FVector HipsBoneLoc = GetMesh()->GetBoneLocation(FName("hips"));
-	float Offset = HipsBoneLoc.Z - RootBoneLoc.Z;
-	GetMesh()->AddWorldOffset(FVector(0.f, 0.f, Offset));
-
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
 	//TODO: Faire un parent bone string field qui permet de déterminer le bone à partir duquel le ragdoll doit être appliqué
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("hips"), true, true);
 	GetMesh()->SetPhysicsLinearVelocity(FinalVelocity, false, FName("hips"));
