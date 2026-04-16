@@ -45,4 +45,6 @@ protected:
 
 	UPROPERTY()
 	TSet<TObjectPtr<ACharacter>> OverlappingCharacters;
+	
+	FGuid UniqueId;
 };

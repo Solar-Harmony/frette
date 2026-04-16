@@ -13,7 +13,6 @@ class FRETTE_API UFretteTemperatureSourceComponent : public USceneComponent
 
 public:
 	UFretteTemperatureSourceComponent();
-	void OnRegister();
 
 protected:
 	virtual void BeginPlay() override;
@@ -38,20 +37,39 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
 	float AmbientTemperature = 10.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
+	float DiffusionStrength = 1.f; // Alpha in the heat equation
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature", meta=(ClampMin = "0.0", ClampMax = "1.0"))
+	float VisualisationSlice = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
+	int NumberFlowArrows = 1.f;
 
 	UFUNCTION(BlueprintCallable)
 	float ComputeTemperature(float r) const;
+	
+	UFUNCTION(BlueprintCallable)
+	float ComputeFlow(float r) const;
 
 	UPROPERTY()
 	USphereComponent* OverlapSphere;
 
 	UPROPERTY()
-	TObjectPtr<UDrawSphereComponent> DebugSphereInner;
+	TSet<TObjectPtr<ACharacter>> OverlappingCharacters;
 	
 	#if WITH_EDITORONLY_DATA
-	UFUNCTION(BlueprintCallable)
 	void UpdateMaterial();
+	
+	void UpdateDebugArrows();
+	
+	UPROPERTY()
+	TArray<UArrowComponent*> DebugDiffusionArrows;
 
+	UPROPERTY()
+	TObjectPtr<UDrawSphereComponent> DebugSphereInner;
+	
 	UPROPERTY()
 	UStaticMeshComponent* SphereMesh;
 
@@ -60,6 +78,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* HeatMaterial;
+	
+	FGuid UniqueId;
 	
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
 	#endif

@@ -1,15 +1,22 @@
 ﻿#include "Components/FretteTemperatureSourceComponent.h"
 
+#include "AssetTypeCategories.h"
 #include "BaseGizmos/GizmoElementArrowHead.h"
+#include "Components/ArrowComponent.h"
 #include "Components/DrawSphereComponent.h"
-#include "Evaluation/IMovieSceneEvaluationHook.h"
+#include "Components/FretteTemperatureComponent.h"
+#include "GameFramework/Character.h"
+#include "Components/InstancedStaticMeshComponent.h"
 
 // Sets default values for this component's properties
 UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 {
+	PrimaryComponentTick.bCanEverTick = false;
 
-	PrimaryComponentTick.bCanEverTick = true;
+	UniqueId = FGuid::NewGuid();
+
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
+	OverlapSphere->SetupAttachment(this);
 	OverlapSphere->InitSphereRadius(OuterRadius);
 	OverlapSphere->SetGenerateOverlapEvents(true);
 	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -26,6 +33,7 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 
 	#if WITH_EDITORONLY_DATA
 	DebugSphereInner = CreateEditorOnlyDefaultSubobject<UDrawSphereComponent>(TEXT("Debug Sphere 2"));
+	DebugSphereInner->SetupAttachment(this);
 	DebugSphereInner->SetIsVisualizationComponent(true);
 	DebugSphereInner->SetLineThickness(2.f);
 	DebugSphereInner->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -35,6 +43,7 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 	DebugSphereInner->InitSphereRadius(InnerRadius);
 
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HeatSphere"));
+	SphereMesh->SetupAttachment(this);
 	SphereMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SphereMesh->SetHiddenInGame(true);
 
@@ -43,31 +52,57 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 	{
 		SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
 		float Scale = OuterRadius / 50.f;
-		SphereMesh->SetWorldScale3D(FVector(Scale));
+		SphereMesh->SetRelativeScale3D(FVector(Scale));
+		if (HeatMaterial)
+		{
+			HeatMaterialInstance = UMaterialInstanceDynamic::Create(HeatMaterial, this);
+			SphereMesh->SetMaterial(0, HeatMaterialInstance);
+			UpdateMaterial();
+		}
 	}
 
-	if (HeatMaterial)
-	{
-		HeatMaterialInstance = UMaterialInstanceDynamic::Create(HeatMaterial, this);
-		SphereMesh->SetMaterial(0, HeatMaterialInstance);
-		UpdateMaterial();
-	}
+	UpdateDebugArrows();
 	#endif
 }
 
-void UFretteTemperatureSourceComponent::OnRegister()
+void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 {
-	Super::OnRegister();
+	const FVector Center = GetComponentLocation();
+	const float r = VisualisationSlice * OuterRadius;
+	float Flow = ComputeFlow(r);
+	Flow = FMath::Clamp(Flow, 0.f, DiffusionStrength);
 
-	if (AActor* Owner = GetOwner())
+	for (int32 i = 0; i < NumberFlowArrows; i++)
 	{
-		if (USceneComponent* Root = Owner->GetRootComponent())
+		UArrowComponent* Arrow = nullptr;
+
+		if (DebugDiffusionArrows.Num() > i)
 		{
-			#if WITH_EDITORONLY_DATA
-			DebugSphereInner->AttachToComponent(Root, FAttachmentTransformRules::KeepRelativeTransform);
-			SphereMesh->AttachToComponent(Root, FAttachmentTransformRules::KeepRelativeTransform);
-			#endif
-			OverlapSphere->AttachToComponent(Root, FAttachmentTransformRules::KeepRelativeTransform);
+			Arrow = DebugDiffusionArrows[i];
+		}
+		else
+		{
+            FName ArrowName = FName(*FString::Printf(TEXT("Arrow_%d"), i));
+			Arrow = NewObject<UArrowComponent>(this, UArrowComponent::StaticClass(), ArrowName);
+			Arrow->SetupAttachment(this);
+			DebugDiffusionArrows.Add(Arrow);
+		}
+
+		FVector Dir = FVector(1, 0, 0);
+		FVector ArrowPos = Center + Dir * r;
+
+		Arrow->SetWorldLocation(ArrowPos);
+		Arrow->SetWorldRotation(FRotationMatrix::MakeFromX(Dir).ToQuat());
+		Arrow->SetArrowSize(Flow * 0.1f);
+
+		Arrow->SetVisibility(true);
+	}
+
+	for (int32 i = NumberFlowArrows; i < DebugDiffusionArrows.Num(); i++)
+	{
+		if (DebugDiffusionArrows[i])
+		{
+			DebugDiffusionArrows[i]->SetVisibility(false);
 		}
 	}
 }
@@ -92,23 +127,111 @@ float UFretteTemperatureSourceComponent::ComputeTemperature(float r) const
 	return value;
 }
 
+float UFretteTemperatureSourceComponent::ComputeFlow(float r) const
+{
+	if (r <= InnerRadius)
+		return DiffusionStrength;
+	if (r >= OuterRadius)
+		return 0.f;
+
+	// We will compute the spherically symmetric laplacian to get the (flow) using centered finite difference
+	// This is from stuff I derived from the heat equation so curious to see if it works lol
+
+	const float Epsilon = 0.01f;
+	const float Epsilon2 = Epsilon * Epsilon;
+	const float Tprev = ComputeTemperature(r - Epsilon),
+	            Tnext = ComputeTemperature(r + Epsilon),
+	            T = ComputeTemperature(r);
+
+	// Second derivative (centered finite difference)
+	const float d2 = (Tnext + Tprev - 2 * T) / Epsilon2;
+
+	// First derivative (centered finite difference)
+	const float d1 = (Tnext - Tprev) / (2 * Epsilon);
+
+	const float Laplacian = d2 + (2.0 / r) * d1;
+
+	return DiffusionStrength * Laplacian;
+}
+
 // Called every frame
-void UFretteTemperatureSourceComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UFretteTemperatureSourceComponent::TickComponent(
+	float DeltaTime,
+	ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	for (ACharacter* Character : OverlappingCharacters)
+	{
+		if (!Character)
+			continue;
+
+		UFretteTemperatureComponent* TempComp =
+			Character->FindComponentByClass<UFretteTemperatureComponent>();
+
+		USkeletalMeshComponent* Mesh = Character->GetMesh();
+
+		if (!TempComp || !Mesh)
+			continue;
+
+		const FVector SourcePos = OverlapSphere->GetComponentLocation();
+
+		// Vu qu<on veut continuellement update 
+		const int32 BoneCount = Mesh->GetNumBones();
+
+		for (int32 i = 0; i < BoneCount; i++)
+		{
+			const FName BoneName = Mesh->GetBoneName(i);
+			if (BoneName == NAME_None)
+				continue;
+
+			const FVector BonePos =
+				Mesh->GetBoneLocation(BoneName, EBoneSpaces::WorldSpace);
+
+			const float Dist = FVector::Dist(BonePos, SourcePos);
+
+			// Evaluate field contribution directly
+			const float Flow = ComputeFlow(Dist);
+
+			TempComp->AddBodyPartTemperatureFlow(Flow, BoneName, UniqueId);
+		}
+	}
 }
 
 void UFretteTemperatureSourceComponent::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Begin overlap: %s"), *GetNameSafe(OtherActor));
+	ACharacter* Character = Cast<ACharacter>(OtherActor);
+	if (!Character)
+		return;
+
+	OverlappingCharacters.Add(Character);
+
+	if (!OverlappingCharacters.IsEmpty())
+	{
+		SetComponentTickEnabled(true);
+	}
 }
 
 void UFretteTemperatureSourceComponent::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("End overlap: %s"), *GetNameSafe(OtherActor));
+	ACharacter* Character = Cast<ACharacter>(OtherActor);
+	if (!Character)
+		return;
+
+	OverlappingCharacters.Remove(Character);
+	if (UFretteTemperatureComponent* TemperatureComponent =
+		Character->FindComponentByClass<UFretteTemperatureComponent>())
+	{
+		TemperatureComponent->ClearBodyPartTemperatureFlows(UniqueId);
+	}
+
+	if (OverlappingCharacters.IsEmpty())
+	{
+		SetComponentTickEnabled(false);
+	}
 }
 
 #if WITH_EDITORONLY_DATA
@@ -135,7 +258,7 @@ void UFretteTemperatureSourceComponent::PostEditChangeProperty(FPropertyChangedE
 	if (SphereMesh)
 	{
 		float Scale = OuterRadius / 50.f;
-		SphereMesh->SetWorldScale3D(FVector(Scale));
+		SphereMesh->SetRelativeScale3D(FVector(Scale));
 	}
 
 	if (!HeatMaterialInstance && HeatMaterial)
@@ -145,5 +268,6 @@ void UFretteTemperatureSourceComponent::PostEditChangeProperty(FPropertyChangedE
 	}
 
 	UpdateMaterial();
+	UpdateDebugArrows();
 }
 #endif

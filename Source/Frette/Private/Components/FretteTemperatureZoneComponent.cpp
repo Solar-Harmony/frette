@@ -9,6 +9,7 @@ UFretteTemperatureZoneComponent::UFretteTemperatureZoneComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
+	UniqueId = FGuid::NewGuid();
 }
 
 void UFretteTemperatureZoneComponent::BeginPlay()
@@ -51,7 +52,7 @@ void UFretteTemperatureZoneComponent::TemperatureZoneTick()
 			if (!ActiveBones.Contains(Bone))
 			{
 				ActiveBones.Add(Bone);
-				TemperatureComponent->AddBodyPartTemperatureModifier(TemperatureChange, Bone);
+				TemperatureComponent->AddBodyPartTemperatureFlow(TemperatureChange, Bone, UniqueId);
 			}
 		}
 
@@ -59,7 +60,7 @@ void UFretteTemperatureZoneComponent::TemperatureZoneTick()
 		{
 			if (!BonesCurrentlyInZone.Contains(*It))
 			{
-				TemperatureComponent->AddBodyPartTemperatureModifier(-TemperatureChange, *It);
+				TemperatureComponent->ClearBodyPartTemperatureFlow(*It, UniqueId);
 				It.RemoveCurrent();
 			}
 		}
@@ -134,19 +135,10 @@ void UFretteTemperatureZoneComponent::OnOverlapEnd(UPrimitiveComponent* Overlapp
 		return;
 
 	OverlappingCharacters.Remove(Character);
-
-	if (FCharacterActiveBones* Bones = ActiveBonesPerCharacter.Find(Character))
+	if (UFretteTemperatureComponent* TemperatureComponent =
+		Character->FindComponentByClass<UFretteTemperatureComponent>())
 	{
-		if (UFretteTemperatureComponent* TemperatureComponent =
-			Character->FindComponentByClass<UFretteTemperatureComponent>())
-		{
-			for (const FName& Bone : Bones->Bones)
-			{
-				TemperatureComponent->AddBodyPartTemperatureModifier(-TemperatureChange, Bone);
-			}
-		}
-
-		ActiveBonesPerCharacter.Remove(Character);
+		TemperatureComponent->ClearBodyPartTemperatureFlows(UniqueId);
 	}
 
 	if (OverlappingCharacters.IsEmpty())

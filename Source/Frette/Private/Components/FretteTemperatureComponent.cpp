@@ -13,14 +13,6 @@ void UFretteTemperatureComponent::BeginPlay()
 	SetComponentTickInterval(TimeBetweenTemperatureChange);
 
 	BodyPartComponent = GetOwner()->GetComponentByClass<UFretteBodyPartComponent>();
-
-	for (const TObjectPtr<UFretteBodyPartData>& Data : BodyPartComponent->BodyPartData)
-	{
-		if (Data->BodyPartTag.IsValid())
-		{
-			BodyPartTemperatureTargets.Add(Data->BodyPartTag, 0);
-		}
-	}
 }
 
 void UFretteTemperatureComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -36,41 +28,82 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 	{
 		if (!BodyPartComponent)
 			return;
+		
+		TMap<FGameplayTag, float> BoneFlowAccum;
 
-		for (const auto BodyPartTemperatureTarget : BodyPartTemperatureTargets)
+		for (const auto& Entry : BodyPartTemperatureFlows)
 		{
-			const int CurrentBodyPartTemperature = BodyPartComponent->GetValueFromBodyPart(BodyPartTemperatureTarget.Key, TemperatureEffectTag);
-			const int TargetTemperature = BodyPartTemperatureTarget.Value + AmbientTemperature;
-			if (CurrentBodyPartTemperature == TargetTemperature)
+			const FTemperatureKey& Key = Entry.Key;
+			const float FlowValue = Entry.Value;
+
+			const FGameplayTag BoneTag = Key.BodyPart;
+
+			float& AccumulatedFlow = BoneFlowAccum.FindOrAdd(BoneTag);
+			AccumulatedFlow += FlowValue;
+		}
+
+		for (const auto& Pair : BoneFlowAccum)
+		{
+			const FGameplayTag& BoneTag = Pair.Key;
+			float NetFlow = Pair.Value;
+
+			float CurrentTemp =
+				BodyPartComponent->GetValueFromBodyPart(BoneTag, TemperatureEffectTag);
+			
+			if (CurrentTemp < MinTemperature || CurrentTemp > MaxTemperature)
 				continue;
 
-			//Pourrais ajouter un modifier pour rendre le changement soit plus rapide ou plus lent sans avoir a changer la tick interval
-			const int Delta = TargetTemperature > CurrentBodyPartTemperature ? 1 : -1;
+			const float AmbientDelta =
+				DiffusionSpeed * (AmbientTemperature - CurrentTemp);
 
-			BodyPartComponent->AddValueFromBodyPartTag(BodyPartTemperatureTarget.Key, Delta, TemperatureEffectTag);
+			NetFlow += AmbientDelta;
+			
+			BodyPartComponent->AddValueFromBodyPartTag(
+				BoneTag,
+				NetFlow,
+				TemperatureEffectTag
+			);
 		}
 	}
 }
 
-void UFretteTemperatureComponent::AddBodyPartTemperatureModifier(const int NewTargetTemperature, const FGameplayTag BodyPartTag)
+void UFretteTemperatureComponent::AddBodyPartTemperatureFlow(const float NewTargetTemperature, const FGameplayTag BodyPartTag, FGuid SourceId)
 {
-	if (int* CurrentValue = BodyPartTemperatureTargets.Find(BodyPartTag))
+	if (float* CurrentValue = BodyPartTemperatureFlows.Find(FTemperatureKey(BodyPartTag, SourceId)))
 	{
 		*CurrentValue += NewTargetTemperature;
 	}
 }
 
-void UFretteTemperatureComponent::AddBodyPartTemperatureModifier(const int NewTargetTemperature, const FName BoneName)
+void UFretteTemperatureComponent::AddBodyPartTemperatureFlow(const float NewTargetTemperature, const FName BoneName, FGuid SourceId)
 {
 	FGameplayTag BodyPartTag = BodyPartComponent->GetBodyPartFromBoneName(BoneName);
 
-	if (int* CurrentValue = BodyPartTemperatureTargets.Find(BodyPartTag))
-	{
-		*CurrentValue += NewTargetTemperature;
-	}
+	AddBodyPartTemperatureFlow(NewTargetTemperature, BodyPartTag, SourceId);
 }
 
-void UFretteTemperatureComponent::AddToAmbientTemperature(const int NewAmbientTemperature)
+void UFretteTemperatureComponent::AddToAmbientTemperature(const float NewAmbientTemperature)
 {
 	AmbientTemperature += NewAmbientTemperature;
+}
+
+void UFretteTemperatureComponent::ClearBodyPartTemperatureFlow(FGameplayTag BodyPartTag, FGuid SourceId)
+{
+	BodyPartTemperatureFlows.Remove(FTemperatureKey(BodyPartTag, SourceId));
+}
+
+void UFretteTemperatureComponent::ClearBodyPartTemperatureFlow(FName BoneName, FGuid SourceId)
+{
+	FGameplayTag BodyPartTag = BodyPartComponent->GetBodyPartFromBoneName(BoneName);
+	
+	BodyPartTemperatureFlows.Remove(FTemperatureKey(BodyPartTag, SourceId));
+}
+
+void UFretteTemperatureComponent::ClearBodyPartTemperatureFlows(FGuid SourceId)
+{
+	for (auto It = BodyPartTemperatureFlows.CreateIterator(); It; ++It)
+	{
+		if (It->Key.SourceId == SourceId)
+			It.RemoveCurrent();
+	}
 }

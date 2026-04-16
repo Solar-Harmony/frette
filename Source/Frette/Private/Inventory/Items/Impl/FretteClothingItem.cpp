@@ -27,5 +27,6 @@ void UFretteClothingItem::UpdateBodyPartTemperatureModifier(const bool bIsEquipp
 
 	FGameplayTag AffectedBodyPartTag = ItemData->ItemSlotTag;
 	const int ModifierToApply = bIsEquipping ? ItemData->TemperatureModifier : -ItemData->TemperatureModifier;
-	TemperatureComponent->AddBodyPartTemperatureModifier(ModifierToApply, AffectedBodyPartTag);
+	// TODO fix this
+	//TemperatureComponent->AddBodyPartTemperatureFlow(ModifierToApply, AffectedBodyPartTag);
 }
