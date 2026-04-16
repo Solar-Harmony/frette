@@ -90,8 +90,8 @@ void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* Loaded
 	
 	StaticMesh->SetStaticMesh(Mesh);
 	
-	StaticMesh->SetSimulatePhysics(true);
+	// StaticMesh->SetSimulatePhysics(true);
 	StaticMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
-	StaticMesh->SetEnableGravity(true);
-	StaticMesh->SetMassOverrideInKg(NAME_None, 100.0f, true);
+	// StaticMesh->SetEnableGravity(true);
+	// StaticMesh->SetMassOverrideInKg(NAME_None, 100.0f, true);
 }
