@@ -89,17 +89,9 @@ void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* Loaded
 	precondition(IsValid(Mesh), "Failed to load mesh for item '%s'.", GetNameSafe(ItemData));
 	
 	StaticMesh->SetStaticMesh(Mesh);
-
-	for (const auto& Pair : ItemData->OverrideMaterials)
-	{
-		if (UMaterialInterface* Mat = Pair.Value.LoadSynchronous())
-		{
-			StaticMesh->SetMaterial(Pair.Key, Mat);
-		}
-	}
-
+	
 	StaticMesh->SetSimulatePhysics(true);
 	StaticMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	StaticMesh->SetEnableGravity(true);
-	StaticMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
+	StaticMesh->SetMassOverrideInKg(NAME_None, 100.0f, true);
 }
