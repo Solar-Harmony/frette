@@ -1,9 +1,10 @@
 #include "Components/BodyPart/FretteBodyPartInstance.h"
 #include "AbilitySystemBlueprintLibrary.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Character/FretteBaseCharacter.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Components/BodyPart/FretteBodyPartContext.h"
 #include "Components/BodyPart/EffectRules/FretteDeltaValueRule.h"
+#include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
 
 void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner)
@@ -60,13 +61,13 @@ FFretteBodyPartContext UFretteBodyPartInstance::AddValueByTag(const int Value, c
 		return FFretteBodyPartContext();
 
 	const int CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
-	
+
 	FRETTE_LOG(Log, "%s of %s's %s changed by %f, now %d", *Tag.ToString(), *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), ClampedDelta, CurrentValue);
-	
+
 	FFretteBodyPartContext Context;
 	CheckDeltaRules(Tag, Context, ClampedDelta);
 	CheckAccumulatedValueRules(Tag, Context, CurrentValue);
-	
+
 	return Context;
 }
 
@@ -162,7 +163,7 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const
 {
 	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
-	
+
 	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
 		return;
 

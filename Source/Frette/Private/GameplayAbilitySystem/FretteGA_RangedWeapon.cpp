@@ -21,7 +21,7 @@ void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* Weap
 
 	ensure(Controller);
 
-	FRotator SpawnRotation = WeaponInstance->GetOwningPlayer()->GetControlRotation();
+	FRotator SpawnRotation = GetAimRotation(InstigatorPawn, MuzzleLocation);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Instigator = WeaponInstance->GetOwningPlayer();
@@ -35,6 +35,37 @@ void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* Weap
 		SpawnParams
 		);
 
+}
+
+FRotator UFretteGA_RangedWeapon::GetAimRotation(const APawn* InstigatorPawn, const FVector MuzzleLocation) const
+{
+	const APlayerController* PC = Cast<APlayerController>(InstigatorPawn->GetController());
+	if (!PC)
+		return InstigatorPawn->GetControlRotation();
+
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+	// Trace from camera to find aim point
+	FHitResult HitResult;
+	FVector TraceEnd = CameraLocation + CameraRotation.Vector() * 50000.f;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(InstigatorPawn);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		CameraLocation,
+		TraceEnd,
+		ECC_Visibility,
+		Params
+		);
+
+	FVector AimPoint = bHit ? HitResult.ImpactPoint : TraceEnd;
+	DrawDebugLine(GetWorld(), CameraLocation, AimPoint, FColor::Green, false, 2.f);
+	DrawDebugLine(GetWorld(), MuzzleLocation, AimPoint, FColor::Red, false, 2.f);
+	return (AimPoint - MuzzleLocation).Rotation();
 }
 
 UFretteRangedWeaponItem* UFretteGA_RangedWeapon::GetWeaponInstance() const
@@ -58,10 +89,10 @@ bool UFretteGA_RangedWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, 
 		const AFrettePlayerCharacter* Zouave = Cast<AFrettePlayerCharacter>(GetAvatarActor());
 		if (Zouave != nullptr)
 		{
-			UFretteNotificationsComponent::Notify(Zouave, INVTEXT("You are out of ammo. Press R to reload!"));	
+			UFretteNotificationsComponent::Notify(Zouave, INVTEXT("You are out of ammo. Press R to reload!"));
 		}
 	}
-	
+
 	return bEnoughAmmo;
 }
 
@@ -73,6 +104,6 @@ void UFretteGA_RangedWeapon::ApplyCost(const FGameplayAbilitySpecHandle Handle, 
 	check(WeaponInstance);
 
 	WeaponInstance->TryUseAmmo();
-	
+
 	FRETTE_LOG(Log, "%s's %s now has %d ammo left", *ActorInfo->OwnerActor->GetName(), *WeaponInstance->GetData()->GetName(), WeaponInstance->GetCurrentAmmo());
 }

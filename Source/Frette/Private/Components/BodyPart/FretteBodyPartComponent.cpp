@@ -1,6 +1,7 @@
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 
 #include "GameplayTagContainer.h"
+#include "Character/FretteBaseCharacter.h"
 #include "Components/BodyPart/FretteBodyPartTags.h"
 #include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
@@ -16,7 +17,7 @@ UFretteBodyPartComponent::UFretteBodyPartComponent()
 void UFretteBodyPartComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// the listen server is also a client, and ReadyForReplication executes after the UI widget Constructs there 
 	if (GetWorld()->GetNetMode() == NM_ListenServer)
 	{
@@ -29,7 +30,7 @@ void UFretteBodyPartComponent::BeginPlay()
 
 			AddReplicatedSubObject(Instance);
 		}
-		
+
 		OnBodyPartsInitialized.Broadcast();
 	}
 }
@@ -37,13 +38,13 @@ void UFretteBodyPartComponent::BeginPlay()
 void UFretteBodyPartComponent::ReadyForReplication()
 {
 	Super::ReadyForReplication();
-	
+
 	if (GetOwnerRole() != ROLE_Authority)
 		return;
-	
+
 	if (!BodyPartInstances.IsEmpty())
-		return;	
-	
+		return;
+
 	for (UFretteBodyPartData* Data : BodyPartData)
 	{
 		UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
@@ -53,7 +54,7 @@ void UFretteBodyPartComponent::ReadyForReplication()
 
 		AddReplicatedSubObject(Instance);
 	}
-	
+
 	OnBodyPartsInitialized.Broadcast();
 }
 
@@ -68,7 +69,7 @@ void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPa
 	if (GetOwnerRole() == ROLE_Authority)
 	{
 		UE_LOG(LogFrette, Log, TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
-		
+
 		if (BodyPartTag.IsValid())
 		{
 			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
@@ -117,7 +118,7 @@ int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGa
 	UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag);
 	if (BodyPart == nullptr)
 		return 0;
-	
+
 	return BodyPart->FindOrAddAccumulatedValue(ValueTypeTag);
 }
 
@@ -142,7 +143,7 @@ UFretteBodyPartInstance* UFretteBodyPartComponent::GetInstanceFromBodyPartTag(FG
 		FRETTE_LOG(Error, "Body part with tag %s not found!", *BodyPartTag.ToString());
 		return nullptr;
 	}
-	
+
 	return *Instance;
 }
 
@@ -150,7 +151,7 @@ float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag
 {
 	static TArray<float> NormalizedValues;
 	NormalizedValues.Reset(BodyPartInstances.Num());
-	
+
 	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{
 		const UFretteBodyPartData* Data = Instance->GetBodyPartData();
@@ -160,29 +161,29 @@ float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag
 			FRETTE_LOG(Error, "T cave");
 			continue;
 		}
-		
+
 		if (!Config->bIsCritical)
 			continue;
-		
+
 		const float Value = Instance->FindOrAddAccumulatedValue(ValueTag);
 		const float Min = bForFeedback ? Config->FeedbackLowValue : Config->MinValue;
-		const float Max = bForFeedback? Config->FeedbackHighValue : Config->MaxValue;
+		const float Max = bForFeedback ? Config->FeedbackHighValue : Config->MaxValue;
 		const float Normalized = FMath::Clamp((Value - Min) / (Max - Min), 0.0f, 1.0f);
 		NormalizedValues.Add(Normalized);
 	}
-	
+
 	return FMath::Min(NormalizedValues);
 }
 
 void UFretteBodyPartComponent::OnRep_BodyPartInstances()
 {
 	BodyPartTagToInstanceMap.Empty(BodyPartInstances.Num());
-	
+
 	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{
 		BodyPartTagToInstanceMap.Add(Instance->GetBodyPartTag(), Instance);
 	}
-	
+
 	OnBodyPartsInitialized.Broadcast();
 }
 

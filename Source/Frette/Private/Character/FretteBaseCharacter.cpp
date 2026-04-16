@@ -21,6 +21,13 @@ AFretteBaseCharacter::AFretteBaseCharacter()
 	BodyTemperatureComponent->SetIsReplicated(true);
 }
 
+void AFretteBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFretteBaseCharacter, bIsAiming);
+
+}
+
 void AFretteBaseCharacter::ApplyStartupEffects()
 {
 	if (!HasAuthority())

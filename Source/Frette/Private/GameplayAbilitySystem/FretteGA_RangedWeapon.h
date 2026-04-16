@@ -13,6 +13,7 @@ class UFretteGA_RangedWeapon : public UFretteGameplayAbility
 public:
 	UFUNCTION(BlueprintCallable)
 	void SpawnProjectile(const UFretteRangedWeaponItem* WeaponInstance);
+	FRotator GetAimRotation(const APawn* InstigatorPawn, FVector MuzzleLocation) const;
 
 	UFUNCTION(BlueprintCallable)
 	UFretteRangedWeaponItem* GetWeaponInstance() const;

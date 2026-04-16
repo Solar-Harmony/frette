@@ -19,7 +19,7 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Replicated)
 	bool bIsAiming = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -33,6 +33,7 @@ public:
 
 protected:
 	AFretteBaseCharacter();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> AbilitySystemComponent;
 

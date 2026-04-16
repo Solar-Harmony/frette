@@ -17,6 +17,9 @@ void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!HasAuthority())
+		return;
+
 	for (int i = 0; i < MaxSpawnedEntities; ++i)
 	{
 		SpawnEntity();
