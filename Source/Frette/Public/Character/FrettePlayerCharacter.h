@@ -8,6 +8,7 @@
 #include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
+class UFretteCompassComponent;
 class UFretteTemperatureComponent;
 
 class UCameraComponent;
@@ -51,10 +52,13 @@ public:
 
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UFretteCompassComponent> CompassComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
