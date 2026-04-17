@@ -67,10 +67,15 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 
 void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 {
+	const float GoldenAngle = 2.39996323f; // helps avoid clumping
 	const FVector Center = GetComponentLocation();
 	const float r = VisualisationSlice * OuterRadius;
-	float Flow = ComputeFlow(r);
-	Flow = FMath::Clamp(Flow, 0.f, DiffusionStrength);
+	
+	float Flow;
+	if (AroowsAreForTemperature)
+		Flow = ((ComputeTemperature(r) - MinTemperature) / (MaxTemperature - MinTemperature)) * 200.f;
+	else
+		Flow = ComputeFlow(r) * 10.f;
 
 	for (int32 i = 0; i < NumberFlowArrows; i++)
 	{
@@ -82,18 +87,38 @@ void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 		}
 		else
 		{
-            FName ArrowName = FName(*FString::Printf(TEXT("Arrow_%d"), i));
+			FName ArrowName = FName(*FString::Printf(TEXT("Arrow_%d"), i));
 			Arrow = NewObject<UArrowComponent>(this, UArrowComponent::StaticClass(), ArrowName);
 			Arrow->SetupAttachment(this);
+			Arrow->SetArrowSize(1.f);
+			Arrow->SetHiddenInGame(true);
 			DebugDiffusionArrows.Add(Arrow);
 		}
 
-		FVector Dir = FVector(1, 0, 0);
+		// This is a trick to have uniform arrows around the upper-sphere
+		// If we just use a angle grid approach, the vectors clump to the top
+		const float t = (float)i / (float)NumberFlowArrows;
+
+		const float Azimuth = i * GoldenAngle;
+		const float z = 1.0f - t;
+		const float r_xy = FMath::Sqrt(1.0f - z * z);
+
+		FVector Dir;
+		Dir.X = r_xy * FMath::Cos(Azimuth);
+		Dir.Y = r_xy * FMath::Sin(Azimuth);
+		Dir.Z = z;
+
 		FVector ArrowPos = Center + Dir * r;
 
 		Arrow->SetWorldLocation(ArrowPos);
 		Arrow->SetWorldRotation(FRotationMatrix::MakeFromX(Dir).ToQuat());
-		Arrow->SetArrowSize(Flow * 0.1f);
+		Arrow->SetArrowLength(Flow);
+		if (Flow == 0 || AroowsAreForTemperature)
+			Arrow->SetArrowColor(FColor::White);
+		else if (Flow > 0)
+			Arrow->SetArrowColor(FColor::Red);
+		else
+			Arrow->SetArrowColor(FColor::Blue);
 
 		Arrow->SetVisibility(true);
 	}
@@ -112,6 +137,11 @@ void UFretteTemperatureSourceComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
+float UFretteTemperatureSourceComponent::ComputeFalloff(float r) const
+{
+	return (OuterRadius / r) - 1.0f;
+}
+
 float UFretteTemperatureSourceComponent::ComputeTemperature(float r) const
 {
 	if (r <= InnerRadius)
@@ -122,36 +152,30 @@ float UFretteTemperatureSourceComponent::ComputeTemperature(float r) const
 	float value = AmbientTemperature +
 		(SourceTemperature - AmbientTemperature) *
 		(InnerRadius / (OuterRadius - InnerRadius)) *
-		((OuterRadius / r) - 1.0f);
+		ComputeFalloff(r);
 
 	return value;
 }
 
 float UFretteTemperatureSourceComponent::ComputeFlow(float r) const
 {
+	// MEMO Keep an eye on this if the numerical scheme is unstable
+	constexpr float Epsilon = 1e-4;
 	if (r <= InnerRadius)
-		return DiffusionStrength;
+	{
+		// The flow is 0 inside the inner radius according to the math so we'll fake it so it feels consistent
+		return ComputeFlow(InnerRadius + Epsilon);
+	}
 	if (r >= OuterRadius)
 		return 0.f;
 
-	// We will compute the spherically symmetric laplacian to get the (flow) using centered finite difference
-	// This is from stuff I derived from the heat equation so curious to see if it works lol
-
-	const float Epsilon = 0.01f;
-	const float Epsilon2 = Epsilon * Epsilon;
+	// We will compute the spherically symmetric gradient to get the (flow) using centered finite difference
 	const float Tprev = ComputeTemperature(r - Epsilon),
-	            Tnext = ComputeTemperature(r + Epsilon),
-	            T = ComputeTemperature(r);
+	            Tnext = ComputeTemperature(r + Epsilon);
 
-	// Second derivative (centered finite difference)
-	const float d2 = (Tnext + Tprev - 2 * T) / Epsilon2;
+	const float Gradient = (Tprev - Tnext) / (2 * Epsilon);
 
-	// First derivative (centered finite difference)
-	const float d1 = (Tnext - Tprev) / (2 * Epsilon);
-
-	const float Laplacian = d2 + (2.0 / r) * d1;
-
-	return DiffusionStrength * Laplacian;
+	return DiffusionStrength * Gradient;
 }
 
 // Called every frame
@@ -189,12 +213,14 @@ void UFretteTemperatureSourceComponent::TickComponent(
 			const FVector BonePos =
 				Mesh->GetBoneLocation(BoneName, EBoneSpaces::WorldSpace);
 
-			const float Dist = FVector::Dist(BonePos, SourcePos);
+			const float r = FVector::Dist(BonePos, SourcePos);
 
 			// Evaluate field contribution directly
-			const float Flow = ComputeFlow(Dist);
+			const float Flow = ComputeFlow(r);
+			const float Temp = ComputeTemperature(r);
+			const float Falloff = ComputeTemperature(r);
 
-			TempComp->AddBodyPartTemperatureFlow(Flow, BoneName, UniqueId);
+			TempComp->AddBodyPartTemperatureContribution(FTemperatureContribution(Temp, Falloff, Flow), BoneName, UniqueId);
 		}
 	}
 }
@@ -225,7 +251,7 @@ void UFretteTemperatureSourceComponent::OnEndOverlap(UPrimitiveComponent* Overla
 	if (UFretteTemperatureComponent* TemperatureComponent =
 		Character->FindComponentByClass<UFretteTemperatureComponent>())
 	{
-		TemperatureComponent->ClearBodyPartTemperatureFlows(UniqueId);
+		TemperatureComponent->ClearBodyPartTemperatureContributions(UniqueId);
 	}
 
 	if (OverlappingCharacters.IsEmpty())

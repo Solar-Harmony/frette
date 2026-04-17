@@ -9,6 +9,28 @@
 class UFretteBodyPartComponent;
 
 USTRUCT(BlueprintType)
+struct FTemperatureContribution
+{
+	GENERATED_BODY()
+	
+	FTemperatureContribution() = default;
+
+	FTemperatureContribution(float Temperature, float Weight, float Flow)
+		: Temperature(Temperature)
+		, Weight(Weight)
+		, Flow(Flow) {}
+	
+	UPROPERTY()
+	float Temperature;
+	
+	UPROPERTY()
+	float Weight;
+	
+	UPROPERTY()
+	float Flow;
+};
+
+USTRUCT(BlueprintType)
 struct FTemperatureKey
 {
 	GENERATED_BODY()
@@ -52,11 +74,11 @@ public:
 	void AddToAmbientTemperature(float NewAmbientTemperature);
 
 	UFUNCTION(BlueprintCallable)
-	void AddBodyPartTemperatureFlow(float NewTargetTemperature, FGameplayTag BodyPartTag, FGuid SourceId);
-	void AddBodyPartTemperatureFlow(float NewTargetTemperature, FName BoneName, FGuid SourceId);
-	void ClearBodyPartTemperatureFlow(FGameplayTag BodyPartTag, FGuid SourceId);
-	void ClearBodyPartTemperatureFlow(FName BoneName, FGuid SourceId);
-	void ClearBodyPartTemperatureFlows(FGuid SourceId);
+	void AddBodyPartTemperatureContribution(FTemperatureContribution Contribution, FGameplayTag BodyPartTag, FGuid SourceId);
+	void AddBodyPartTemperatureContribution(FTemperatureContribution Contribution, FName BoneName, FGuid SourceId);
+	void ClearBodyPartTemperatureContribution(FGameplayTag BodyPartTag, FGuid SourceId);
+	void ClearBodyPartTemperatureContribution(FName BoneName, FGuid SourceId);
+	void ClearBodyPartTemperatureContributions(FGuid SourceId);
 
 protected:
 	UFretteTemperatureComponent();
@@ -73,6 +95,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly);
 	float MaxTemperature = 1500;
+	
+	UPROPERTY(EditDefaultsOnly);
+	float Damping = 1.0; // Force the system to equilibrium [0, 1]
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite);
 	float DiffusionSpeed = 0.3; // [0, 1]
@@ -86,7 +111,7 @@ protected:
 	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
 
 	UPROPERTY()
-	TMap<FTemperatureKey, float> BodyPartTemperatureFlows;
+	TMap<FTemperatureKey, FTemperatureContribution> BodyPartTemperatureContributions;
 
 	FTimerHandle TemperatureTickHandle;
 	float CurrentTemperature = 0;

@@ -1,6 +1,7 @@
 #include "Components/FretteTemperatureComponent.h"
 
 #include "Components/BodyPart/FretteBodyPartComponent.h"
+#include "Frette/Frette.h"
 
 UFretteTemperatureComponent::UFretteTemperatureComponent()
 {
@@ -30,33 +31,49 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 			return;
 		
 		TMap<FGameplayTag, float> BoneFlowAccum;
+		TMap<FGameplayTag, float> BoneTempAccum;
 
-		for (const auto& Entry : BodyPartTemperatureFlows)
+		for (const auto& Entry : BodyPartTemperatureContributions)
 		{
 			const FTemperatureKey& Key = Entry.Key;
-			const float FlowValue = Entry.Value;
+			const FTemperatureContribution Contributionn = Entry.Value;
 
 			const FGameplayTag BoneTag = Key.BodyPart;
 
 			float& AccumulatedFlow = BoneFlowAccum.FindOrAdd(BoneTag);
-			AccumulatedFlow += FlowValue;
+			float& AccumulatedTemp = BoneTempAccum.FindOrAdd(BoneTag);
+			AccumulatedFlow += Contributionn.Flow;
+			AccumulatedTemp += Contributionn.Weight * Contributionn.Temperature;
 		}
 
 		for (const auto& Pair : BoneFlowAccum)
 		{
 			const FGameplayTag& BoneTag = Pair.Key;
 			float NetFlow = Pair.Value;
+			float NetTemperature = BoneTempAccum.FindOrAdd(BoneTag);
+			
+			// Truncate the net temp just to be safe
+			NetTemperature = FMath::Clamp(NetTemperature, MinTemperature, MaxTemperature);
 
 			float CurrentTemp =
 				BodyPartComponent->GetValueFromBodyPart(BoneTag, TemperatureEffectTag);
 			
 			if (CurrentTemp < MinTemperature || CurrentTemp > MaxTemperature)
+			{
+				UE_LOG(LogFrette, Log, TEXT("Your temperature system is not doing good in terms of numerical stability no cap!! Truncating temp biatch!!!"));
 				continue;
+			}
 
-			const float AmbientDelta =
-				DiffusionSpeed * (AmbientTemperature - CurrentTemp);
-
-			NetFlow += AmbientDelta;
+			const float AmbientFlow = DiffusionSpeed * (AmbientTemperature - CurrentTemp);
+			NetFlow += AmbientFlow;
+			
+			// Make things more physically accurate??
+			const float DeltaTime = GetWorld()->GetDeltaSeconds();
+			NetFlow *= DeltaTime;
+			
+			// DAMPING We will make the behavior asymptotic near the target temp to make the system equilibrate
+			const float Influence = (NetTemperature - CurrentTemp) / (MaxTemperature - MinTemperature);
+			NetFlow *= FMath::Clamp(Influence, Damping, 1.0);
 			
 			BodyPartComponent->AddValueFromBodyPartTag(
 				BoneTag,
@@ -67,19 +84,19 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 	}
 }
 
-void UFretteTemperatureComponent::AddBodyPartTemperatureFlow(const float NewTargetTemperature, const FGameplayTag BodyPartTag, FGuid SourceId)
+void UFretteTemperatureComponent::AddBodyPartTemperatureContribution(const FTemperatureContribution Contribution, const FGameplayTag BodyPartTag, FGuid SourceId)
 {
-	if (float* CurrentValue = BodyPartTemperatureFlows.Find(FTemperatureKey(BodyPartTag, SourceId)))
+	if (FTemperatureContribution* CurrentValue = BodyPartTemperatureContributions.Find(FTemperatureKey(BodyPartTag, SourceId)))
 	{
-		*CurrentValue += NewTargetTemperature;
+		*CurrentValue = Contribution;
 	}
 }
 
-void UFretteTemperatureComponent::AddBodyPartTemperatureFlow(const float NewTargetTemperature, const FName BoneName, FGuid SourceId)
+void UFretteTemperatureComponent::AddBodyPartTemperatureContribution(const FTemperatureContribution Contribution, const FName BoneName, FGuid SourceId)
 {
 	FGameplayTag BodyPartTag = BodyPartComponent->GetBodyPartFromBoneName(BoneName);
 
-	AddBodyPartTemperatureFlow(NewTargetTemperature, BodyPartTag, SourceId);
+	AddBodyPartTemperatureContribution(Contribution, BodyPartTag, SourceId);
 }
 
 void UFretteTemperatureComponent::AddToAmbientTemperature(const float NewAmbientTemperature)
@@ -87,21 +104,21 @@ void UFretteTemperatureComponent::AddToAmbientTemperature(const float NewAmbient
 	AmbientTemperature += NewAmbientTemperature;
 }
 
-void UFretteTemperatureComponent::ClearBodyPartTemperatureFlow(FGameplayTag BodyPartTag, FGuid SourceId)
+void UFretteTemperatureComponent::ClearBodyPartTemperatureContribution(FGameplayTag BodyPartTag, FGuid SourceId)
 {
-	BodyPartTemperatureFlows.Remove(FTemperatureKey(BodyPartTag, SourceId));
+	BodyPartTemperatureContributions.Remove(FTemperatureKey(BodyPartTag, SourceId));
 }
 
-void UFretteTemperatureComponent::ClearBodyPartTemperatureFlow(FName BoneName, FGuid SourceId)
+void UFretteTemperatureComponent::ClearBodyPartTemperatureContribution(FName BoneName, FGuid SourceId)
 {
 	FGameplayTag BodyPartTag = BodyPartComponent->GetBodyPartFromBoneName(BoneName);
 	
-	BodyPartTemperatureFlows.Remove(FTemperatureKey(BodyPartTag, SourceId));
+	BodyPartTemperatureContributions.Remove(FTemperatureKey(BodyPartTag, SourceId));
 }
 
-void UFretteTemperatureComponent::ClearBodyPartTemperatureFlows(FGuid SourceId)
+void UFretteTemperatureComponent::ClearBodyPartTemperatureContributions(FGuid SourceId)
 {
-	for (auto It = BodyPartTemperatureFlows.CreateIterator(); It; ++It)
+	for (auto It = BodyPartTemperatureContributions.CreateIterator(); It; ++It)
 	{
 		if (It->Key.SourceId == SourceId)
 			It.RemoveCurrent();

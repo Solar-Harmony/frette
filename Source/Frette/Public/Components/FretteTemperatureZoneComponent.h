@@ -38,7 +38,10 @@ protected:
 	TObjectPtr<UShapeComponent> OverlapShape;
 
 	UPROPERTY(EditAnywhere, Category = "Frette|Temperature Zone")
-	int TemperatureChange = -10;
+	float Temperature = -30;
+	
+	UPROPERTY(EditAnywhere, Category = "Frette|Temperature Zone")
+	float Flow = -12;
 
 	UPROPERTY()
 	TMap<TObjectPtr<ACharacter>, FCharacterActiveBones> ActiveBonesPerCharacter;

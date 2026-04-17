@@ -52,7 +52,7 @@ void UFretteTemperatureZoneComponent::TemperatureZoneTick()
 			if (!ActiveBones.Contains(Bone))
 			{
 				ActiveBones.Add(Bone);
-				TemperatureComponent->AddBodyPartTemperatureFlow(TemperatureChange, Bone, UniqueId);
+				TemperatureComponent->AddBodyPartTemperatureContribution(FTemperatureContribution(Temperature, 1.0f, Flow), Bone, UniqueId);
 			}
 		}
 
@@ -60,7 +60,7 @@ void UFretteTemperatureZoneComponent::TemperatureZoneTick()
 		{
 			if (!BonesCurrentlyInZone.Contains(*It))
 			{
-				TemperatureComponent->ClearBodyPartTemperatureFlow(*It, UniqueId);
+				TemperatureComponent->ClearBodyPartTemperatureContribution(*It, UniqueId);
 				It.RemoveCurrent();
 			}
 		}
@@ -138,7 +138,7 @@ void UFretteTemperatureZoneComponent::OnOverlapEnd(UPrimitiveComponent* Overlapp
 	if (UFretteTemperatureComponent* TemperatureComponent =
 		Character->FindComponentByClass<UFretteTemperatureComponent>())
 	{
-		TemperatureComponent->ClearBodyPartTemperatureFlows(UniqueId);
+		TemperatureComponent->ClearBodyPartTemperatureContributions(UniqueId);
 	}
 
 	if (OverlappingCharacters.IsEmpty())

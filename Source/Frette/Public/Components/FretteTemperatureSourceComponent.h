@@ -45,8 +45,14 @@ public:
 	float VisualisationSlice = 0.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
-	int NumberFlowArrows = 1.f;
+	int NumberFlowArrows = 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
+	bool AroowsAreForTemperature = false;
 
+	UFUNCTION(BlueprintCallable)
+	float ComputeFalloff(float r) const;
+	
 	UFUNCTION(BlueprintCallable)
 	float ComputeTemperature(float r) const;
 	
@@ -80,7 +86,10 @@ public:
 	UMaterialInterface* HeatMaterial;
 	
 	FGuid UniqueId;
+	float MinTemperature = -40;
+	float MaxTemperature = 1500;
 	
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
 	#endif
+	
 };
