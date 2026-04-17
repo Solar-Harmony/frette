@@ -9,12 +9,17 @@ class FRETTE_API UFretteWeatherDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
-	FName WeatherName;
-
+	// Ambient temperature across the environment while this weather is fully active.
 	UPROPERTY(EditDefaultsOnly, meta=(Units="Celsius"))
 	float AmbientTemperature;
 	
-	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds"))
-	float BaseTransitionDuration;
+	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds", ClampMin=5))
+	int BaseDuration = 60;
+	
+	// TotalDuration = BaseDuration + rand(0, MaxRandomDurationOffset);
+	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds"), ClampMin=0)
+	int MaxAdditionalDuration = 20;
+	
+	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds"), ClampMin=1)
+	int EndTransitionDuration = 10;
 };

@@ -20,6 +20,9 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 #define FRETTE_LOG(Verbosity, Format, ...) \
 	UE_LOG(LogFrette, Verbosity, TEXT(Format) __VA_OPT__(, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__)))
 
+#define FRETTE_LOG(Category, Verbosity, Format, ...) \
+	UE_LOG(LogFrette##Category, Verbosity, TEXT(Format) __VA_OPT__(, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__)))
+
 // Helper for more readable precondition early returns. If the condition is FALSE, breaks + print msg then returns.
 // Note: format str will be auto-wrapped with TEXT(), and args will be auto-converted to TCHAR* if possible.
 // Usage:
@@ -85,6 +88,11 @@ namespace Frette::Private
 	FORCEINLINE const TCHAR* ToTCHAR(const char* CharPtr)
 	{
 		return ANSI_TO_TCHAR(CharPtr);
+	}
+	
+	FORCEINLINE const TCHAR* ToTCHAR(const UObjectBaseUtility* Object)
+	{
+		return *GetNameSafe(Object);
 	}
 
 	// fallback case for types that don't use %s
