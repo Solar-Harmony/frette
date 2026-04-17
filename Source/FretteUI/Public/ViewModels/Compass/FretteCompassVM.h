@@ -22,19 +22,19 @@ public:
 		switch (CardinalDirection)
 		{
 			case ECardinalDirection::North:
-				return LOCTEXT("DirN", "\x2BB9 North");
+				return LOCTEXT("DirN", "\x2191 North");
 			case ECardinalDirection::NorthEast:
 				return LOCTEXT("DirNE", "\x2196 North-east");
 			case ECardinalDirection::East:
-				return LOCTEXT("DirE", "\x2BB8 East");
+				return LOCTEXT("DirE", "\x2190 East");
 			case ECardinalDirection::SouthEast:
 				return LOCTEXT("DirSE", "\x2199 South-east");
 			case ECardinalDirection::South:
-				return LOCTEXT("DirS", "\x2BBB South");
+				return LOCTEXT("DirS", "\x2193 South");
 			case ECardinalDirection::SouthWest:
 				return LOCTEXT("DirSW", "\x2198 South-west");
 			case ECardinalDirection::West:
-				return LOCTEXT("DirW", "\x2BBA West");
+				return LOCTEXT("DirW", "\x2192 West");
 			case ECardinalDirection::NorthWest:
 				return LOCTEXT("DirNW", "\x2197 North-west");
 			default:
