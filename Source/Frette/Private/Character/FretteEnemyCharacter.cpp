@@ -52,6 +52,9 @@ void AFretteEnemyCharacter::OnTargetPerceived(AActor* Actor, FAIStimulus Stimulu
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
+		//Empeche de switch entre 2 target de manière bizarre
+		//Pourrais avoir un check de distance pour target le plus proche 
+		//plutot que le premier target vu
 		if (TargetedPlayer)
 			return;
 
