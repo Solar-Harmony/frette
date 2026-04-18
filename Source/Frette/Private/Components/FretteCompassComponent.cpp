@@ -13,6 +13,7 @@ ECardinalDirection UFretteCompassComponent::GetPlayerCardinalDirection() const
 
 void UFretteCompassComponent::BeginPlay()
 {
+	Super::BeginPlay();
 	Camera = GetOwner()->FindComponentByClass<UCameraComponent>();
 }
 
