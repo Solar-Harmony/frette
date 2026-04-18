@@ -1,9 +1,11 @@
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 
 #include "GameplayTagContainer.h"
+#include "Character/FrettePlayerCharacter.h"
 #include "Components/BodyPart/FretteBodyPartTags.h"
 #include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/FrettePlayerController.h"
 
 UFretteBodyPartComponent::UFretteBodyPartComponent()
 {
@@ -63,34 +65,6 @@ void UFretteBodyPartComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME(UFretteBodyPartComponent, BodyPartInstances);
 }
 
-void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPartTag, const int Value, const FGameplayTag ValueType)
-{
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		UE_LOG(LogFrette, Log, TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
-		
-		if (BodyPartTag.IsValid())
-		{
-			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
-			{
-				const FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
-				// FIXME: Not using a proper value delta, also not sure about the way i do it
-				const FFretteBodyPartChangeEvent ChangeEvent(BodyPartTag, ValueType, Result.AccumulatedValue, Value);
-				Client_NotifyBodyPartChange(ChangeEvent);
-			}
-		}
-	}
-}
-
-void UFretteBodyPartComponent::AddValueFromBoneName(const FName BoneName, const int Value, const FGameplayTag ValueType)
-{
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		FGameplayTag BodyPartTag = GetBodyPartFromBoneName(BoneName);
-		AddValueFromBodyPartTag(BodyPartTag, Value, ValueType);
-	}
-}
-
 FGameplayTag UFretteBodyPartComponent::GetBodyPartFromBoneName(const FName BoneName) const
 {
 	if (const FGameplayTag* Tag = BoneTagDataAsset.Get()->BoneToBodyPartTag.Find(BoneName))
@@ -98,6 +72,15 @@ FGameplayTag UFretteBodyPartComponent::GetBodyPartFromBoneName(const FName BoneN
 		return *Tag;
 	}
 	return FGameplayTag();
+}
+
+int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGameplayTag ValueTypeTag) const
+{
+	UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag);
+	if (BodyPart == nullptr)
+		return 0;
+	
+	return BodyPart->FindOrAddAccumulatedValue(ValueTypeTag);
 }
 
 UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayTag BodyPartTag) const
@@ -112,23 +95,52 @@ UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayT
 	return nullptr;
 }
 
-int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGameplayTag ValueTypeTag) const
+void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPartTag, const int Value, const FGameplayTag ValueType)
 {
-	UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag);
-	if (BodyPart == nullptr)
-		return 0;
+	if (GetOwnerRole() != ROLE_Authority)
+		return;
+		
+	if (!BodyPartTag.IsValid())
+		return;
+
+	const AFrettePlayerController* Calisse = Cast<AFrettePlayerController>(Cast<AFrettePlayerCharacter>(GetOwner())->GetController());
+	if (Calisse->bFretteCinematicMode)
+		return;
 	
-	return BodyPart->FindOrAddAccumulatedValue(ValueTypeTag);
+	if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
+	{
+		const FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
+		// FIXME: Not using a proper value delta, also not sure about the way i do it
+		const FFretteBodyPartChangeEvent ChangeEvent(BodyPartTag, ValueType, Result.AccumulatedValue, Value);
+		Client_NotifyBodyPartChange(ChangeEvent);
+		
+		UE_LOG(LogFrette, Log, TEXT("Added %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
+	}
+}
+
+void UFretteBodyPartComponent::AddValueFromBoneName(const FName BoneName, const int Value, const FGameplayTag ValueType)
+{
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		const FGameplayTag BodyPartTag = GetBodyPartFromBoneName(BoneName);
+		AddValueFromBodyPartTag(BodyPartTag, Value, ValueType);
+	}
 }
 
 void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag ValueType)
 {
-	if (GetOwnerRole() == ROLE_Authority)
+	if (GetOwnerRole() != ROLE_Authority)
+		return;
+	
+	const AFrettePlayerController* Calisse = Cast<AFrettePlayerController>(Cast<AFrettePlayerCharacter>(GetOwner())->GetController());
+	if (Calisse->bFretteCinematicMode)
+		return;
+	
+	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{
-		for (UFretteBodyPartInstance* Instance : BodyPartInstances)
+		if (Instance != nullptr)
 		{
-			if (Instance)
-				Instance->AddValueByTag(Value, ValueType);
+			Instance->AddValueByTag(Value, ValueType);
 		}
 	}
 }

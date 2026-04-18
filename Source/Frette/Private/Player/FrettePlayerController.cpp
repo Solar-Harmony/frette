@@ -4,6 +4,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/HUD.h"
 #include "Input/FretteInputComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Player/FrettePlayerState.h"
 
 class AFrettePlayerState;
@@ -39,6 +40,11 @@ void AFrettePlayerController::Client_OnClueGenerated_Implementation(const FText&
 	OnClientReceiveNewClue.Broadcast(ClueText);
 }
 
+void AFrettePlayerController::SetFretteCinematicMode_Implementation(bool bIsCinematic)
+{
+	bFretteCinematicMode = bIsCinematic;
+}
+
 void AFrettePlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -58,6 +64,7 @@ void AFrettePlayerController::OnPossess(APawn* InPawn)
 	if (IsLocalController())
 	{
 		SetupWidgetsAndViewModels();
+		OnWidgetsInitialized.Broadcast();
 	}
 }
 
@@ -90,6 +97,7 @@ void AFrettePlayerController::OnRep_PlayerState()
 	if (IsLocalController())
 	{
 		SetupWidgetsAndViewModels();
+		OnWidgetsInitialized.Broadcast();
 	}
 }
 
