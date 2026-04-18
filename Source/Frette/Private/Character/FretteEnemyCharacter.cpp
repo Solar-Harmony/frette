@@ -52,6 +52,10 @@ void AFretteEnemyCharacter::OnTargetPerceived(AActor* Actor, FAIStimulus Stimulu
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
+		if (TargetedPlayer)
+			return;
+
+		TargetedPlayer = Player;
 		OnPlayerPerceived(Player);
 	}
 	else

@@ -29,8 +29,11 @@ public:
 
 	float PatrolRadius = 1000.f;
 
-	UPROPERTY(BlueprintReadWrite,Replicated)
+	UPROPERTY(BlueprintReadWrite, Replicated)
 	bool WaitingAtPatrolPoint = false;
+
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<AFrettePlayerCharacter> TargetedPlayer;
 
 protected:
 	AFretteEnemyCharacter();
