@@ -3,17 +3,17 @@
 #include "CoreMinimal.h"
 #include "Character/FretteEnemyCharacter.h"
 #include "Components/SphereComponent.h"
-#include "Components/SplineComponent.h"
 #include "GameFramework/Actor.h"
-#include "Spawner.generated.h"
+#include "FretteEnemySpawner.generated.h"
 
 UCLASS()
-class FRETTE_API ASpawner : public AActor
+class FRETTE_API AFretteEnemySpawner : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	ASpawner();
+	AFretteEnemySpawner();
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -24,18 +24,26 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Frette")
 	TSubclassOf<AFretteEnemyCharacter> EntityToSpawn;
 
-	UPROPERTY(EditAnywhere, Category = "Frette|Spawner")
+	UPROPERTY(EditAnywhere, Category = "Frette")
 	int32 MaxSpawnedEntities = 3;
 
 	UPROPERTY(EditAnywhere, Category = "Frette")
-	FVector2f SpawnTimerRandomInterval = FVector2f(5.f, 20.f);
+	FVector2f SpawnTimerRandomInterval = FVector2f(5.0f, 20.0f);
 
 	int RemainingSpawnedEntities = 0;
 
 	void SpawnEntity();
+	FVector GetRandomNavPoint() const;
 
 	UFUNCTION()
 	void OnEntityDied(AFretteEnemyCharacter* entity);
-	FVector GetRandomNavPoint() const;
+
+	#if WITH_EDITORONLY_DATA
+	UPROPERTY()
+	TObjectPtr<UBillboardComponent> Billboard;
+
+	UPROPERTY(EditAnywhere, Category = "Frette|Editor")
+	TObjectPtr<UTexture2D> BillboardIcon;
+	#endif
 
 };

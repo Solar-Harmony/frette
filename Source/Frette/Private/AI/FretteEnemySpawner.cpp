@@ -1,9 +1,9 @@
-#include "AI/Spawner.h"
-
+#include "AI/FretteEnemySpawner.h"
 #include "NavigationSystem.h"
-#include "Components/SphereComponent.h"
+#include "Components/BillboardComponent.h"
+#include "Frette/Frette.h"
 
-ASpawner::ASpawner()
+AFretteEnemySpawner::AFretteEnemySpawner()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SpawnZone = CreateDefaultSubobject<USphereComponent>(TEXT("SpawnZone"));
@@ -11,14 +11,42 @@ ASpawner::ASpawner()
 
 	SpawnZone->SetHiddenInGame(true);
 	SpawnZone->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	#if WITH_EDITORONLY_DATA
+	Billboard = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Billboard"));
+
+	if (Billboard)
+	{
+		Billboard->SetupAttachment(RootComponent);
+	}
+	#endif
 }
 
-void ASpawner::BeginPlay()
+void AFretteEnemySpawner::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	#if WITH_EDITORONLY_DATA
+	if (Billboard)
+	{
+		if (BillboardIcon)
+		{
+			Billboard->SetSprite(BillboardIcon);
+		}
+		Billboard->SetRelativeLocation(FVector(0.f, 0.f, SpawnZone->GetUnscaledSphereRadius()));
+	}
+	#endif
+}
+
+void AFretteEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 
 	if (!HasAuthority())
 		return;
+
+	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	precondition(NavSystem != nullptr, "No Navigation System found in the world. Please add a NavMeshBoundsVolume to your level.");
 
 	for (int i = 0; i < MaxSpawnedEntities; ++i)
 	{
@@ -26,11 +54,11 @@ void ASpawner::BeginPlay()
 	}
 }
 
-void ASpawner::SpawnEntity()
+void AFretteEnemySpawner::SpawnEntity()
 {
 	ensureAlwaysMsgf(EntityToSpawn, TEXT("EntityToSpawn is not set in %s. Please set it in the Blueprint."), *GetName());
 
-	FVector SpawnLocation = GetRandomNavPoint();
+	const FVector SpawnLocation = GetRandomNavPoint();
 
 	AFretteEnemyCharacter* Entity = GetWorld()->SpawnActorDeferred<AFretteEnemyCharacter>(
 		EntityToSpawn,
@@ -43,19 +71,18 @@ void ASpawner::SpawnEntity()
 
 	Entity->PatrolOrigin = GetActorLocation();
 	Entity->PatrolRadius = SpawnZone->GetScaledSphereRadius();
-	Entity->OnDied.AddDynamic(this, &ASpawner::OnEntityDied);
+	Entity->OnDied.AddDynamic(this, &AFretteEnemySpawner::OnEntityDied);
 
 	Entity->FinishSpawning(FTransform(FRotator::ZeroRotator, SpawnLocation));
 
 	RemainingSpawnedEntities++;
 }
 
-void ASpawner::OnEntityDied(AFretteEnemyCharacter* entity)
+void AFretteEnemySpawner::OnEntityDied(AFretteEnemyCharacter* entity)
 {
 	RemainingSpawnedEntities--;
 
-	const FRandomStream Stream;
-	const float RandomTimer = Stream.FRandRange(SpawnTimerRandomInterval.X, SpawnTimerRandomInterval.Y);
+	const float RandomTimer = FMath::RandRange(SpawnTimerRandomInterval.X, SpawnTimerRandomInterval.Y);
 
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
@@ -63,9 +90,9 @@ void ASpawner::OnEntityDied(AFretteEnemyCharacter* entity)
 	}, RandomTimer, false);
 }
 
-FVector ASpawner::GetRandomNavPoint() const
+FVector AFretteEnemySpawner::GetRandomNavPoint() const
 {
-	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
 
 	if (!NavSystem)
 		return FVector::ZeroVector;

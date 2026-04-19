@@ -4,6 +4,7 @@
 #include "NavigationSystem.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Components/CapsuleComponent.h"
+#include "GameplayAbilitySystem/FretteAttributeSet.h"
 #include "Perception/AISenseConfig_Sight.h"
 
 class UNavigationSystemV1;
@@ -14,6 +15,7 @@ AFretteEnemyCharacter::AFretteEnemyCharacter()
 	AbilitySystemComponent = CreateDefaultSubobject<UFretteAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	AttributeSet = CreateDefaultSubobject<UFretteAttributeSet>("AttributeSet");
 	AiPerception = CreateDefaultSubobject<UAIPerceptionComponent>("AIPerceptionComponent");
 
 	UAISenseConfig_Sight* SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
@@ -71,6 +73,8 @@ void AFretteEnemyCharacter::InitAbilityActorInfo()
 {
 	Super::InitAbilityActorInfo();
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	ApplyStartupEffects();
+	SubToAttributeChanges();
 }
 
 FVector AFretteEnemyCharacter::GetRandomPatrolPoint() const

@@ -137,6 +137,8 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 
 void AFrettePlayerCharacter::Die()
 {
+	Super::Die();
+
 	if (!HasAuthority())
 		return;
 

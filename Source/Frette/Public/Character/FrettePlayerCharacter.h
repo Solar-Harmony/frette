@@ -35,8 +35,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerLook(FVector2D LookAxis);
 
-	bool GetIsDead() const { return bIsDead; }
-
 	UPROPERTY()
 	FOnPlayerDied OnPlayerDied;
 
@@ -49,10 +47,10 @@ public:
 
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
-	UPROPERTY(EditAnywhere, Category="Frette|Look")
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
 	float HorizontalLookSensitivity = 1.f;
 
-	UPROPERTY(EditAnywhere, Category="Frette|Look")
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
 	float VerticalLookSensitivity = 1.f;
 
 protected:
@@ -79,9 +77,6 @@ protected:
 	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
 
 	virtual void Multicast_HandleDeath_Implementation(FVector FinalVelocity) override;
-
-	UPROPERTY(EditAnywhere)
-	bool bIsDead = false;
 
 private:
 	virtual void InitAbilityActorInfo() override;

@@ -6,7 +6,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
-void AFretteBaseCharacter::Die() {}
+void AFretteBaseCharacter::Die()
+{
+	bIsDead = true;
+}
 
 AFretteBaseCharacter::AFretteBaseCharacter()
 {

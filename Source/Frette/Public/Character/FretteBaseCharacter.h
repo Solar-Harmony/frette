@@ -19,6 +19,8 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 	GENERATED_BODY()
 
 public:
+	bool GetIsDead() const { return bIsDead; }
+
 	UPROPERTY(BlueprintReadWrite, Replicated)
 	bool bIsAiming = false;
 
@@ -35,6 +37,7 @@ protected:
 	AFretteBaseCharacter();
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> AbilitySystemComponent;
 
@@ -55,6 +58,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	int CharacterLevel = 1;
+
+	UPROPERTY()
+	bool bIsDead = false;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
 
