@@ -181,7 +181,7 @@ void AFretteGameMode::BeginPlay()
 	precondition(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.");
 
 	const int32 TotalLandmarks = NearLandmarks.Num() + FarLandmarks.Num();
-	precondition(NumCluesPlaced <= TotalLandmarks, "%d clues placed but only %d total landmarks exist.", NumCluesPlaced, TotalLandmarks);
+	precondition(NumCluesPlaced >= TotalLandmarks, "%d clues placed but only %d total landmarks exist.", NumCluesPlaced, TotalLandmarks);
 	
 	UpdateTimeBeforeNextPrimaryClue();
 }
