@@ -25,14 +25,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	void TemperatureZoneTick();
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	TArray<FName> GetAffectedBonesFromSkelMesh(const USkeletalMeshComponent* SkelMesh) const;
 
 	UPROPERTY()
 	TObjectPtr<UShapeComponent> OverlapShape;
@@ -42,9 +40,6 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (ForceUnits = "°C/s"))
 	float Flow = -12;
-
-	UPROPERTY()
-	TMap<TObjectPtr<ACharacter>, FCharacterActiveBones> ActiveBonesPerCharacter;
 
 	UPROPERTY()
 	TSet<TObjectPtr<ACharacter>> OverlappingCharacters;

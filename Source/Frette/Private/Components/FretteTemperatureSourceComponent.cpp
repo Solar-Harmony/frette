@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
+#include "Components/BodyPart/FretteBodyPartData.h"
 
 // Sets default values for this component's properties
 UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
@@ -61,7 +63,7 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HeatSphere"));
 	SphereMesh->SetupAttachment(this);
 	SphereMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	SphereMesh->SetHiddenInGame(true);
+	//SphereMesh->SetHiddenInGame(true);
 	SphereMesh->SetSimulatePhysics(false);
 	SphereMesh->SetEnableGravity(false);
 	//SphereMesh->SetMobility(EComponentMobility::Static);
@@ -99,6 +101,8 @@ void UFretteTemperatureSourceComponent::OnRegister()
 void UFretteTemperatureSourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	SetComponentTickEnabled(false);
 }
 
 float UFretteTemperatureSourceComponent::ComputeTemperature(float r) const
@@ -152,61 +156,72 @@ void UFretteTemperatureSourceComponent::TickComponent(
 
 		UFretteTemperatureComponent* TempComp =
 			Character->FindComponentByClass<UFretteTemperatureComponent>();
+		
+		UFretteBodyPartComponent* BodyPartComponent = Character->FindComponentByClass<UFretteBodyPartComponent>();
+		USkeletalMeshComponent* SkeletalMeshComp = Character->FindComponentByClass<USkeletalMeshComponent>();
 
-		USkeletalMeshComponent* Mesh = Character->GetMesh();
-
-		if (!TempComp || !Mesh)
+		if (!IsValid(TempComp) || !IsValid(BodyPartComponent) || !IsValid(SkeletalMeshComp))
 			continue;
 
 		const FVector SourcePos = OverlapSphere->GetComponentLocation();
 
-		// Vu qu<on veut continuellement update 
-		const int32 BoneCount = Mesh->GetNumBones();
-
-		for (int32 i = 0; i < BoneCount; i++)
+		for (const TObjectPtr<UFretteBodyPartData>& Data : BodyPartComponent->BodyPartData)
 		{
-			const FName BoneName = Mesh->GetBoneName(i);
-			if (BoneName == NAME_None)
-				continue;
-
-			const FVector BonePos =
-				Mesh->GetBoneLocation(BoneName, EBoneSpaces::WorldSpace);
-
-			const float r = FVector::Dist(BonePos, SourcePos);
-
-			// Evaluate field contribution directly
-			float Flow = ComputeFlow(r);
-			float Temp = ComputeTemperature(r);
-
-			// Since there can be objects between the heat source and the character,
-			// we will perform a basic line of sight check if the bone is not in the
-			// inner radius.
-			if (r <= SourceRadius)
+			if (Data->BodyPartTag.IsValid())
 			{
-				FHitResult HitResult;
-				FCollisionQueryParams QueryParams;
-				QueryParams.AddIgnoredActor(GetOwner());
-				QueryParams.AddIgnoredActor(Character);
-
-				const FVector DirToBone = (BonePos - SourcePos).GetSafeNormal();
-				FVector TraceEnd = SourcePos + (DirToBone * SourceRadius);
-
-				bool bBlocked = GetWorld()->LineTraceSingleByChannel(
-					HitResult,
-					BonePos,
-					TraceEnd,
-					ECC_Visibility,
-					QueryParams
-					);
-
-				if (bBlocked)
+				const FGameplayTag BodyPartTag = Data->BodyPartTag;
+				FName BoneName;
+				if (!BodyPartComponent->GetRepresentativeBoneForTag(BodyPartTag, BoneName)
+					|| SkeletalMeshComp->GetBoneIndex(BoneName) == INDEX_NONE)
 				{
-					Flow *= ObstructionFactor;
-					Temp = FMath::Lerp(AmbientTemperature, Temp, ObstructionFactor);
+					continue;
 				}
-			}
 
-			TempComp->AddBodyPartTemperatureContribution(FTemperatureContribution(Temp, Flow), BoneName, UniqueId);
+				const FVector BonePos = SkeletalMeshComp->GetBoneLocation(BoneName, EBoneSpaces::WorldSpace);
+
+				const float r = FVector::Dist(BonePos, SourcePos);
+				
+				// If the bone is outside the diffusion radius, we need to remove its contribution
+				if (r > DiffusionRadius)
+				{
+					TempComp->ClearBodyPartTemperatureContribution(BodyPartTag, UniqueId);
+					continue;
+				}
+
+				// Evaluate field contribution directly
+				float Flow = ComputeFlow(r);
+				float Temp = ComputeTemperature(r);
+
+				// Since there can be objects between the heat source and the character,
+				// we will perform a basic line of sight check if the bone is not in the
+				// inner radius.
+				if (r > SourceRadius)
+				{
+					FHitResult HitResult;
+					FCollisionQueryParams QueryParams;
+					QueryParams.AddIgnoredActor(GetOwner());
+					QueryParams.AddIgnoredActor(Character);
+
+					const FVector DirToBone = (BonePos - SourcePos).GetSafeNormal();
+					FVector TraceEnd = SourcePos + (DirToBone * SourceRadius);
+
+					bool bBlocked = GetWorld()->LineTraceSingleByChannel(
+						HitResult,
+						BonePos,
+						TraceEnd,
+						ECC_Visibility,
+						QueryParams
+						);
+
+					if (bBlocked)
+					{
+						Flow *= ObstructionFactor;
+						Temp = FMath::Lerp(AmbientTemperature, Temp, ObstructionFactor);
+					}
+				}
+
+				TempComp->AddBodyPartTemperatureContribution(FTemperatureContribution(Temp, Flow), BodyPartTag, UniqueId);
+			}
 		}
 	}
 }

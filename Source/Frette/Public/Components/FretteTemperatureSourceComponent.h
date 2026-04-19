@@ -4,6 +4,7 @@
 #include "NiagaraComponent.h"
 #include "Components/ActorComponent.h"
 #include "Components/DrawSphereComponent.h"
+#include "Components/TextRenderComponent.h"
 #include "Core/FretteWorldSettings.h"
 #include "FretteTemperatureSourceComponent.generated.h"
 

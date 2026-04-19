@@ -23,7 +23,7 @@ public class Frette : ModuleRules
 			"UMG",
 			"NetCore",
 			"Boost",
-			"PhysicsCore"
+			"PhysicsCore", "Niagara"
 		});
 
 		PrivateDependencyModuleNames.AddRange(["StateTreeModule"]);

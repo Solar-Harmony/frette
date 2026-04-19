@@ -5,6 +5,24 @@
 #include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
 
+namespace
+{
+void BuildRepresentativeBoneMap(const UFretteBonesToTagData* BoneTagDataAsset, TMap<FGameplayTag, FName>& OutMap)
+{
+	OutMap.Reset();
+	if (!IsValid(BoneTagDataAsset))
+		return;
+
+	for (const TPair<FName, FGameplayTag>& Entry : BoneTagDataAsset->BoneToBodyPartTag)
+	{
+		if (!Entry.Value.IsValid() || OutMap.Contains(Entry.Value))
+			continue;
+
+		OutMap.Add(Entry.Value, Entry.Key);
+	}
+}
+}
+
 UFretteBodyPartComponent::UFretteBodyPartComponent()
 {
 	SetIsReplicatedByDefault(true);
@@ -16,6 +34,7 @@ UFretteBodyPartComponent::UFretteBodyPartComponent()
 void UFretteBodyPartComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	BuildRepresentativeBoneMap(BoneTagDataAsset, BodyPartTagToRepresentativeBoneMap);
 	
 	// the listen server is also a client, and ReadyForReplication executes after the UI widget Constructs there 
 	if (GetWorld()->GetNetMode() == NM_ListenServer)
@@ -37,6 +56,7 @@ void UFretteBodyPartComponent::BeginPlay()
 void UFretteBodyPartComponent::ReadyForReplication()
 {
 	Super::ReadyForReplication();
+	BuildRepresentativeBoneMap(BoneTagDataAsset, BodyPartTagToRepresentativeBoneMap);
 	
 	if (GetOwnerRole() != ROLE_Authority)
 		return;
@@ -93,11 +113,40 @@ void UFretteBodyPartComponent::AddValueFromBoneName(const FName BoneName, const 
 
 FGameplayTag UFretteBodyPartComponent::GetBodyPartFromBoneName(const FName BoneName) const
 {
-	if (const FGameplayTag* Tag = BoneTagDataAsset.Get()->BoneToBodyPartTag.Find(BoneName))
+	if (!IsValid(BoneTagDataAsset))
+		return FGameplayTag();
+
+	if (const FGameplayTag* Tag = BoneTagDataAsset->BoneToBodyPartTag.Find(BoneName))
 	{
 		return *Tag;
 	}
 	return FGameplayTag();
+}
+
+bool UFretteBodyPartComponent::GetRepresentativeBoneForTag(const FGameplayTag BodyPartTag, FName& OutBoneName) const
+{
+	if (!BodyPartTag.IsValid())
+		return false;
+
+	if (const FName* BoneName = BodyPartTagToRepresentativeBoneMap.Find(BodyPartTag))
+	{
+		OutBoneName = *BoneName;
+		return true;
+	}
+
+	if (!IsValid(BoneTagDataAsset))
+		return false;
+
+	for (const TPair<FName, FGameplayTag>& Entry : BoneTagDataAsset->BoneToBodyPartTag)
+	{
+		if (!Entry.Value.MatchesTagExact(BodyPartTag))
+			continue;
+
+		OutBoneName = Entry.Key;
+		return true;
+	}
+
+	return false;
 }
 
 UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayTag BodyPartTag) const
@@ -177,6 +226,7 @@ float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag
 void UFretteBodyPartComponent::OnRep_BodyPartInstances()
 {
 	BodyPartTagToInstanceMap.Empty(BodyPartInstances.Num());
+	BuildRepresentativeBoneMap(BoneTagDataAsset, BodyPartTagToRepresentativeBoneMap);
 	
 	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{

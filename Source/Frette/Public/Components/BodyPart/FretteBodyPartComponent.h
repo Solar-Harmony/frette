@@ -81,6 +81,7 @@ public:
 	void Client_NotifyBodyPartChange(const FFretteBodyPartChangeEvent& ChangeEvent);
 
 	FGameplayTag GetBodyPartFromBoneName(FName BoneName) const;
+	bool GetRepresentativeBoneForTag(FGameplayTag BodyPartTag, FName& OutBoneName) const;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TArray<TObjectPtr<UFretteBodyPartData>> BodyPartData;
@@ -101,5 +102,7 @@ protected:
 private:
 	UPROPERTY()
 	TMap<FGameplayTag, TObjectPtr<UFretteBodyPartInstance>> BodyPartTagToInstanceMap;
-};
 
+	UPROPERTY()
+	TMap<FGameplayTag, FName> BodyPartTagToRepresentativeBoneMap;
+};

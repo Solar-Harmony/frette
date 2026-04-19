@@ -79,6 +79,7 @@ public:
 
 protected:
 	UFretteTemperatureComponent();
+	void OnRegister();
 	virtual void BeginPlay() override;
 	void OnTemperatureTick();
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
