@@ -25,5 +25,8 @@ class FRETTE_API UFretteGameplayStatics : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable)
 	static ECardinalDirection DirVectorToCardinal(const FVector2D& Dir);
+	
+	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
+	static bool ProjectActorToFloor(AActor* Actor, USceneComponent* SnapRoot, float ZOffset, FCollisionProfileName CollisionProfile);
 };
 
