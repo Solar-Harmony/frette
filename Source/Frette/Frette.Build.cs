@@ -26,6 +26,6 @@ public class Frette : ModuleRules
 			"PhysicsCore"
 		});
 
-		PrivateDependencyModuleNames.AddRange(["StateTreeModule"]);
+		PrivateDependencyModuleNames.AddRange(["StateTreeModule", "Niagara"]);
 	}
 }
