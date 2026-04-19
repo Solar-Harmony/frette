@@ -31,7 +31,7 @@ public:
 	UPROPERTY(EditInstanceOnly)
 	TObjectPtr<UFretteInteractableComponent> Interactable;
 	
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> StaticMesh;
 	
 	UFUNCTION(BlueprintNativeEvent)
