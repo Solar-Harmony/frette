@@ -4,7 +4,16 @@
 #include "NiagaraComponent.h"
 #include "Components/ActorComponent.h"
 #include "Components/DrawSphereComponent.h"
+#include "Core/FretteWorldSettings.h"
 #include "FretteTemperatureSourceComponent.generated.h"
+
+UENUM(BlueprintType)
+enum class ETemperatureSourceArrowRole : uint8
+{
+	None         UMETA(DisplayName = "Hidden"),
+	Temperature  UMETA(DisplayName = "Temperature Field"),
+	Flow         UMETA(DisplayName = "Flow Field")
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFretteTemperatureSourceComponent : public USceneComponent
@@ -13,6 +22,7 @@ class FRETTE_API UFretteTemperatureSourceComponent : public USceneComponent
 
 public:
 	UFretteTemperatureSourceComponent();
+	void OnRegister();
 
 protected:
 	virtual void BeginPlay() override;
@@ -26,32 +36,24 @@ public:
 	UFUNCTION()
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
-	float InnerRadius = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
+	float SourceRadius = 1.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
-	float OuterRadius = 300.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
+	float DiffusionRadius = 300.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (Units = "Celsius"))
 	float SourceTemperature = 100.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
+	// TODO Plug that into weather system
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (Units = "Celsius"))
 	float AmbientTemperature = 10.f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
-	float DiffusionStrength = 1.f; // Alpha in the heat equation
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
+	float FlowStrength = 1.f; // Alpha in the heat equation
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature", meta=(ClampMin = "0.0", ClampMax = "1.0"))
-	float VisualisationSlice = 0.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
-	int NumberFlowArrows = 1;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Temperature")
-	bool AroowsAreForTemperature = false;
-
-	UFUNCTION(BlueprintCallable)
-	float ComputeFalloff(float r) const;
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
+	float ObstructionFactor = 0.1f;
 	
 	UFUNCTION(BlueprintCallable)
 	float ComputeTemperature(float r) const;
@@ -59,37 +61,52 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float ComputeFlow(float r) const;
 
-	UPROPERTY()
-	USphereComponent* OverlapSphere;
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<USphereComponent> OverlapSphere;
 
 	UPROPERTY()
 	TSet<TObjectPtr<ACharacter>> OverlappingCharacters;
 	
 	#if WITH_EDITORONLY_DATA
-	void UpdateMaterial();
+	void UpdateMaterial() const;
 	
 	void UpdateDebugArrows();
 	
 	UPROPERTY()
-	TArray<UArrowComponent*> DebugDiffusionArrows;
+	TArray<TObjectPtr<UArrowComponent>> DebugArrows;
 
 	UPROPERTY()
 	TObjectPtr<UDrawSphereComponent> DebugSphereInner;
 	
 	UPROPERTY()
-	UStaticMeshComponent* SphereMesh;
+	TObjectPtr<UTextRenderComponent> DebugText;
+	
+	UPROPERTY()
+	TObjectPtr<UStaticMeshComponent> SphereMesh;
 
 	UPROPERTY()
-	UMaterialInstanceDynamic* HeatMaterialInstance;
+	TObjectPtr<UMaterialInstanceDynamic> HeatMaterialInstance;
 
-	UPROPERTY(EditAnywhere)
-	UMaterialInterface* HeatMaterial;
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> HeatMaterial;
+	
+	UPROPERTY()
+	TObjectPtr<AFretteWorldSettings> WorldSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "1.0"))
+	float RadialSlice = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
+	int NumberArrows = 16;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
+	ETemperatureSourceArrowRole ShowArrows = ETemperatureSourceArrowRole::None;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
+	bool bShowNumbersAtSlice = false;
 	
 	FGuid UniqueId;
-	float MinTemperature = -40;
-	float MaxTemperature = 1500;
-	
-	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
+
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	#endif
-	
 };

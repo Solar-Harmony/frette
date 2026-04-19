@@ -43,22 +43,22 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 			float& AccumulatedFlow = BoneFlowAccum.FindOrAdd(BoneTag);
 			float& AccumulatedTemp = BoneTempAccum.FindOrAdd(BoneTag);
 			AccumulatedFlow += Contributionn.Flow;
-			AccumulatedTemp += Contributionn.Weight * Contributionn.Temperature;
+			AccumulatedTemp += Contributionn.Temperature - AmbientTemperature;
 		}
 
 		for (const auto& Pair : BoneFlowAccum)
 		{
 			const FGameplayTag& BoneTag = Pair.Key;
 			float NetFlow = Pair.Value;
-			float NetTemperature = BoneTempAccum.FindOrAdd(BoneTag);
+			float NetTemperature = BoneTempAccum.FindOrAdd(BoneTag) + AmbientTemperature;
 			
 			// Truncate the net temp just to be safe
-			NetTemperature = FMath::Clamp(NetTemperature, MinTemperature, MaxTemperature);
+			NetTemperature = FMath::Clamp(NetTemperature, WorldSettings->MinTemperature, WorldSettings->MaxTemperature);
 
 			float CurrentTemp =
 				BodyPartComponent->GetValueFromBodyPart(BoneTag, TemperatureEffectTag);
 			
-			if (CurrentTemp < MinTemperature || CurrentTemp > MaxTemperature)
+			if (CurrentTemp < WorldSettings->MinTemperature || CurrentTemp > WorldSettings->MaxTemperature)
 			{
 				UE_LOG(LogFrette, Log, TEXT("Your temperature system is not doing good in terms of numerical stability no cap!! Truncating temp biatch!!!"));
 				continue;
@@ -72,7 +72,7 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 			NetFlow *= DeltaTime;
 			
 			// DAMPING We will make the behavior asymptotic near the target temp to make the system equilibrate
-			const float Influence = (NetTemperature - CurrentTemp) / (MaxTemperature - MinTemperature);
+			const float Influence = (NetTemperature - CurrentTemp) / (WorldSettings->MaxTemperature - WorldSettings->MinTemperature);
 			NetFlow *= FMath::Clamp(Influence, Damping, 1.0);
 			
 			BodyPartComponent->AddValueFromBodyPartTag(

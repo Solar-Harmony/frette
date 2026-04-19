@@ -7,18 +7,22 @@
 #include "Components/FretteTemperatureComponent.h"
 #include "GameFramework/Character.h"
 #include "Components/InstancedStaticMeshComponent.h"
+#include "Components/TextRenderComponent.h"
 
 // Sets default values for this component's properties
 UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	bUseAttachParentBound = true;
+
+	PrimaryComponentTick.bCanEverTick = true;
 
 	UniqueId = FGuid::NewGuid();
 
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
 	OverlapSphere->SetupAttachment(this);
-	OverlapSphere->InitSphereRadius(OuterRadius);
+	OverlapSphere->InitSphereRadius(DiffusionRadius);
 	OverlapSphere->SetGenerateOverlapEvents(true);
+	//OverlapSphere->SetMobility(EComponentMobility::Static);
 	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	OverlapSphere->SetCollisionObjectType(ECC_WorldDynamic);
 	OverlapSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -32,127 +36,82 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 		&UFretteTemperatureSourceComponent::OnEndOverlap);
 
 	#if WITH_EDITORONLY_DATA
+	DebugText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("DebugText"));
+	DebugText->SetVisibility(bShowNumbersAtSlice);
+	const float TextSize = DiffusionRadius / 4.f;
+	DebugText->SetRelativeLocation(FVector(0, 0, DiffusionRadius + 0.5 * TextSize));
+	DebugText->SetWorldSize(TextSize);
+	DebugText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+	DebugText->SetTextRenderColor(FColor::White);
+	//DebugText->SetMobility(EComponentMobility::Static);
+	DebugText->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DebugText->SetHiddenInGame(true);
+	DebugText->SetupAttachment(this);
+	
 	DebugSphereInner = CreateEditorOnlyDefaultSubobject<UDrawSphereComponent>(TEXT("Debug Sphere 2"));
 	DebugSphereInner->SetupAttachment(this);
 	DebugSphereInner->SetIsVisualizationComponent(true);
 	DebugSphereInner->SetLineThickness(2.f);
 	DebugSphereInner->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DebugSphereInner->SetMobility(EComponentMobility::Static);
+	//DebugSphereInner->SetMobility(EComponentMobility::Static);
 	DebugSphereInner->SetHiddenInGame(true);
 	DebugSphereInner->ShapeColor = FColor::Cyan;
-	DebugSphereInner->InitSphereRadius(InnerRadius);
+	DebugSphereInner->InitSphereRadius(SourceRadius);
 
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HeatSphere"));
 	SphereMesh->SetupAttachment(this);
 	SphereMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SphereMesh->SetHiddenInGame(true);
-
+	SphereMesh->SetSimulatePhysics(false);
+	SphereMesh->SetEnableGravity(false);
+	//SphereMesh->SetMobility(EComponentMobility::Static);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("/Engine/BasicShapes/Sphere"));
 	if (SphereMeshAsset.Succeeded())
 	{
 		SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
-		float Scale = OuterRadius / 50.f;
+		float Scale = DiffusionRadius / 50.f;
 		SphereMesh->SetRelativeScale3D(FVector(Scale));
-		if (HeatMaterial)
-		{
-			HeatMaterialInstance = UMaterialInstanceDynamic::Create(HeatMaterial, this);
-			SphereMesh->SetMaterial(0, HeatMaterialInstance);
-			UpdateMaterial();
-		}
 	}
-
-	UpdateDebugArrows();
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialAsset(TEXT("/Game/Actors/Effects/Area/FireArea/M_Heat.M_Heat"));
+	if (MaterialAsset.Succeeded())
+	{
+		HeatMaterial = MaterialAsset.Object;
+		HeatMaterialInstance = UMaterialInstanceDynamic::Create(HeatMaterial, this);
+		SphereMesh->SetMaterial(0, HeatMaterialInstance);
+	}
 	#endif
 }
 
-void UFretteTemperatureSourceComponent::UpdateDebugArrows()
+void UFretteTemperatureSourceComponent::OnRegister()
 {
-	const float GoldenAngle = 2.39996323f; // helps avoid clumping
-	const FVector Center = GetComponentLocation();
-	const float r = VisualisationSlice * OuterRadius;
-	
-	float Flow;
-	if (AroowsAreForTemperature)
-		Flow = ((ComputeTemperature(r) - MinTemperature) / (MaxTemperature - MinTemperature)) * 200.f;
-	else
-		Flow = ComputeFlow(r) * 10.f;
+	Super::OnRegister();
 
-	for (int32 i = 0; i < NumberFlowArrows; i++)
-	{
-		UArrowComponent* Arrow = nullptr;
+	if (UWorld* World = GetWorld())
+		WorldSettings = Cast<AFretteWorldSettings>(World->GetWorldSettings());
 
-		if (DebugDiffusionArrows.Num() > i)
-		{
-			Arrow = DebugDiffusionArrows[i];
-		}
-		else
-		{
-			FName ArrowName = FName(*FString::Printf(TEXT("Arrow_%d"), i));
-			Arrow = NewObject<UArrowComponent>(this, UArrowComponent::StaticClass(), ArrowName);
-			Arrow->SetupAttachment(this);
-			Arrow->SetArrowSize(1.f);
-			Arrow->SetHiddenInGame(true);
-			DebugDiffusionArrows.Add(Arrow);
-		}
-
-		// This is a trick to have uniform arrows around the upper-sphere
-		// If we just use a angle grid approach, the vectors clump to the top
-		const float t = (float)i / (float)NumberFlowArrows;
-
-		const float Azimuth = i * GoldenAngle;
-		const float z = 1.0f - t;
-		const float r_xy = FMath::Sqrt(1.0f - z * z);
-
-		FVector Dir;
-		Dir.X = r_xy * FMath::Cos(Azimuth);
-		Dir.Y = r_xy * FMath::Sin(Azimuth);
-		Dir.Z = z;
-
-		FVector ArrowPos = Center + Dir * r;
-
-		Arrow->SetWorldLocation(ArrowPos);
-		Arrow->SetWorldRotation(FRotationMatrix::MakeFromX(Dir).ToQuat());
-		Arrow->SetArrowLength(Flow);
-		if (Flow == 0 || AroowsAreForTemperature)
-			Arrow->SetArrowColor(FColor::White);
-		else if (Flow > 0)
-			Arrow->SetArrowColor(FColor::Red);
-		else
-			Arrow->SetArrowColor(FColor::Blue);
-
-		Arrow->SetVisibility(true);
-	}
-
-	for (int32 i = NumberFlowArrows; i < DebugDiffusionArrows.Num(); i++)
-	{
-		if (DebugDiffusionArrows[i])
-		{
-			DebugDiffusionArrows[i]->SetVisibility(false);
-		}
-	}
+	#if WITH_EDITORONLY_DATA
+	UpdateDebugArrows();
+	UpdateMaterial();
+	#endif
 }
+
 
 void UFretteTemperatureSourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-float UFretteTemperatureSourceComponent::ComputeFalloff(float r) const
-{
-	return (OuterRadius / r) - 1.0f;
-}
-
 float UFretteTemperatureSourceComponent::ComputeTemperature(float r) const
 {
-	if (r <= InnerRadius)
+	if (r <= SourceRadius)
 		return SourceTemperature;
-	if (r >= OuterRadius)
+	if (r >= DiffusionRadius)
 		return AmbientTemperature;
 
 	float value = AmbientTemperature +
 		(SourceTemperature - AmbientTemperature) *
-		(InnerRadius / (OuterRadius - InnerRadius)) *
-		ComputeFalloff(r);
+		(SourceRadius / (DiffusionRadius - SourceRadius)) *
+		((DiffusionRadius / r) - 1.0f);
 
 	return value;
 }
@@ -161,12 +120,12 @@ float UFretteTemperatureSourceComponent::ComputeFlow(float r) const
 {
 	// MEMO Keep an eye on this if the numerical scheme is unstable
 	constexpr float Epsilon = 1e-4;
-	if (r <= InnerRadius)
+	if (r <= SourceRadius)
 	{
 		// The flow is 0 inside the inner radius according to the math so we'll fake it so it feels consistent
-		return ComputeFlow(InnerRadius + Epsilon);
+		return ComputeFlow(SourceRadius + Epsilon);
 	}
-	if (r >= OuterRadius)
+	if (r >= DiffusionRadius)
 		return 0.f;
 
 	// We will compute the spherically symmetric gradient to get the (flow) using centered finite difference
@@ -175,7 +134,7 @@ float UFretteTemperatureSourceComponent::ComputeFlow(float r) const
 
 	const float Gradient = (Tprev - Tnext) / (2 * Epsilon);
 
-	return DiffusionStrength * Gradient;
+	return FlowStrength * Gradient;
 }
 
 // Called every frame
@@ -216,11 +175,38 @@ void UFretteTemperatureSourceComponent::TickComponent(
 			const float r = FVector::Dist(BonePos, SourcePos);
 
 			// Evaluate field contribution directly
-			const float Flow = ComputeFlow(r);
-			const float Temp = ComputeTemperature(r);
-			const float Falloff = ComputeTemperature(r);
+			float Flow = ComputeFlow(r);
+			float Temp = ComputeTemperature(r);
 
-			TempComp->AddBodyPartTemperatureContribution(FTemperatureContribution(Temp, Falloff, Flow), BoneName, UniqueId);
+			// Since there can be objects between the heat source and the character,
+			// we will perform a basic line of sight check if the bone is not in the
+			// inner radius.
+			if (r <= SourceRadius)
+			{
+				FHitResult HitResult;
+				FCollisionQueryParams QueryParams;
+				QueryParams.AddIgnoredActor(GetOwner());
+				QueryParams.AddIgnoredActor(Character);
+
+				const FVector DirToBone = (BonePos - SourcePos).GetSafeNormal();
+				FVector TraceEnd = SourcePos + (DirToBone * SourceRadius);
+
+				bool bBlocked = GetWorld()->LineTraceSingleByChannel(
+					HitResult,
+					BonePos,
+					TraceEnd,
+					ECC_Visibility,
+					QueryParams
+					);
+
+				if (bBlocked)
+				{
+					Flow *= ObstructionFactor;
+					Temp = FMath::Lerp(AmbientTemperature, Temp, ObstructionFactor);
+				}
+			}
+
+			TempComp->AddBodyPartTemperatureContribution(FTemperatureContribution(Temp, Flow), BoneName, UniqueId);
 		}
 	}
 }
@@ -261,36 +247,124 @@ void UFretteTemperatureSourceComponent::OnEndOverlap(UPrimitiveComponent* Overla
 }
 
 #if WITH_EDITORONLY_DATA
-void UFretteTemperatureSourceComponent::UpdateMaterial()
+void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 {
-	if (!HeatMaterialInstance)
+	if (!IsValid(WorldSettings))
 		return;
 
-	HeatMaterialInstance->SetScalarParameterValue("InnerRadius", InnerRadius);
-	HeatMaterialInstance->SetScalarParameterValue("OuterRadius", OuterRadius);
+	const float r = RadialSlice * DiffusionRadius;
+	const float TemperatureAtSlice = ComputeTemperature(r);
+	const float FlowAtSlice = ComputeFlow(r);
+	
+	// The arrows are useful but it is important to have access to numbers for tuning
+	FString Text = FString::Printf(TEXT("Temp: %.3f°C\nFlow: %.3f°C/s"), 
+		TemperatureAtSlice, FlowAtSlice);
+	DebugText->SetText(FText::FromString(Text));
+
+	if (ShowArrows == ETemperatureSourceArrowRole::None)
+	{
+		for (const auto Arrow : DebugArrows)
+			Arrow->SetVisibility(false);
+		return;
+	}
+
+	float Quantity = 0;
+	if (ShowArrows == ETemperatureSourceArrowRole::Temperature)
+		Quantity = ((TemperatureAtSlice - WorldSettings->MinTemperature)
+			/ (WorldSettings->MaxTemperature - WorldSettings->MinTemperature)) * 200.f;
+	else if (ShowArrows == ETemperatureSourceArrowRole::Flow)
+		Quantity = FlowAtSlice * 10.f;
+
+	for (int32 i = 0; i < NumberArrows; i++)
+	{
+		UArrowComponent* Arrow = nullptr;
+
+		if (DebugArrows.Num() > i)
+		{
+			Arrow = DebugArrows[i];
+		}
+		else
+		{
+			FName ArrowName = FName(*FString::Printf(TEXT("Arrow_%d"), i));
+			Arrow = NewObject<UArrowComponent>(this, UArrowComponent::StaticClass(), ArrowName);
+			Arrow->SetupAttachment(this);
+			Arrow->SetArrowSize(1.f);
+			Arrow->SetHiddenInGame(true);
+			Arrow->SetSimulatePhysics(false);
+			Arrow->SetEnableGravity(false);
+			//Arrow->SetMobility(EComponentMobility::Static);
+			Arrow->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Arrow->RegisterComponent();
+			DebugArrows.Add(Arrow);
+		}
+
+		// This is a trick to have uniform arrows around the upper-sphere
+		// If we just use an (i, j) angle grid approach for (azimuth, inclination),
+		// the vectors clump to the top or the bottom
+		const float t = (float)i / (float)NumberArrows;
+
+		constexpr float GoldenAngle = 2.39996323f;
+		const float Azimuth = i * GoldenAngle;
+		const float z = 1.0f - t;
+		const float r_xy = FMath::Sqrt(1.0f - z * z);
+
+		FVector Dir;
+		Dir.X = r_xy * FMath::Cos(Azimuth);
+		Dir.Y = r_xy * FMath::Sin(Azimuth);
+		Dir.Z = z;
+
+		FVector ArrowPos = Dir * r;
+
+		Arrow->SetRelativeLocation(ArrowPos);
+		Arrow->SetRelativeRotation(FRotationMatrix::MakeFromX(Dir).ToQuat());
+		Arrow->SetArrowLength(Quantity);
+		if (Quantity == 0 || ShowArrows == ETemperatureSourceArrowRole::Temperature)
+			Arrow->SetArrowColor(FColor::White);
+		else if (Quantity > 0)
+			Arrow->SetArrowColor(FColor::Red);
+		else
+			Arrow->SetArrowColor(FColor::Blue);
+
+		Arrow->SetVisibility(true);
+	}
+
+	for (int32 i = NumberArrows; i < DebugArrows.Num(); i++)
+	{
+		if (DebugArrows[i])
+		{
+			DebugArrows[i]->SetVisibility(false);
+		}
+	}
+}
+
+void UFretteTemperatureSourceComponent::UpdateMaterial() const
+{
+	if (!IsValid(HeatMaterialInstance) || !IsValid(WorldSettings))
+		return;
+
+	HeatMaterialInstance->SetScalarParameterValue("InnerRadius", SourceRadius);
+	HeatMaterialInstance->SetScalarParameterValue("OuterRadius", DiffusionRadius);
 	HeatMaterialInstance->SetScalarParameterValue("SourceTemperature", SourceTemperature);
 	HeatMaterialInstance->SetScalarParameterValue("AmbientTemperature", AmbientTemperature);
-	HeatMaterialInstance->SetScalarParameterValue("MinTemperature", -40);
-	HeatMaterialInstance->SetScalarParameterValue("MaxTemperature", 1500);
+	HeatMaterialInstance->SetScalarParameterValue("MinTemperature", WorldSettings->MinTemperature);
+	HeatMaterialInstance->SetScalarParameterValue("MaxTemperature", WorldSettings->MaxTemperature);
 }
 
 void UFretteTemperatureSourceComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	OverlapSphere->SetSphereRadius(OuterRadius);
-	DebugSphereInner->SetSphereRadius(InnerRadius);
+	OverlapSphere->SetSphereRadius(DiffusionRadius);
+	DebugSphereInner->SetSphereRadius(SourceRadius);
+	const float TextSize = DiffusionRadius / 4.f;
+	DebugText->SetRelativeLocation(FVector(0, 0, DiffusionRadius + 0.5 * TextSize));
+	DebugText->SetWorldSize(TextSize);
+	DebugText->SetVisibility(bShowNumbersAtSlice);
 
 	if (SphereMesh)
 	{
-		float Scale = OuterRadius / 50.f;
+		float Scale = DiffusionRadius / 50.f;
 		SphereMesh->SetRelativeScale3D(FVector(Scale));
-	}
-
-	if (!HeatMaterialInstance && HeatMaterial)
-	{
-		HeatMaterialInstance = UMaterialInstanceDynamic::Create(HeatMaterial, this);
-		SphereMesh->SetMaterial(0, HeatMaterialInstance);
 	}
 
 	UpdateMaterial();

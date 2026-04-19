@@ -37,10 +37,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UShapeComponent> OverlapShape;
 
-	UPROPERTY(EditAnywhere, Category = "Frette|Temperature Zone")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (Units = "Celsius"))
 	float Temperature = -30;
 	
-	UPROPERTY(EditAnywhere, Category = "Frette|Temperature Zone")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (ForceUnits = "°C/s"))
 	float Flow = -12;
 
 	UPROPERTY()

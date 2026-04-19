@@ -52,7 +52,7 @@ void UFretteTemperatureZoneComponent::TemperatureZoneTick()
 			if (!ActiveBones.Contains(Bone))
 			{
 				ActiveBones.Add(Bone);
-				TemperatureComponent->AddBodyPartTemperatureContribution(FTemperatureContribution(Temperature, 1.0f, Flow), Bone, UniqueId);
+				TemperatureComponent->AddBodyPartTemperatureContribution(FTemperatureContribution(Temperature, Flow), Bone, UniqueId);
 			}
 		}
 

@@ -4,6 +4,7 @@
 #include "GameplayTagContainer.h"
 #include "BodyPart/FretteBodyPartTags.h"
 #include "Components/ActorComponent.h"
+#include "Core/FretteWorldSettings.h"
 #include "FretteTemperatureComponent.generated.h"
 
 class UFretteBodyPartComponent;
@@ -15,16 +16,12 @@ struct FTemperatureContribution
 	
 	FTemperatureContribution() = default;
 
-	FTemperatureContribution(float Temperature, float Weight, float Flow)
+	FTemperatureContribution(float Temperature, float Flow)
 		: Temperature(Temperature)
-		, Weight(Weight)
 		, Flow(Flow) {}
 	
 	UPROPERTY()
 	float Temperature;
-	
-	UPROPERTY()
-	float Weight;
 	
 	UPROPERTY()
 	float Flow;
@@ -68,7 +65,7 @@ class FRETTE_API UFretteTemperatureComponent : public UActorComponent
 
 public:
 	UPROPERTY(EditAnywhere)
-	float TimeBetweenTemperatureChange = 3.f;
+	float TimeBetweenTemperatureChange = 0.5f;
 
 	UFUNCTION(BlueprintCallable)
 	void AddToAmbientTemperature(float NewAmbientTemperature);
@@ -90,17 +87,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite);
 	float AmbientTemperature = -30;
 
-	UPROPERTY(EditDefaultsOnly);
-	float MinTemperature = -40;
+	// TODO but in world settings?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
+	float Damping = 1.0; // Force the system to equilibrium around the target temp fully with 1
 
-	UPROPERTY(EditDefaultsOnly);
-	float MaxTemperature = 1500;
-	
-	UPROPERTY(EditDefaultsOnly);
-	float Damping = 1.0; // Force the system to equilibrium [0, 1]
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite);
-	float DiffusionSpeed = 0.3; // [0, 1]
+	// TODO but in world settings?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
+	float DiffusionSpeed = 0.3;
 
 	const FGameplayTag TemperatureEffectTag = TAG_BodyPartValues_Temperature;
 
@@ -112,6 +105,9 @@ protected:
 
 	UPROPERTY()
 	TMap<FTemperatureKey, FTemperatureContribution> BodyPartTemperatureContributions;
+	
+	UPROPERTY()
+	TObjectPtr<AFretteWorldSettings> WorldSettings;
 
 	FTimerHandle TemperatureTickHandle;
 	float CurrentTemperature = 0;
