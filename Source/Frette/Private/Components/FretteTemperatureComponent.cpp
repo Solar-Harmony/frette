@@ -89,19 +89,19 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 					NetFlow = 0;
 
 				const float AmbientFlow = DiffusionSpeed * (AmbientTemperature - CurrentTemp);
-				NetFlow += AmbientFlow;
+				float TotalFlow = NetFlow + AmbientFlow;
 
 				// Make things more physically accurate??
 				const float DeltaTime = GetWorld()->GetDeltaSeconds();
-				NetFlow *= DeltaTime;
+				TotalFlow *= DeltaTime;
 
 				// DAMPING: We will make the behavior asymptotic near the target temp to make the system equilibrate
 				const float Influence = (NetTemperature - CurrentTemp) / (WorldSettings->MaxTemperature - WorldSettings->MinTemperature);
-				const float AsymptoticFlow = FMath::Lerp(1.0f - Damping, 1.0f, FMath::Abs(Influence)) * NetFlow;
+				const float AsymptoticFlow = FMath::Lerp(1.0f - Damping, 1.0f, FMath::Abs(Influence)) * TotalFlow;
 
 				// TODO: Remove this log spam lol
-				UE_LOG(LogFrette, Log, TEXT("Temp integrator: BoneTag[%s] CurrentTemp[%.4f] NetTemp[%.4f] NetFlow[%.4f] DeltaTime[%.4f] Influence[%.4f] AsymptoticFlow[%.4f]"),
-					*BoneTag.ToString(), CurrentTemp, NetTemperature, NetFlow, DeltaTime, Influence, AsymptoticFlow);
+				UE_LOG(LogFrette, Log, TEXT("Temp integrator: BoneTag[%s] CurrentTemp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] TotalFlow[%.3f] DeltaTime[%.3f] Influence[%.3f] AsymptoticFlow[%.3f]"),
+					*BoneTag.ToString(), CurrentTemp, NetTemperature, NetFlow, AmbientFlow, TotalFlow, DeltaTime, Influence, AsymptoticFlow);
 
 				// Add the computed value to the bone component
 				BodyPartComponent->AddValueFromBodyPartTag(

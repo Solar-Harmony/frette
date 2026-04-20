@@ -16,7 +16,7 @@ void UFretteBodyPartsGameplayEffectComponent::OnGameplayEffectExecuted(FActiveGa
 	for (auto Pair : GESpec.SetByCallerTagMagnitudes)
 	{
 		// TODO: check is Frette.BodyPart
-		const int32 Value = FMath::TruncToInt32(Pair.Value);
+		const float Value = Pair.Value;
 		BodyParts->AddValueFromBodyPartTag(Pair.Key, Value, Attribute);
 	}
 }
