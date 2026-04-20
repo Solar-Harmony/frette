@@ -52,37 +52,24 @@ void AFretteProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	}
 
 	UFretteBodyPartComponent* BodyPart = OtherActor->GetComponentByClass<UFretteBodyPartComponent>();
-	if (!BodyPart)
+	USkeletalMeshComponent* SkeletalMesh = Cast<USkeletalMeshComponent>(Hit.GetComponent());
+	FVector BoneVelocity = FVector::ZeroVector;
+	if (BodyPart && SkeletalMesh && SkeletalMesh->GetPhysicsAsset() && Hit.Item != INDEX_NONE)
 	{
-		Destroy();
-		return;
-	}
-
-	USkeletalMeshComponent* SkelMesh = Cast<USkeletalMeshComponent>(Hit.GetComponent());
-	if (!SkelMesh || !SkelMesh->GetPhysicsAsset() || Hit.Item == INDEX_NONE)
-	{
-		Destroy();
-		return;
+		const USkeletalBodySetup* HitBody = SkeletalMesh->GetPhysicsAsset()->SkeletalBodySetups[Hit.Item];
+		const FName HitPhysBone = HitBody->BoneName;
+		BoneVelocity = SkeletalMesh->GetPhysicsLinearVelocity(HitPhysBone);
+		ApplyDamage(BodyPart, HitPhysBone);
 	}
 	
-	const USkeletalBodySetup* HitBody = SkelMesh->GetPhysicsAsset()->SkeletalBodySetups[Hit.Item];
-	const FName HitPhysBone = HitBody->BoneName;
-	const FVector BoneVelocity = SkelMesh->GetPhysicsLinearVelocity(HitPhysBone);
-	
-	Multicast_ShowHitEffects(Hit, BoneVelocity);
-
-	ApplyDamage(BodyPart, HitPhysBone);
-	
+	Multicast_ShowHitEffects(Hit, BoneVelocity, SkeletalMesh != nullptr);
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetActorHiddenInGame(true);
-	if (ProjectileMovement)
-	{
-		ProjectileMovement->StopMovementImmediately();
-	}
+	ProjectileMovement->StopMovementImmediately();
 	SetLifeSpan(1.0f);
 }
 
-void AFretteProjectile::Multicast_ShowHitEffects_Implementation(const FHitResult& Hit, FVector BoneVelocity)
+void AFretteProjectile::Multicast_ShowHitEffects_Implementation(const FHitResult& Hit, const FVector& BoneVelocity, bool bHasBlood)
 {
 	if (IsValid(ImpactDecalMaterial))
 	{
@@ -92,11 +79,11 @@ void AFretteProjectile::Multicast_ShowHitEffects_Implementation(const FHitResult
 			ImpactDecalSize,            
 			Hit.ImpactPoint + Hit.ImpactNormal * 1.0f,
 			Hit.ImpactNormal.Rotation(),
-			0.0f
+			60.0f
 		);
 	}
 
-	if (IsValid(ImpactVFX))
+	if (bHasBlood && IsValid(ImpactVFXFlesh))
 	{
 		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			GetWorld(),
@@ -113,6 +100,24 @@ void AFretteProjectile::Multicast_ShowHitEffects_Implementation(const FHitResult
 		{
 			NiagaraComponent->SetVariableVec3("User.ImpactNormal", Hit.ImpactNormal);
 			NiagaraComponent->SetVariableVec3("User.BoneVelocity", BoneVelocity);
+		}
+	} 
+	else if (IsValid(ImpactVFX))
+	{
+		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			ImpactVFXFlesh,
+			Hit.ImpactPoint,
+			Hit.ImpactNormal.Rotation(),
+			 FVector(1.0f),
+			true,
+			true,
+			ENCPoolMethod::AutoRelease
+		);
+		
+		if (NiagaraComponent)
+		{
+			NiagaraComponent->SetVariableVec3("User.ImpactNormal", Hit.ImpactNormal);
 		}
 	}
 }

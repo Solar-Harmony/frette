@@ -1,8 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayEffect.h"
-#include "../../../../../../UE_5.7/Engine/Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
+#include "NiagaraSystem.h"
 #include "Components/SphereComponent.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "GameFramework/Actor.h"
@@ -30,6 +29,9 @@ public:
 	UNiagaraSystem* ImpactVFX;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Projectile")
+	UNiagaraSystem* ImpactVFXFlesh;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Projectile")
 	FVector ImpactDecalSize = FVector(5.0f, 25.0f, 25.0f);
 	
 	UPROPERTY(EditDefaultsOnly, meta= (ClampMin=0), Category="Frette|Projectile")
@@ -44,7 +46,7 @@ protected:
 		const FHitResult& Hit);
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_ShowHitEffects(const FHitResult& Hit, FVector BoneVelocity);
+	void Multicast_ShowHitEffects(const FHitResult& Hit, const FVector& BoneVelocity, bool bHasBlood); 
 
 	void ApplyDamage(UFretteBodyPartComponent* BodyPartComponent, FName HitBoneName) const;
 };
