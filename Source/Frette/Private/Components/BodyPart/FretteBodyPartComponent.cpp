@@ -18,7 +18,7 @@ UFretteBodyPartComponent::UFretteBodyPartComponent()
 void UFretteBodyPartComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// the listen server is also a client, and ReadyForReplication executes after the UI widget Constructs there 
 	if (GetWorld()->GetNetMode() == NM_ListenServer)
 	{
@@ -102,7 +102,7 @@ void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPa
 		
 	if (!BodyPartTag.IsValid())
 		return;
-
+	
 	const AFrettePlayerController* Calisse = Cast<AFrettePlayerController>(Cast<AFrettePlayerCharacter>(GetOwner())->GetController());
 	if (Calisse->bFretteCinematicMode)
 		return;
@@ -178,7 +178,7 @@ float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag
 		
 		const float Value = Instance->FindOrAddAccumulatedValue(ValueTag);
 		const float Min = bForFeedback ? Config->FeedbackLowValue : Config->MinValue;
-		const float Max = bForFeedback? Config->FeedbackHighValue : Config->MaxValue;
+		const float Max = bForFeedback ? Config->FeedbackHighValue : Config->MaxValue;
 		const float Normalized = FMath::Clamp((Value - Min) / (Max - Min), 0.0f, 1.0f);
 		NormalizedValues.Add(Normalized);
 	}

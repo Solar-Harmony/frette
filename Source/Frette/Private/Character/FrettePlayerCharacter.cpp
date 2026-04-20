@@ -101,8 +101,8 @@ void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
 
 void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 {
-	AddControllerYawInput(LookAxis.X);
-	AddControllerPitchInput(LookAxis.Y);
+	AddControllerYawInput(LookAxis.X * HorizontalLookSensitivity);
+	AddControllerPitchInput(LookAxis.Y * VerticalLookSensitivity);
 }
 
 //Set la position de la caméra a la position du socket de tête du mesh (pour les animations)
@@ -146,21 +146,15 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 	SubToAttributeChanges();
 }
 
-void AFrettePlayerCharacter::SetIsDead(const bool bNewIsDead)
+void AFrettePlayerCharacter::Die()
 {
+	Super::Die();
+
 	if (!HasAuthority())
 		return;
 
-	if (bIsDead == bNewIsDead)
-		return;
-
-	bIsDead = bNewIsDead;
-
-	if (bIsDead)
-	{
-		Multicast_HandleDeath(GetCharacterMovement()->Velocity);
-		OnPlayerDied.Broadcast(this);
-	}
+	Multicast_HandleDeath(GetCharacterMovement()->Velocity);
+	OnPlayerDied.Broadcast(this);
 }
 
 void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity)
