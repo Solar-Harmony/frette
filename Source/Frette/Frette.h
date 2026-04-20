@@ -13,7 +13,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 // Usage:
 // FRETTE_LOG(Log, "Message with no args.");
 // FRETTE_LOG(Warning, "Message with args: %d, %s", Arg1, Arg2);
-#define FRETTE_PRIVATE_WRAP(r, data, elem) data(elem)
+#define FRETTE_PRIVATE_WRAP(r, data, elem) Frette::Private::PrintArg(Frette::Private::ToTCHAR(elem))
 
 #define FRETTE_PRIVATE_MAP_ARGS(func, ...) \
 	BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(FRETTE_PRIVATE_WRAP, func, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__)))
@@ -23,6 +23,9 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 
 #define FRETTE_LOGC(Category, Verbosity, Format, ...) \
 	UE_LOG(LogFrette##Category, Verbosity, TEXT(Format) __VA_OPT__(, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__)))
+
+#define FretteFmt(Format, ...) \
+	FString::Printf(TEXT(Format), FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__));
 
 // Helper for more readable precondition early returns. If the condition is FALSE, breaks + print msg then returns.
 // Note: format str will be auto-wrapped with TEXT(), and args will be auto-converted to TCHAR* if possible.
@@ -66,19 +69,19 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 
 namespace Frette::Private
 {
-	FORCEINLINE const TCHAR* ToTCHAR(const FString& Str)
+	FORCEINLINE const FString& ToTCHAR(const FString& Str)
 	{
-		return *Str;
+		return Str;
 	}
 
-	FORCEINLINE const TCHAR* ToTCHAR(const FName& Name)
+	FORCEINLINE FString ToTCHAR(const FName& Name)
 	{
-		return *Name.ToString();
+		return Name.ToString();
 	}
 
-	FORCEINLINE const TCHAR* ToTCHAR(const FText& Text)
+	FORCEINLINE FString ToTCHAR(const FText& Text)
 	{
-		return *Text.ToString();
+		return Text.ToString();
 	}
 
 	FORCEINLINE const TCHAR* ToTCHAR(const TCHAR* TCHARPtr)
@@ -86,31 +89,47 @@ namespace Frette::Private
 		return TCHARPtr;
 	}
 
-	FORCEINLINE const TCHAR* ToTCHAR(const char* CharPtr)
+	FORCEINLINE FString ToTCHAR(const char* CharPtr)
 	{
-		return ANSI_TO_TCHAR(CharPtr);
+		return FString(ANSI_TO_TCHAR(CharPtr));
 	}
 	
-	FORCEINLINE const TCHAR* ToTCHAR(FGameplayTag Tag)
+	FORCEINLINE FString ToTCHAR(FGameplayTag Tag)
 	{
-		return *Tag.ToString();
+		return Tag.ToString();
 	}
 
-	FORCEINLINE const TCHAR* ToTCHAR(const UObjectBaseUtility* Object)
+	FORCEINLINE FString ToTCHAR(const UObjectBaseUtility* Object)
 	{
-		return *GetNameSafe(Object);
+		return GetNameSafe(Object);
 	}
 	
 	template<typename T>
-	FORCEINLINE const TCHAR* ToTCHAR(const TObjectPtr<T>& ObjectPtr)
+	FORCEINLINE FString ToTCHAR(const TObjectPtr<T>& ObjectPtr)
 	{
 		static_assert(std::is_base_of_v<UObjectBaseUtility, T>, "T must derive from Object");
-		return *GetNameSafe(ObjectPtr);
+		return GetNameSafe(ObjectPtr);
 	}
 
 	// fallback case for types that don't use %s
 	template <typename T>
 	FORCEINLINE const T& ToTCHAR(const T& Value)
+	{
+		return Value;
+	}
+
+	FORCEINLINE const TCHAR* PrintArg(const FString& Str)
+	{
+		return *Str;
+	}
+
+	FORCEINLINE const TCHAR* PrintArg(const TCHAR* TCHARPtr)
+	{
+		return TCHARPtr;
+	}
+
+	template <typename T>
+	FORCEINLINE const T& PrintArg(const T& Value)
 	{
 		return Value;
 	}
