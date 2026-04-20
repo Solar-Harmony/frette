@@ -13,16 +13,16 @@ USTRUCT(BlueprintType)
 struct FTemperatureContribution
 {
 	GENERATED_BODY()
-	
+
 	FTemperatureContribution() = default;
 
 	FTemperatureContribution(float Temperature, float Flow)
 		: Temperature(Temperature)
 		, Flow(Flow) {}
-	
+
 	UPROPERTY()
 	float Temperature;
-	
+
 	UPROPERTY()
 	float Flow;
 };
@@ -31,7 +31,7 @@ USTRUCT(BlueprintType)
 struct FTemperatureKey
 {
 	GENERATED_BODY()
-	
+
 	FTemperatureKey() = default;
 
 	FTemperatureKey(FGameplayTag BodyPart, FGuid SourceId)
@@ -88,18 +88,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite);
 	float AmbientTemperature = -30;
 
-	// TODO but in world settings?
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", Units = "Celsius"))
-	float DampingThreshold = 10; // If we are this close to target temp, we will start approaching it slower and slower
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (ForceUnits = "°C/s", ClampMin = "0.0"))
-	float BoneTagNeighboursDiffusionFlow = 0.4;
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ClampMin="0.0", Units="Celsius",
+		ToolTip="Temperature difference below which damping reduces the applied temperature change. This prevents oscillations and ensures smooth convergence toward the target temperature."))
+	float DampingThreshold = 10;
 
-	// TODO but in world settings?
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (ForceUnits = "°C/s", ClampMin = "0.0"))
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ForceUnits="°C/s", ClampMin="0.0",
+		ToolTip="Diffusion strength between neighboring body parts. Each degree of temperature difference generates this much temperature change per second (scaled by thermal impedance)."))
+	float BoneTagNeighboursDiffusionFlow = 0.2;
+
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ForceUnits="°C/s", ClampMin="0.0",
+		ToolTip="Base rate at which temperature moves toward ambient when no other effects dominate. This rate increases with the temperature difference (scaled and clamped) and is reduced by thermal impedance."))
 	float AmbientFlow = 0.1;
 
 	const FGameplayTag TemperatureEffectTag = TAG_BodyPartValues_Temperature;
+	const FGameplayTag ThermalImpedanceEffectTag = TAG_BodyPartValues_ThermalImpedance;
 
 	UPROPERTY()
 	TObjectPtr<ACharacter> OwnerCharacter;
@@ -109,10 +111,10 @@ protected:
 
 	UPROPERTY()
 	TMap<FTemperatureKey, FTemperatureContribution> BodyPartTemperatureContributions;
-	
+
 	UPROPERTY()
 	TObjectPtr<AFretteWorldSettings> WorldSettings;
-	
+
 	UPROPERTY()
 	TMap<FGameplayTag, FGameplayTagContainer> BoneTagNeighbours;
 
