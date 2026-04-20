@@ -16,10 +16,10 @@ struct FRETTE_API FFretteActiveWeather
 	GENERATED_BODY()
 	
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFretteWeatherDataAsset> WeatherData;
+	TObjectPtr<UFretteWeatherDataAsset> WeatherData = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly)
-	float TimeRemaining;
+	float TimeRemaining = 0.0f;
 };
 
 UCLASS()

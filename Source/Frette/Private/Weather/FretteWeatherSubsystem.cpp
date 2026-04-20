@@ -8,7 +8,17 @@ DEFINE_LOG_CATEGORY(LogFretteWeather);
 void UFretteWeatherSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	Config = CastChecked<AFretteWorldSettings>(GetWorld()->GetWorldSettings())->WeatherConfig;
+	
+	if (const AFretteWorldSettings* FretteWorldSettings = Cast<AFretteWorldSettings>(GetWorld()->GetWorldSettings()))
+	{
+		Config = FretteWorldSettings->WeatherConfig;
+	}
+
+	if (Config == nullptr)
+	{
+		return;
+	}
+
 	ActiveWeather = ChooseNextWeather();
 	NextWeather = ChooseNextWeather();
 	
@@ -17,7 +27,7 @@ void UFretteWeatherSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 bool UFretteWeatherSubsystem::IsTickable() const
 {
-	return Config->bUseDynamicWeather;
+	return Config != nullptr && Config->bUseDynamicWeather;
 }
 
 void UFretteWeatherSubsystem::Tick(float DeltaTime)
