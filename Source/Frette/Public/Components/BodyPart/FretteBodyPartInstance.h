@@ -3,12 +3,13 @@
 #include "CoreMinimal.h"
 #include "FretteBodyPartData.h"
 #include "FretteBodyPartEffectRule.h"
-#include "Character/FretteBaseCharacter.h"
+#include "Abilities/GameplayAbilityTypes.h"
 #include "UObject/Object.h"
 #include "FretteBodyPartInstance.generated.h"
 
 struct FGameplayTag;
 class UFretteBodyPartData;
+class AFretteBaseCharacter;
 
 USTRUCT()
 struct FFretteAccumulatedValueEntry
@@ -34,11 +35,13 @@ public:
 
 	void Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner);
 	int32& FindOrAddAccumulatedValue(const FGameplayTag& Tag);
-	void AddValueByTag(int Value, FGameplayTag Tag);
+	FFretteBodyPartContext AddValueByTag(int Value, FGameplayTag Tag);
 	void CheckAndApplyRules(EBodyPartEventType EventType, FGameplayTag Tag, const FFretteBodyPartContext& Context) const;
 
 	UPROPERTY(ReplicatedUsing=OnRep_AccumulatedValues)
 	TArray<FFretteAccumulatedValueEntry> AccumulatedValues;
+	
+	UFretteBodyPartData* GetBodyPartData() const { return SourceData; }
 
 	UFUNCTION()
 	void OnRep_AccumulatedValues();
@@ -57,10 +60,10 @@ private:
 	TArray<FFretteEffectRuleEntry> GetRulesForEvent(const EBodyPartEventType EventType) const;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TObjectPtr<UFretteBodyPartData> SourceData;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TObjectPtr<AFretteBaseCharacter> OwnerCharacter;
 
 	int MinValueDelta = 9999;
@@ -76,5 +79,4 @@ private:
 	TMap<EBodyPartEventType, TMap<FGameplayTag, TArray<FFretteEffectRuleEntry>>> EventTypeToRulesMap;
 
 	TMap<TSubclassOf<UGameplayAbility>, FGameplayAbilitySpecHandle> GrantedAbilityHandles;
-
 };

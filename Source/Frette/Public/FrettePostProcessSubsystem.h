@@ -9,13 +9,13 @@ class FRETTE_API UFrettePostProcessSubsystem : public UGameInstanceSubsystem
 
 public:
 	UPROPERTY()
-	UMaterialInstanceDynamic* InteractibleMID;
+	TObjectPtr<UMaterialInstanceDynamic> InteractibleMID;
 
 	UPROPERTY()
-	UMaterialParameterCollectionInstance* OutlineMPCI;
+	TObjectPtr<UMaterialParameterCollectionInstance> OutlineMPCI;
 
-	void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	void OnWorldInitialized();
 
-	void SetOutline(FLinearColor Color, float Thickness, float Alpha);
+	void SetOutline(FLinearColor Color, float Thickness, float Alpha) const;
 };

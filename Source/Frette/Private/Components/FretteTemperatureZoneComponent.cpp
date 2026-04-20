@@ -2,7 +2,7 @@
 #include "Components/FretteTemperatureComponent.h"
 #include "Components/ShapeComponent.h"
 #include "GameFramework/Character.h"
-#include "PhysicsEngine/PhysicsAsset.h"
+#include "PhysicsEngine/BodySetup.h"
 
 //Pas sur de l'autorité / multiplayer
 UFretteTemperatureZoneComponent::UFretteTemperatureZoneComponent()

@@ -13,6 +13,7 @@
 class UCameraComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClientReceiveNewClue, const FText&, ClueText);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWidgetsInitialized);
 
 UCLASS()
 class FRETTE_API AFrettePlayerController : public APlayerController
@@ -24,17 +25,26 @@ public:
 	FOnClientReceiveNewClue OnClientReceiveNewClue;
 
 	UFUNCTION(Client, Reliable)
-	void Client_OnClueGenerated(const FText& ClueText);
-
+	void Client_OnClueGenerated(const FText& ClueText) const;
+	
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Frette|Calisse")
+	void SetFretteCinematicMode(bool bIsCinematic);
+	
+	UPROPERTY()
+	bool bFretteCinematicMode = false;
+	
+	// Only runs on clients.
+	UPROPERTY(BlueprintAssignable, meta=(DisplayName="Event Widgets Created"))
+	FOnWidgetsInitialized OnWidgetsInitialized;
+	
 protected:
 	virtual void SetupInputComponent() override;
-
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Create Widgets and Viewmodels"))
 	void SetupWidgetsAndViewModels();
-
+	
 private:
 	AFrettePlayerController();
 

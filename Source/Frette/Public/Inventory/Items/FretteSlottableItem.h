@@ -18,7 +18,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	int32 SlotID = -1;
-
+	
 	virtual void OnEquipped();
 	virtual void OnUnequipped();
 
@@ -39,10 +39,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (Categories = "Frette.BodyPart"))
 	FGameplayTag ItemSlotTag;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, DisplayName="Abilities Granted on Equip")
 	FFretteAbilitySet GrantedAbilities;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, DisplayName="Effects Applied on Equip")
 	TArray<FFretteGameplayEffectConfig> GrantedEffects;
 
 	UPROPERTY(EditDefaultsOnly)

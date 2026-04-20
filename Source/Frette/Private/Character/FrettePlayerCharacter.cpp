@@ -2,6 +2,7 @@
 #include "AbilitySystemComponent.h"
 #include "Character/FretteNotificationsComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/FretteCompassComponent.h"
 #include "Components/FretteTemperatureComponent.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Equipment/FretteEquipmentComponent.h"
@@ -37,15 +38,11 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment Component"));
 	EquipmentComponent->SetIsReplicated(true);
-
 	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("Notifications Component"));
+	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("NotificationsComponent_Internal"));
 	NotificationsComponent->SetIsReplicated(true);
-
-	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
-	BodyPartComponent->SetIsReplicated(true);
-
-	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
-	BodyTemperatureComponent->SetIsReplicated(true);
+	
+	CompassComponent = CreateDefaultSubobject<UFretteCompassComponent>(TEXT("Compass Component"));
 }
 
 void AFrettePlayerCharacter::BeginPlay()
@@ -98,8 +95,8 @@ void AFrettePlayerCharacter::DoPlayerMove(FVector2D MoveAxis)
 
 void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 {
-	AddControllerYawInput(LookAxis.X);
-	AddControllerPitchInput(LookAxis.Y);
+	AddControllerYawInput(LookAxis.X * HorizontalLookSensitivity);
+	AddControllerPitchInput(LookAxis.Y * VerticalLookSensitivity);
 }
 
 //Set la position de la caméra a la position du socket de tête du mesh (pour les animations)
@@ -143,21 +140,15 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 	SubToAttributeChanges();
 }
 
-void AFrettePlayerCharacter::SetIsDead(const bool bNewIsDead)
+void AFrettePlayerCharacter::Die()
 {
+	Super::Die();
+
 	if (!HasAuthority())
 		return;
 
-	if (bIsDead == bNewIsDead)
-		return;
-
-	bIsDead = bNewIsDead;
-
-	if (bIsDead)
-	{
-		Multicast_HandleDeath(GetCharacterMovement()->Velocity);
-		OnPlayerDied.Broadcast(this);
-	}
+	Multicast_HandleDeath(GetCharacterMovement()->Velocity);
+	OnPlayerDied.Broadcast(this);
 }
 
 void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity)

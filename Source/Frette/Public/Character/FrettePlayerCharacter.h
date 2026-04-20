@@ -3,12 +3,11 @@
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
 
 #include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
-class UFretteTemperatureComponent;
+class UFretteCompassComponent;
 
 class UCameraComponent;
 class UInventoryComponent;
@@ -36,13 +35,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoPlayerLook(FVector2D LookAxis);
 
-	bool GetIsDead() const { return bIsDead; }
-
 	UPROPERTY()
 	FOnPlayerDied OnPlayerDied;
 
-	UFUNCTION(BlueprintCallable)
-	void SetIsDead(bool bNewIsDead);
+	virtual void Die() override;
 
 	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) override;
 
@@ -51,11 +47,14 @@ public:
 
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
+	float HorizontalLookSensitivity = 1.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
+	float VerticalLookSensitivity = 1.f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UFretteCompassComponent> CompassComponent;
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;
@@ -80,11 +79,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_HandleDeath(FVector DeathVelocity);
-
-	UPROPERTY(EditAnywhere)
-	bool bIsDead = false;
+	virtual void Multicast_HandleDeath_Implementation(FVector FinalVelocity) override;
 
 private:
 	virtual void InitAbilityActorInfo() override;

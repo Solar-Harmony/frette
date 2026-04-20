@@ -8,6 +8,8 @@ public class Frette : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+		
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core",
@@ -21,9 +23,11 @@ public class Frette : ModuleRules
 			"UMG",
 			"NetCore",
 			"Boost",
-			"PhysicsCore"
+			"PhysicsCore",
+			"AIModule",
+			"NavigationSystem"
 		});
 
-		PrivateDependencyModuleNames.AddRange(["StateTreeModule"]);
+		PrivateDependencyModuleNames.AddRange(["StateTreeModule", "Niagara"]);
 	}
 }

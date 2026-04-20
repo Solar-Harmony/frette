@@ -13,6 +13,7 @@ ECardinalDirection UFretteCompassComponent::GetPlayerCardinalDirection() const
 
 void UFretteCompassComponent::BeginPlay()
 {
+	Super::BeginPlay();
 	Camera = GetOwner()->FindComponentByClass<UCameraComponent>();
 }
 
@@ -24,6 +25,7 @@ void UFretteCompassComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	if (ensure(!Forward2D.IsNearlyZero()))
 	{
 		CachedDirection = UFretteGameplayStatics::DirVectorToCardinal(Forward2D.GetSafeNormal());
+		OnUpdateDirection.ExecuteIfBound(CachedDirection);
 	}
 }
 

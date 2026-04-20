@@ -1,5 +1,4 @@
 #pragma once
-#if WITH_EDITOR
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
@@ -16,5 +15,3 @@ class FRETTE_API AMyHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 };
-
-#endif

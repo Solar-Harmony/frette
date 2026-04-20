@@ -14,6 +14,12 @@ void UFretteInventoryWidget::InitializeSlotViewmodels() const
 	TArray<UWidget*> Widgets;
 	WidgetTree->GetAllWidgets(Widgets);
 	
+	if (!IsValid(SlotsVM))
+	{
+		UE_LOG(LogTemp, Error, TEXT("The SlotsVM was not bound to the inventory correctly!"));
+		return;
+	}
+	
 	for (UWidget* Widget : Widgets)
 	{
 		const auto* SlotWidget = Cast<UFretteInventorySlotWidget>(Widget);
@@ -38,8 +44,5 @@ void UFretteInventoryWidget::InitializeSlotViewmodels() const
 void UFretteInventoryWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	check(SlotsVM);
-	
 	InitializeSlotViewmodels();
 }

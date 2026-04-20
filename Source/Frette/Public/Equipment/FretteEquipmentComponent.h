@@ -17,10 +17,16 @@ public:
 	{
 		SetIsReplicatedByDefault(true);
 	}
-	
+
 	UFUNCTION(Server, Reliable)
 	void EquipItem(UFretteSlottableItem* Item) const;
 
 	UFUNCTION(Server, Reliable)
 	void UnequipItem(UFretteSlottableItem* Item) const;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnItemEquipped(UFretteSlottableItem* Item) const;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnItemUnequipped(UFretteSlottableItem* Item) const;
 };

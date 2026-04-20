@@ -81,13 +81,13 @@ void UFretteInteractorComponent::Interact()
 void UFretteInteractorComponent::Server_Interact_Implementation(AActor* Interactable)
 {
 	// TODO: the server should validate by raycasting again, to prevent cheating
-	require(IsValid(Interactable));
+	precondition(IsValid(Interactable));
 
 	const UFretteInteractableComponent* InteractableComponent = Interactable->GetComponentByClass<UFretteInteractableComponent>();
-	require(IsValid(InteractableComponent))
+	precondition(IsValid(InteractableComponent))
 
 	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
-	require(IsValid(Interactor));
+	precondition(IsValid(Interactor));
 
 	InteractableComponent->OnInteract.Broadcast(Interactor);
 }
@@ -107,13 +107,13 @@ void UFretteInteractorComponent::EndInteract()
 
 void UFretteInteractorComponent::Server_EndInteract_Implementation(AActor* Interactable)
 {
-	require(IsValid(Interactable));
+	precondition(IsValid(Interactable));
 
 	const UFretteInteractableComponent* InteractableComponent = Interactable->GetComponentByClass<UFretteInteractableComponent>();
-	require(IsValid(InteractableComponent))
+	precondition(IsValid(InteractableComponent))
 
 	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
-	require(IsValid(Interactor));
+	precondition(IsValid(Interactor));
 
 	InteractableComponent->OnInteractEnd.Broadcast(Interactor);
 }
@@ -140,7 +140,6 @@ void UFretteInteractorComponent::UpdateInteractableTarget()
 	TScriptInterface<IFretteInteractableInterface> NewHovered = nullptr;
 	if (bHit && Hit.GetActor())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("Hit %s"), *Hit.GetActor()->GetName()));
 		if (Hit.GetActor()->Implements<UFretteInteractableInterface>())
 		{
 			NewHovered.SetObject(Hit.GetActor());

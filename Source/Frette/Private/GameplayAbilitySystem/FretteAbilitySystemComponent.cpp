@@ -53,7 +53,7 @@ void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& Inp
 
 void UFretteAbilitySystemComponent::GrantAbility(const FFretteGameplayAbilityConfig& AbilityConfig, UObject* SourceObject)
 {
-	require(AbilityConfig.IsValid(), "Tried to apply an invalid ability config.");
+	precondition(AbilityConfig.IsValid(), "Tried to apply an invalid ability config.");
 	
 	FGameplayAbilitySpec Spec(AbilityConfig.Ability, AbilityConfig.AbilityLevel);
 	Spec.SourceObject = SourceObject;
@@ -64,10 +64,10 @@ void UFretteAbilitySystemComponent::GrantAbility(const FFretteGameplayAbilityCon
 
 void UFretteAbilitySystemComponent::RevokeAbility(const FFretteGameplayAbilityConfig& AbilityConfig)
 {
-	require(AbilityConfig.IsValid(), "Tried to revoke an invalid ability config.");
+	precondition(AbilityConfig.IsValid(), "Tried to revoke an invalid ability config.");
 	
 	const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(AbilityConfig.InputTag);
-	require(Handle != nullptr && Handle->IsValid(), "Tried to revoke an ability that wasn't granted.");
+	precondition(Handle != nullptr && Handle->IsValid(), "Tried to revoke an ability that wasn't granted.");
 
 	ClearAbility(*Handle);
 }
@@ -90,13 +90,13 @@ void UFretteAbilitySystemComponent::RevokeAbilities(const TArray<FFretteGameplay
 
 void UFretteAbilitySystemComponent::GrantAbilities(const UFretteAbilitySetDataAsset* AbilitySet, UObject* SourceObject)
 {
-	require(AbilitySet, "Tried to grant abilities from a null ability set.");
+	precondition(AbilitySet, "Tried to grant abilities from a null ability set.");
 	GrantAbilities(AbilitySet->AbilityConfigs, SourceObject);
 }
 
 void UFretteAbilitySystemComponent::RevokeAbilities(const UFretteAbilitySetDataAsset* AbilitySet)
 {
-	require(AbilitySet, "Tried to revoke abilities from a null ability set.");
+	precondition(AbilitySet, "Tried to revoke abilities from a null ability set.");
 	RevokeAbilities(AbilitySet->AbilityConfigs);
 }
 
@@ -130,14 +130,21 @@ FActiveGameplayEffectHandle UFretteAbilitySystemComponent::ApplyEffect(const FFr
 	FGameplayEffectContextHandle Context = MakeEffectContext();
 	Context.AddSourceObject(SourceObject);
 	
-	const FGameplayEffectSpecHandle Spec = MakeOutgoingSpec(Config.EffectClass, Config.Level, Context);
+	const TSharedPtr<FGameplayEffectSpec> Spec = MakeOutgoingSpec(Config.EffectClass, Config.Level, Context).Data;
 	
 	for (const TPair<FGameplayTag, float>& Magnitude : Config.Magnitudes)
 	{
-		Spec.Data.Get()->SetSetByCallerMagnitude(Magnitude.Key, Magnitude.Value);
+		Spec->SetSetByCallerMagnitude(Magnitude.Key, Magnitude.Value);
 	}
 	
-	return ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+	for (auto Tag : Config.ParameterTags)
+	{
+		Spec->AddDynamicAssetTag(Tag);
+	}
+	
+	Spec->DynamicGrantedTags.AppendTags(Config.GrantedTags);
+	
+	return ApplyGameplayEffectSpecToSelf(*Spec);
 }
 
 UFretteAbilitySystemComponent* UFretteAbilitySystemComponent::Get(class AFretteBaseCharacter* Character)

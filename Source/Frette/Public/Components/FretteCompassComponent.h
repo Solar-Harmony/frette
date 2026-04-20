@@ -7,6 +7,8 @@
 
 class UCameraComponent;
 
+DECLARE_DELEGATE_OneParam(FOnPlayerCardinalDirectionUpdated, ECardinalDirection /*NewDirection*/);
+
 UCLASS(ClassGroup=(Frette), meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFretteCompassComponent : public UActorComponent
 {
@@ -14,13 +16,13 @@ class FRETTE_API UFretteCompassComponent : public UActorComponent
 
 public:
 	UFretteCompassComponent();
+	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION(BlueprintPure)
 	ECardinalDirection GetPlayerCardinalDirection() const;
-
-protected:
-	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	FOnPlayerCardinalDirectionUpdated OnUpdateDirection;
 
 private:
 	UPROPERTY()
