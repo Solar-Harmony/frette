@@ -10,6 +10,11 @@ class AFretteWorldSettings;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogFretteWeather, Log, All);
 
+inline TAutoConsoleVariable CVarFretteWeatherReport(
+		TEXT("Frette.Weather.Report"),
+		false,
+		TEXT("Displays information about weather on-screen."));
+
 USTRUCT(BlueprintType)
 struct FRETTE_API FFretteActiveWeather
 {

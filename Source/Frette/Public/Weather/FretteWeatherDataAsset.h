@@ -11,7 +11,7 @@ class FRETTE_API UFretteWeatherDataAsset : public UDataAsset
 public:
 	// Ambient temperature across the environment while this weather is fully active.
 	UPROPERTY(EditDefaultsOnly, meta=(Units="Celsius"))
-	float AmbientTemperature;
+	int AmbientTemperature = 15;
 	
 	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds", ClampMin=5))
 	int BaseDuration = 60;
