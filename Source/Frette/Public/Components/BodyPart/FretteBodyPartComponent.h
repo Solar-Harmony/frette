@@ -101,5 +101,7 @@ protected:
 private:
 	UPROPERTY()
 	TMap<FGameplayTag, TObjectPtr<UFretteBodyPartInstance>> BodyPartTagToInstanceMap;
+	
+	bool Ciboire() const;
 };
 

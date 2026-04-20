@@ -74,6 +74,19 @@ FGameplayTag UFretteBodyPartComponent::GetBodyPartFromBoneName(const FName BoneN
 	return FGameplayTag();
 }
 
+bool UFretteBodyPartComponent::Ciboire() const
+{
+	const AFrettePlayerCharacter* TabarnakDe = Cast<AFrettePlayerCharacter>(GetOwner());
+	if (TabarnakDe == nullptr)
+		return false;
+
+	const AFrettePlayerController* Calisse = Cast<AFrettePlayerController>(TabarnakDe->GetController());
+	if (Calisse == nullptr)
+		return false;
+
+	return Calisse->bFretteCinematicMode;
+}
+
 int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGameplayTag ValueTypeTag) const
 {
 	UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag);
@@ -103,8 +116,7 @@ void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPa
 	if (!BodyPartTag.IsValid())
 		return;
 	
-	const AFrettePlayerController* Calisse = Cast<AFrettePlayerController>(Cast<AFrettePlayerCharacter>(GetOwner())->GetController());
-	if (Calisse->bFretteCinematicMode)
+	if (Ciboire())
 		return;
 	
 	if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
@@ -132,8 +144,7 @@ void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag ValueT
 	if (GetOwnerRole() != ROLE_Authority)
 		return;
 	
-	const AFrettePlayerController* Calisse = Cast<AFrettePlayerController>(Cast<AFrettePlayerCharacter>(GetOwner())->GetController());
-	if (Calisse->bFretteCinematicMode)
+	if (Ciboire())
 		return;
 	
 	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
