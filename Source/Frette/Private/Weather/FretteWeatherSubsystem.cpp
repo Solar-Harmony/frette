@@ -12,7 +12,7 @@ void UFretteWeatherSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	ActiveWeather = ChooseNextWeather();
 	NextWeather = ChooseNextWeather();
 	
-	FRETTE_LOG(Weather, Log, "Initial weather is '%s'.", ActiveWeather.WeatherData);
+	FRETTE_LOGC(Weather, Log, "Initial weather is '%s'.", *ActiveWeather.WeatherData->GetName());
 }
 
 bool UFretteWeatherSubsystem::IsTickable() const
@@ -30,7 +30,7 @@ void UFretteWeatherSubsystem::Tick(float DeltaTime)
 		ActiveWeather = NextWeather;
 		NextWeather = ChooseNextWeather();
 		ActiveToNextWeatherFac = 0.0f;
-		FRETTE_LOG(Weather, Log, "Transition to '%s' complete. Next weather will be '%s'.", ActiveWeather.WeatherData);
+		FRETTE_LOGC(Weather, Log, "Transition to '%s' complete. Next weather will be '%s'.", *ActiveWeather.WeatherData->GetName(), *NextWeather.WeatherData->GetName());
 	}
 	// are we transitioning to the next weather?
 	else if (ActiveWeather.TimeRemaining <= ActiveWeather.WeatherData->EndTransitionDuration)
@@ -48,7 +48,7 @@ void UFretteWeatherSubsystem::Tick(float DeltaTime)
 		NextWeather.WeatherData->AmbientTemperature,
 		ActiveToNextWeatherFac);
 	
-	FRETTE_LOG(Weather, Log, "Currently %f°C. Transitioning from '%s' (%f°C) to '%s' (%f°C)... %f%%.", CurrentTemperature, ActiveWeather.WeatherData, ActiveWeather.WeatherData->AmbientTemperature, NextWeather.WeatherData, NextWeather.WeatherData->AmbientTemperature, ActiveToNextWeatherFac * 100.0f);
+	FRETTE_LOGC(Weather, Log, "Currently %f°C. Transitioning from '%s' (%f°C) to '%s' (%f°C)... %f%%.", (float)CurrentTemperature, *ActiveWeather.WeatherData->GetName(), ActiveWeather.WeatherData->AmbientTemperature, *NextWeather.WeatherData->GetName(), NextWeather.WeatherData->AmbientTemperature, ActiveToNextWeatherFac * 100.0f);
 }
 
 FFretteActiveWeather UFretteWeatherSubsystem::ChooseNextWeather() const

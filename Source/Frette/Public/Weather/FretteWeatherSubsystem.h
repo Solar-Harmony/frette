@@ -32,6 +32,8 @@ public:
 	virtual bool IsTickable() const override;
 	virtual void Tick(float DeltaTime) override;
 	
+	virtual TStatId GetStatId() const override { return TStatId(); }
+	
 	UFUNCTION(BlueprintPure)
 	int GetTemperature() const { return CurrentTemperature; }
 	

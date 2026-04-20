@@ -13,4 +13,4 @@ class FRETTE_API AFretteWorldSettings : public AWorldSettings
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteWeatherConfig> WeatherConfig;
-}
+};

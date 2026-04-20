@@ -17,9 +17,9 @@ public:
 	int BaseDuration = 60;
 	
 	// TotalDuration = BaseDuration + rand(0, MaxRandomDurationOffset);
-	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds"), ClampMin=0)
+	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds", ClampMin=0))
 	int MaxAdditionalDuration = 20;
 	
-	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds"), ClampMin=1)
+	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds", ClampMin=1))
 	int EndTransitionDuration = 10;
 };

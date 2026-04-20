@@ -20,7 +20,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 #define FRETTE_LOG(Verbosity, Format, ...) \
 	UE_LOG(LogFrette, Verbosity, TEXT(Format) __VA_OPT__(, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__)))
 
-#define FRETTE_LOG(Category, Verbosity, Format, ...) \
+#define FRETTE_LOGC(Category, Verbosity, Format, ...) \
 	UE_LOG(LogFrette##Category, Verbosity, TEXT(Format) __VA_OPT__(, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__)))
 
 // Helper for more readable precondition early returns. If the condition is FALSE, breaks + print msg then returns.
@@ -93,6 +93,13 @@ namespace Frette::Private
 	FORCEINLINE const TCHAR* ToTCHAR(const UObjectBaseUtility* Object)
 	{
 		return *GetNameSafe(Object);
+	}
+	
+	template<typename T>
+	FORCEINLINE const TCHAR* ToTCHAR(const TObjectPtr<T>& ObjectPtr)
+	{
+		static_assert(std::is_base_of_v<UObjectBaseUtility, T>, "T must derive from Object");
+		return *GetNameSafe(ObjectPtr);
 	}
 
 	// fallback case for types that don't use %s
