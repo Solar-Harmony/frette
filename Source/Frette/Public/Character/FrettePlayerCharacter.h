@@ -8,7 +8,6 @@
 #include "FrettePlayerCharacter.generated.h"
 
 class UFretteCompassComponent;
-class UFretteTemperatureComponent;
 
 class UCameraComponent;
 class UInventoryComponent;
