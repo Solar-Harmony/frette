@@ -38,23 +38,23 @@ public:
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
-	float SourceRadius = 1.f;
+	float SourceRadius = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
-	float DiffusionRadius = 300.f;
+	float DiffusionRadius = 300;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (Units = "Celsius"))
-	float SourceTemperature = 100.f;
+	float SourceTemperature = 100;
 
 	// TODO Plug that into weather system
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (Units = "Celsius"))
-	float AmbientTemperature = 10.f;
+	float AmbientTemperature = 10;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
-	float FlowStrength = 1.f; // Alpha in the heat equation
+	float FlowStrength = 1; // Alpha in the heat equation
 	
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
-	float ObstructionFactor = 0.1f;
+	float ObstructionFactor = 0.1;
 	
 	UFUNCTION(BlueprintCallable)
 	float ComputeTemperature(float r) const;
@@ -95,7 +95,7 @@ public:
 	TObjectPtr<AFretteWorldSettings> WorldSettings;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "1.0"))
-	float RadialSlice = 0.0f;
+	float RadialSlice = 0;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
 	int NumberArrows = 16;

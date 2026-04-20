@@ -188,7 +188,6 @@ void UFretteTemperatureSourceComponent::TickComponent(
 					continue;
 				}
 
-				// Evaluate field contribution directly
 				float Flow = ComputeFlow(r);
 				float Temp = ComputeTemperature(r);
 
@@ -288,7 +287,7 @@ void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 		Quantity = ((TemperatureAtSlice - WorldSettings->MinTemperature)
 			/ (WorldSettings->MaxTemperature - WorldSettings->MinTemperature)) * 200.f;
 	else if (ShowArrows == ETemperatureSourceArrowRole::Flow)
-		Quantity = FlowAtSlice * 10.f;
+		Quantity = FlowAtSlice * 20.f;
 
 	for (int32 i = 0; i < NumberArrows; i++)
 	{

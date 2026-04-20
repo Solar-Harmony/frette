@@ -89,12 +89,15 @@ protected:
 	float AmbientTemperature = -30;
 
 	// TODO but in world settings?
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
-	float Damping = 1.0; // Force the system to equilibrium around the target temp fully with 1
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", Units = "Celsius"))
+	float DampingThreshold = 10; // If we are this close to target temp, we will start approaching it slower and slower
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (ForceUnits = "°C/s", ClampMin = "0.0"))
+	float BoneTagNeighboursDiffusionFlow = 0.4;
 
 	// TODO but in world settings?
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "2.0"))
-	float DiffusionSpeed = 0.3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (ForceUnits = "°C/s", ClampMin = "0.0"))
+	float AmbientFlow = 0.1;
 
 	const FGameplayTag TemperatureEffectTag = TAG_BodyPartValues_Temperature;
 
@@ -109,6 +112,9 @@ protected:
 	
 	UPROPERTY()
 	TObjectPtr<AFretteWorldSettings> WorldSettings;
+	
+	UPROPERTY()
+	TMap<FGameplayTag, FGameplayTagContainer> BoneTagNeighbours;
 
 	FTimerHandle TemperatureTickHandle;
 	float CurrentTemperature = 0;
