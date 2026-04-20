@@ -1,6 +1,7 @@
 #include "Player/FrettePlayerController.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/HUD.h"
 #include "Input/FretteInputComponent.h"
@@ -53,6 +54,29 @@ void AFrettePlayerController::SetupInputComponent()
 	FretteInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased);
 	FretteInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ThisClass::OnInteractPressed);
 	FretteInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &ThisClass::OnInteractReleased);
+	FretteInputComponent->BindAction(ToggleSettingAction, ETriggerEvent::Started, this, &AFrettePlayerController::ToggleSettingsMenu);
+
+}
+
+void AFrettePlayerController::ToggleSettingsMenu()
+{
+	if (!PauseMenuInstance)
+	{
+		PauseMenuInstance = CreateWidget<UUserWidget>(this, PauseMenuClass);
+	}
+
+	if (PauseMenuInstance->IsInViewport())
+	{
+		PauseMenuInstance->RemoveFromParent();
+		SetInputMode(FInputModeGameOnly());
+		SetShowMouseCursor(false);
+	}
+	else
+	{
+		PauseMenuInstance->AddToViewport();
+		SetInputMode(FInputModeGameAndUI());
+		SetShowMouseCursor(true);
+	}
 }
 
 // this is needed by the listen server, because since it is both client and server
