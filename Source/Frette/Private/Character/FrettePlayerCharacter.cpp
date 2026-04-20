@@ -41,12 +41,6 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("Notifications Component"));
 	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("NotificationsComponent_Internal"));
 	NotificationsComponent->SetIsReplicated(true);
-
-	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
-	BodyPartComponent->SetIsReplicated(true);
-
-	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
-	BodyTemperatureComponent->SetIsReplicated(true);
 	
 	CompassComponent = CreateDefaultSubobject<UFretteCompassComponent>(TEXT("Compass Component"));
 }

@@ -55,13 +55,7 @@ public:
 	float VerticalLookSensitivity = 1.f;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UFretteCompassComponent> CompassComponent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;
