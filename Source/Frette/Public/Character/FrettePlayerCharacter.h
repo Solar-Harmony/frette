@@ -7,7 +7,7 @@
 #include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
-class UFretteTemperatureComponent;
+class UFretteCompassComponent;
 
 class UCameraComponent;
 class UInventoryComponent;
@@ -49,9 +49,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
 	float HorizontalLookSensitivity = 1.f;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
 	float VerticalLookSensitivity = 1.f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UFretteCompassComponent> CompassComponent;
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;

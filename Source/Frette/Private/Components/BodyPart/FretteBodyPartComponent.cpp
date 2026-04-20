@@ -1,10 +1,11 @@
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 
 #include "GameplayTagContainer.h"
-#include "Character/FretteBaseCharacter.h"
+#include "Character/FrettePlayerCharacter.h"
 #include "Components/BodyPart/FretteBodyPartTags.h"
 #include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/FrettePlayerController.h"
 
 UFretteBodyPartComponent::UFretteBodyPartComponent()
 {
@@ -30,7 +31,7 @@ void UFretteBodyPartComponent::BeginPlay()
 
 			AddReplicatedSubObject(Instance);
 		}
-
+		
 		OnBodyPartsInitialized.Broadcast();
 	}
 }
@@ -38,13 +39,13 @@ void UFretteBodyPartComponent::BeginPlay()
 void UFretteBodyPartComponent::ReadyForReplication()
 {
 	Super::ReadyForReplication();
-
+	
 	if (GetOwnerRole() != ROLE_Authority)
 		return;
-
+	
 	if (!BodyPartInstances.IsEmpty())
-		return;
-
+		return;	
+	
 	for (UFretteBodyPartData* Data : BodyPartData)
 	{
 		UFretteBodyPartInstance* Instance = NewObject<UFretteBodyPartInstance>(this);
@@ -54,7 +55,7 @@ void UFretteBodyPartComponent::ReadyForReplication()
 
 		AddReplicatedSubObject(Instance);
 	}
-
+	
 	OnBodyPartsInitialized.Broadcast();
 }
 
@@ -64,34 +65,6 @@ void UFretteBodyPartComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME(UFretteBodyPartComponent, BodyPartInstances);
 }
 
-void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPartTag, const int Value, const FGameplayTag ValueType)
-{
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		UE_LOG(LogFrette, Log, TEXT("Adding %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
-
-		if (BodyPartTag.IsValid())
-		{
-			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
-			{
-				const FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
-				// FIXME: Not using a proper value delta, also not sure about the way i do it
-				const FFretteBodyPartChangeEvent ChangeEvent(BodyPartTag, ValueType, Result.AccumulatedValue, Value);
-				Client_NotifyBodyPartChange(ChangeEvent);
-			}
-		}
-	}
-}
-
-void UFretteBodyPartComponent::AddValueFromBoneName(const FName BoneName, const int Value, const FGameplayTag ValueType)
-{
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		FGameplayTag BodyPartTag = GetBodyPartFromBoneName(BoneName);
-		AddValueFromBodyPartTag(BodyPartTag, Value, ValueType);
-	}
-}
-
 FGameplayTag UFretteBodyPartComponent::GetBodyPartFromBoneName(const FName BoneName) const
 {
 	if (const FGameplayTag* Tag = BoneTagDataAsset.Get()->BoneToBodyPartTag.Find(BoneName))
@@ -99,6 +72,28 @@ FGameplayTag UFretteBodyPartComponent::GetBodyPartFromBoneName(const FName BoneN
 		return *Tag;
 	}
 	return FGameplayTag();
+}
+
+bool UFretteBodyPartComponent::Ciboire() const
+{
+	const AFrettePlayerCharacter* TabarnakDe = Cast<AFrettePlayerCharacter>(GetOwner());
+	if (TabarnakDe == nullptr)
+		return false;
+
+	const AFrettePlayerController* Calisse = Cast<AFrettePlayerController>(TabarnakDe->GetController());
+	if (Calisse == nullptr)
+		return false;
+
+	return Calisse->bFretteCinematicMode;
+}
+
+int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGameplayTag ValueTypeTag) const
+{
+	UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag);
+	if (BodyPart == nullptr)
+		return 0;
+	
+	return BodyPart->FindOrAddAccumulatedValue(ValueTypeTag);
 }
 
 UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayTag BodyPartTag) const
@@ -113,23 +108,50 @@ UFretteBodyPartInstance* UFretteBodyPartComponent::FindBodyPart(const FGameplayT
 	return nullptr;
 }
 
-int UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, FGameplayTag ValueTypeTag) const
+void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPartTag, const int Value, const FGameplayTag ValueType)
 {
-	UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag);
-	if (BodyPart == nullptr)
-		return 0;
+	if (GetOwnerRole() != ROLE_Authority)
+		return;
+		
+	if (!BodyPartTag.IsValid())
+		return;
+	
+	if (Ciboire())
+		return;
+	
+	if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
+	{
+		const FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
+		// FIXME: Not using a proper value delta, also not sure about the way i do it
+		const FFretteBodyPartChangeEvent ChangeEvent(BodyPartTag, ValueType, Result.AccumulatedValue, Value);
+		Client_NotifyBodyPartChange(ChangeEvent);
+		
+		UE_LOG(LogFrette, Log, TEXT("Added %d of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
+	}
+}
 
-	return BodyPart->FindOrAddAccumulatedValue(ValueTypeTag);
+void UFretteBodyPartComponent::AddValueFromBoneName(const FName BoneName, const int Value, const FGameplayTag ValueType)
+{
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		const FGameplayTag BodyPartTag = GetBodyPartFromBoneName(BoneName);
+		AddValueFromBodyPartTag(BodyPartTag, Value, ValueType);
+	}
 }
 
 void UFretteBodyPartComponent::AddValueToAllParts(int Value, FGameplayTag ValueType)
 {
-	if (GetOwnerRole() == ROLE_Authority)
+	if (GetOwnerRole() != ROLE_Authority)
+		return;
+	
+	if (Ciboire())
+		return;
+	
+	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{
-		for (UFretteBodyPartInstance* Instance : BodyPartInstances)
+		if (Instance != nullptr)
 		{
-			if (Instance)
-				Instance->AddValueByTag(Value, ValueType);
+			Instance->AddValueByTag(Value, ValueType);
 		}
 	}
 }
@@ -143,7 +165,7 @@ UFretteBodyPartInstance* UFretteBodyPartComponent::GetInstanceFromBodyPartTag(FG
 		FRETTE_LOG(Error, "Body part with tag %s not found!", *BodyPartTag.ToString());
 		return nullptr;
 	}
-
+	
 	return *Instance;
 }
 
@@ -151,7 +173,7 @@ float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag
 {
 	static TArray<float> NormalizedValues;
 	NormalizedValues.Reset(BodyPartInstances.Num());
-
+	
 	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{
 		const UFretteBodyPartData* Data = Instance->GetBodyPartData();
@@ -161,29 +183,29 @@ float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag
 			FRETTE_LOG(Error, "T cave");
 			continue;
 		}
-
+		
 		if (!Config->bIsCritical)
 			continue;
-
+		
 		const float Value = Instance->FindOrAddAccumulatedValue(ValueTag);
 		const float Min = bForFeedback ? Config->FeedbackLowValue : Config->MinValue;
 		const float Max = bForFeedback ? Config->FeedbackHighValue : Config->MaxValue;
 		const float Normalized = FMath::Clamp((Value - Min) / (Max - Min), 0.0f, 1.0f);
 		NormalizedValues.Add(Normalized);
 	}
-
+	
 	return FMath::Min(NormalizedValues);
 }
 
 void UFretteBodyPartComponent::OnRep_BodyPartInstances()
 {
 	BodyPartTagToInstanceMap.Empty(BodyPartInstances.Num());
-
+	
 	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{
 		BodyPartTagToInstanceMap.Add(Instance->GetBodyPartTag(), Instance);
 	}
-
+	
 	OnBodyPartsInitialized.Broadcast();
 }
 

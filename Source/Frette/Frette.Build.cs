@@ -28,6 +28,6 @@ public class Frette : ModuleRules
 			"NavigationSystem"
 		});
 
-		PrivateDependencyModuleNames.AddRange(["StateTreeModule"]);
+		PrivateDependencyModuleNames.AddRange(["StateTreeModule", "Niagara"]);
 	}
 }

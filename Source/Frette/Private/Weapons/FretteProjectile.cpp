@@ -1,10 +1,10 @@
 #include "Weapons/FretteProjectile.h"
 
-#include "AbilitySystemBlueprintLibrary.h"
-#include "AbilitySystemComponent.h"
-#include "GameplayEffectTypes.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Components/BodyPart/FretteBodyPartTags.h"
+#include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "PhysicsEngine/SkeletalBodySetup.h"
 #include "Util/FretteCollisionChannels.h"
@@ -52,25 +52,77 @@ void AFretteProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	}
 
 	UFretteBodyPartComponent* BodyPart = OtherActor->GetComponentByClass<UFretteBodyPartComponent>();
-	if (!BodyPart)
+	USkeletalMeshComponent* SkeletalMesh = Cast<USkeletalMeshComponent>(Hit.GetComponent());
+	FVector BoneVelocity = FVector::ZeroVector;
+	if (BodyPart && SkeletalMesh && SkeletalMesh->GetPhysicsAsset() && Hit.Item != INDEX_NONE)
 	{
-		Destroy();
-		return;
+		const USkeletalBodySetup* HitBody = SkeletalMesh->GetPhysicsAsset()->SkeletalBodySetups[Hit.Item];
+		const FName HitPhysBone = HitBody->BoneName;
+		BoneVelocity = SkeletalMesh->GetPhysicsLinearVelocity(HitPhysBone);
+		ApplyDamage(BodyPart, HitPhysBone);
 	}
-	USkeletalMeshComponent* SkelMesh = Cast<USkeletalMeshComponent>(Hit.GetComponent());
-	if (!SkelMesh || !SkelMesh->GetPhysicsAsset() || Hit.Item == INDEX_NONE)
-	{
-		Destroy();
-		return;
-	}
-
-	const USkeletalBodySetup* HitBody = SkelMesh->GetPhysicsAsset()->SkeletalBodySetups[Hit.Item];
-	const FName HitPhysBone = HitBody->BoneName;
-	ApplyDamage(BodyPart, HitPhysBone);
-	Destroy();
+	
+	Multicast_ShowHitEffects(Hit, BoneVelocity, SkeletalMesh != nullptr);
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetActorHiddenInGame(true);
+	ProjectileMovement->StopMovementImmediately();
+	SetLifeSpan(1.0f);
 }
 
-void AFretteProjectile::ApplyDamage(UFretteBodyPartComponent* BodyPartComponent, const FName HitBoneName)
+void AFretteProjectile::Multicast_ShowHitEffects_Implementation(const FHitResult& Hit, const FVector& BoneVelocity, bool bHasBlood)
+{
+	if (IsValid(ImpactDecalMaterial))
+	{
+		UGameplayStatics::SpawnDecalAtLocation(
+			GetWorld(),
+			ImpactDecalMaterial,
+			ImpactDecalSize,            
+			Hit.ImpactPoint + Hit.ImpactNormal * 1.0f,
+			Hit.ImpactNormal.Rotation(),
+			60.0f
+		);
+	}
+
+	if (bHasBlood && IsValid(ImpactVFXFlesh))
+	{
+		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			ImpactVFX,
+			Hit.ImpactPoint,
+			FRotator::ZeroRotator,
+			 FVector(1.0f),
+			true,
+			true,
+			ENCPoolMethod::AutoRelease
+		);
+		
+		if (NiagaraComponent)
+		{
+			NiagaraComponent->SetVariableVec3("User.ImpactNormal", Hit.ImpactNormal);
+			NiagaraComponent->SetVariableVec3("User.BoneVelocity", BoneVelocity);
+		}
+	} 
+	else if (IsValid(ImpactVFX))
+	{
+		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			ImpactVFXFlesh,
+			Hit.ImpactPoint,
+			Hit.ImpactNormal.Rotation(),
+			 FVector(1.0f),
+			true,
+			true,
+			ENCPoolMethod::AutoRelease
+		);
+		
+		if (NiagaraComponent)
+		{
+			NiagaraComponent->SetVariableVec3("User.ImpactNormal", Hit.ImpactNormal);
+		}
+	}
+}
+
+void AFretteProjectile::ApplyDamage(UFretteBodyPartComponent* BodyPartComponent, const FName HitBoneName) const
 {
 	BodyPartComponent->AddValueFromBoneName(HitBoneName, -DamageAmount, TAG_BodyPartValues_Health);
 }

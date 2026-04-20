@@ -57,6 +57,10 @@ void AFretteBaseCharacter::ApplyStartupEffects()
 
 	ApplyDefaultAttributeEffect(EffectContext);
 	ApplyDefaultStartupEffect(EffectContext);
+	
+	if (!IsValid(ArchetypeLoadout))
+		return;
+	
 	AbilitySystemComponent->GrantAbilities(ArchetypeLoadout, this);
 }
 

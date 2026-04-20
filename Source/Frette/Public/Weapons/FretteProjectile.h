@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayEffect.h"
+#include "NiagaraSystem.h"
 #include "Components/SphereComponent.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "GameFramework/Actor.h"
@@ -15,13 +15,26 @@ class AFretteProjectile : public AActor
 
 public:
 	AFretteProjectile();
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	UProjectileMovementComponent* ProjectileMovement;
-
-	UPROPERTY(VisibleAnywhere)
+	
+	UPROPERTY(EditDefaultsOnly)
 	USphereComponent* CollisionComponent;
-
-	UPROPERTY(EditDefaultsOnly, meta= (ClampMin=0), Category="Frette|Damage")
+	
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Projectile")
+	UMaterialInterface* ImpactDecalMaterial;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Projectile")
+	UNiagaraSystem* ImpactVFX;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Projectile")
+	UNiagaraSystem* ImpactVFXFlesh;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Projectile")
+	FVector ImpactDecalSize = FVector(5.0f, 25.0f, 25.0f);
+	
+	UPROPERTY(EditDefaultsOnly, meta= (ClampMin=0), Category="Frette|Projectile")
 	int DamageAmount = 10;
 
 protected:
@@ -32,6 +45,8 @@ protected:
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
 		const FHitResult& Hit);
 
-	void ApplyDamage(UFretteBodyPartComponent* BodyPartComponent, FName HitBoneName);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_ShowHitEffects(const FHitResult& Hit, const FVector& BoneVelocity, bool bHasBlood); 
 
+	void ApplyDamage(UFretteBodyPartComponent* BodyPartComponent, FName HitBoneName) const;
 };
