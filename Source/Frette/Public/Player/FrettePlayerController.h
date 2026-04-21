@@ -75,13 +75,13 @@ private:
 	TObjectPtr<UInputAction> InteractAction;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Frette")
-	TSubclassOf<UUserWidget> PauseMenuClass;
+	TSubclassOf<UUserWidget> SettingsMenuClass;
 
 	UPROPERTY()
-	TObjectPtr<UUserWidget> PauseMenuInstance;
+	TObjectPtr<UUserWidget> SettingsMenuInstance;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Input")
-	TObjectPtr<UInputAction> ToggleSettingAction;
+	TObjectPtr<UInputAction> ToggleSettingsMenuAction;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UFretteInteractorComponent> Interactor;

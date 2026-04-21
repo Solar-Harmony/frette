@@ -54,26 +54,26 @@ void AFrettePlayerController::SetupInputComponent()
 	FretteInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased);
 	FretteInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ThisClass::OnInteractPressed);
 	FretteInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &ThisClass::OnInteractReleased);
-	FretteInputComponent->BindAction(ToggleSettingAction, ETriggerEvent::Started, this, &AFrettePlayerController::ToggleSettingsMenu);
+	FretteInputComponent->BindAction(ToggleSettingsMenuAction, ETriggerEvent::Started, this, &AFrettePlayerController::ToggleSettingsMenu);
 
 }
 
 void AFrettePlayerController::ToggleSettingsMenu()
 {
-	if (!PauseMenuInstance)
+	if (!SettingsMenuInstance)
 	{
-		PauseMenuInstance = CreateWidget<UUserWidget>(this, PauseMenuClass);
+		SettingsMenuInstance = CreateWidget<UUserWidget>(this, SettingsMenuClass);
 	}
 
-	if (PauseMenuInstance->IsInViewport())
+	if (SettingsMenuInstance->IsInViewport())
 	{
-		PauseMenuInstance->RemoveFromParent();
+		SettingsMenuInstance->RemoveFromParent();
 		SetInputMode(FInputModeGameOnly());
 		SetShowMouseCursor(false);
 	}
 	else
 	{
-		PauseMenuInstance->AddToViewport();
+		SettingsMenuInstance->AddToViewport();
 		SetInputMode(FInputModeGameAndUI());
 		SetShowMouseCursor(true);
 	}
