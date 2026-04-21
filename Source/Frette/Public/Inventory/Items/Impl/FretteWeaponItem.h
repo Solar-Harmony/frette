@@ -16,6 +16,7 @@ class UFretteWeaponItem : public UFretteSlottableItem
 public:
 	UFUNCTION()
 	virtual void OnEquipped() override;
+	virtual void OnUnequipped() override;
 
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	TObjectPtr<AActor> SpawnedActor;
