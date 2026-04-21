@@ -18,7 +18,10 @@ void UFretteTemperatureZoneComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetComponentTickInterval(1.f);
+	if (UWorld* World = GetWorld())
+		WorldSettings = Cast<AFretteWorldSettings>(World->GetWorldSettings());
+	
+	SetComponentTickInterval(WorldSettings->TimeBeforeTemperatureUpdates);
 
 	OverlapShape = GetOwner()->FindComponentByClass<UShapeComponent>();
 

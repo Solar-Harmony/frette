@@ -25,7 +25,7 @@ void UFretteTemperatureComponent::OnRegister()
 void UFretteTemperatureComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	SetComponentTickInterval(TimeBetweenTemperatureChange);
+	SetComponentTickInterval(WorldSettings->TimeBeforeTemperatureUpdates);
 
 	BodyPartComponent = GetOwner()->GetComponentByClass<UFretteBodyPartComponent>();
 }

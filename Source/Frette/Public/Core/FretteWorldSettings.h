@@ -18,4 +18,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category="Frette|Temperature", meta = (Units = "Celsius"))
 	float MaxTemperature = 1500; // deg c
+	
+	UPROPERTY(EditAnywhere, Category="Frette|Temperature", meta = (Units = "Seconds"))
+	float TimeBeforeTemperatureUpdates = 0.5;
 };

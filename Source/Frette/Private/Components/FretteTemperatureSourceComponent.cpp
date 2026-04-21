@@ -55,20 +55,27 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 	FloorDiskMesh->SetupAttachment(this);
 	FloorDiskMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	FloorDiskMesh->SetCastShadow(false);
+	FloorDiskMesh->SetHiddenInGame(true);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaneMesh(TEXT("/Engine/BasicShapes/Cylinder"));
 	if (PlaneMesh.Succeeded())
+	{
 		FloorDiskMesh->SetStaticMesh(PlaneMesh.Object);
+		const float Scale = RadialSlice * DiffusionRadius / 50.0f;
+		FloorDiskMesh->SetRelativeScale3D(FVector(Scale, Scale, 0.01f));
+	}
 
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HeatSphere"));
 	SphereMesh->SetupAttachment(this);
 	SphereMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//SphereMesh->SetHiddenInGame(true);
+	SphereMesh->SetHiddenInGame(true);
 	SphereMesh->SetSimulatePhysics(false);
 	SphereMesh->SetEnableGravity(false);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("/Engine/BasicShapes/Sphere"));
 	if (SphereMeshAsset.Succeeded())
 	{
 		SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
+		const float Scale = DiffusionRadius / 50.f;
+		SphereMesh->SetRelativeScale3D(FVector(Scale));
 
 		static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialAsset(TEXT("/Game/Actors/Effects/Area/FireArea/M_Heat.M_Heat"));
 		if (MaterialAsset.Succeeded())
@@ -103,6 +110,8 @@ void UFretteTemperatureSourceComponent::BeginPlay()
 	Super::BeginPlay();
 
 	SetComponentTickEnabled(false);
+	
+	SetComponentTickInterval(0.5f);
 
 	OverlapSphere->OnComponentBeginOverlap.AddDynamic(
 		this,

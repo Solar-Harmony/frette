@@ -69,6 +69,9 @@ public:
 
 	UPROPERTY()
 	TSet<TObjectPtr<ACharacter>> OverlappingCharacters;
+	
+	UPROPERTY()
+	TObjectPtr<AFretteWorldSettings> WorldSettings;
 
 	#if WITH_EDITORONLY_DATA
 	void UpdateDebug();
@@ -95,9 +98,6 @@ public:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> HeatMaterialInstance;
-
-	UPROPERTY()
-	TObjectPtr<AFretteWorldSettings> WorldSettings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin = "0.0", ClampMax = "1.0"))
 	float RadialSlice = 0;

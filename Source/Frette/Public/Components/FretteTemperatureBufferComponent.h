@@ -2,7 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Core/FretteWorldSettings.h"
 #include "FretteTemperatureBufferComponent.generated.h"
+
+struct FPropertyChangedEvent;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class FRETTE_API UFretteTemperatureBufferComponent : public UActorComponent
@@ -11,9 +14,11 @@ class FRETTE_API UFretteTemperatureBufferComponent : public UActorComponent
 
 public:
 	UFretteTemperatureBufferComponent();
+	virtual void BeginPlay() override;
 
 protected:
-	virtual void BeginPlay() override;
+	float GetCharacterMaxThermalImpedance(const ACharacter* Character) const;
+	void UpdateCharacterBufferImpedance(ACharacter* Character);
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -21,15 +26,16 @@ protected:
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	UPROPERTY()
-	TObjectPtr<UShapeComponent> OverlapShape;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (ClampMin = "0.0", ClampMax = "1.0",
-		ToolTip = "This is a number betwwen 0 and 1 for which 0 means no effect on temperature flows and 1 means the flows are completely cancelled."))
-	float ThermalImpedance = 0.5;
+		ToolTip = "Maps component tags to thermal impedance values. Any primitive component with one of these tags is used as a thermal buffer collider."))
+	TMap<FName, float> BufferTagThermalImpedances;
+
+	UPROPERTY(Transient)
+	TMap<TObjectPtr<UPrimitiveComponent>, float> ColliderThermalImpedances;
+
+	UPROPERTY(Transient)
+	TSet<TObjectPtr<UPrimitiveComponent>> BoundOverlapColliders;
 	
 	UPROPERTY()
-	TSet<TObjectPtr<ACharacter>> OverlappingCharacters;
-	
-	FGuid UniqueId;
+	TObjectPtr<AFretteWorldSettings> WorldSettings;
 };

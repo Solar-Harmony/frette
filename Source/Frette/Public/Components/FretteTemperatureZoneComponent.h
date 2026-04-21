@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Core/FretteWorldSettings.h"
 #include "FretteTemperatureZoneComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -33,6 +34,9 @@ protected:
 
 	UPROPERTY()
 	TSet<TObjectPtr<ACharacter>> OverlappingCharacters;
+	
+	UPROPERTY()
+	TObjectPtr<AFretteWorldSettings> WorldSettings;
 	
 	FGuid UniqueId;
 };
