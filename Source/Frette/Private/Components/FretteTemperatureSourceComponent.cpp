@@ -24,18 +24,11 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 	OverlapSphere->SetupAttachment(this);
 	OverlapSphere->InitSphereRadius(DiffusionRadius);
 	OverlapSphere->SetGenerateOverlapEvents(true);
-	//OverlapSphere->SetMobility(EComponentMobility::Static);
 	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	OverlapSphere->SetCollisionObjectType(ECC_WorldDynamic);
 	OverlapSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	OverlapSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	OverlapSphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
-	OverlapSphere->OnComponentBeginOverlap.AddDynamic(
-		this,
-		&UFretteTemperatureSourceComponent::OnBeginOverlap);
-	OverlapSphere->OnComponentEndOverlap.AddDynamic(
-		this,
-		&UFretteTemperatureSourceComponent::OnEndOverlap);
 
 	#if WITH_EDITORONLY_DATA
 	DebugText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("DebugText"));
@@ -45,20 +38,26 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 	DebugText->SetWorldSize(TextSize);
 	DebugText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
 	DebugText->SetTextRenderColor(FColor::White);
-	//DebugText->SetMobility(EComponentMobility::Static);
 	DebugText->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DebugText->SetHiddenInGame(true);
 	DebugText->SetupAttachment(this);
-	
+
 	DebugSphereInner = CreateEditorOnlyDefaultSubobject<UDrawSphereComponent>(TEXT("Debug Sphere 2"));
 	DebugSphereInner->SetupAttachment(this);
 	DebugSphereInner->SetIsVisualizationComponent(true);
 	DebugSphereInner->SetLineThickness(2.f);
 	DebugSphereInner->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//DebugSphereInner->SetMobility(EComponentMobility::Static);
 	DebugSphereInner->SetHiddenInGame(true);
 	DebugSphereInner->ShapeColor = FColor::Cyan;
 	DebugSphereInner->InitSphereRadius(SourceRadius);
+
+	FloorDiskMesh = CreateEditorOnlyDefaultSubobject<UStaticMeshComponent>(TEXT("FloorDiskMesh"));
+	FloorDiskMesh->SetupAttachment(this);
+	FloorDiskMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FloorDiskMesh->SetCastShadow(false);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaneMesh(TEXT("/Engine/BasicShapes/Cylinder"));
+	if (PlaneMesh.Succeeded())
+		FloorDiskMesh->SetStaticMesh(PlaneMesh.Object);
 
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HeatSphere"));
 	SphereMesh->SetupAttachment(this);
@@ -66,20 +65,14 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 	//SphereMesh->SetHiddenInGame(true);
 	SphereMesh->SetSimulatePhysics(false);
 	SphereMesh->SetEnableGravity(false);
-	//SphereMesh->SetMobility(EComponentMobility::Static);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("/Engine/BasicShapes/Sphere"));
 	if (SphereMeshAsset.Succeeded())
 	{
 		SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
-		float Scale = DiffusionRadius / 50.f;
-		SphereMesh->SetRelativeScale3D(FVector(Scale));
-	}
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialAsset(TEXT("/Game/Actors/Effects/Area/FireArea/M_Heat.M_Heat"));
-	if (MaterialAsset.Succeeded())
-	{
-		HeatMaterial = MaterialAsset.Object;
-		HeatMaterialInstance = UMaterialInstanceDynamic::Create(HeatMaterial, this);
-		SphereMesh->SetMaterial(0, HeatMaterialInstance);
+
+		static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialAsset(TEXT("/Game/Actors/Effects/Area/FireArea/M_Heat.M_Heat"));
+		if (MaterialAsset.Succeeded())
+			HeatMaterial = MaterialAsset.Object;
 	}
 	#endif
 }
@@ -91,18 +84,32 @@ void UFretteTemperatureSourceComponent::OnRegister()
 	if (UWorld* World = GetWorld())
 		WorldSettings = Cast<AFretteWorldSettings>(World->GetWorldSettings());
 
+	if (IsValid(HeatMaterial) && !IsValid(HeatMaterialInstance))
+	{
+		HeatMaterialInstance = UMaterialInstanceDynamic::Create(HeatMaterial, this);
+		SphereMesh->SetMaterial(0, HeatMaterialInstance);
+	}
+
+	if (OverlapSphere)
+		OverlapSphere->SetSphereRadius(DiffusionRadius);
+
 	#if WITH_EDITORONLY_DATA
-	UpdateDebugArrows();
-	UpdateMaterial();
+	UpdateDebug();
 	#endif
 }
-
 
 void UFretteTemperatureSourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	SetComponentTickEnabled(false);
+
+	OverlapSphere->OnComponentBeginOverlap.AddDynamic(
+		this,
+		&UFretteTemperatureSourceComponent::OnBeginOverlap);
+	OverlapSphere->OnComponentEndOverlap.AddDynamic(
+		this,
+		&UFretteTemperatureSourceComponent::OnEndOverlap);
 }
 
 float UFretteTemperatureSourceComponent::ComputeTemperature(float r) const
@@ -115,7 +122,7 @@ float UFretteTemperatureSourceComponent::ComputeTemperature(float r) const
 	float value = AmbientTemperature +
 		(SourceTemperature - AmbientTemperature) *
 		(SourceRadius / (DiffusionRadius - SourceRadius)) *
-		((DiffusionRadius / r) - 1.0f);
+		((DiffusionRadius / r) - 1.f);
 
 	return value;
 }
@@ -130,7 +137,7 @@ float UFretteTemperatureSourceComponent::ComputeFlow(float r) const
 		return ComputeFlow(SourceRadius + Epsilon);
 	}
 	if (r >= DiffusionRadius)
-		return 0.f;
+		return 0;
 
 	// We will compute the spherically symmetric gradient to get the (flow) using centered finite difference
 	const float Tprev = ComputeTemperature(r - Epsilon),
@@ -156,7 +163,7 @@ void UFretteTemperatureSourceComponent::TickComponent(
 
 		UFretteTemperatureComponent* TempComp =
 			Character->FindComponentByClass<UFretteTemperatureComponent>();
-		
+
 		UFretteBodyPartComponent* BodyPartComponent = Character->FindComponentByClass<UFretteBodyPartComponent>();
 		USkeletalMeshComponent* SkeletalMeshComp = Character->FindComponentByClass<USkeletalMeshComponent>();
 
@@ -180,7 +187,7 @@ void UFretteTemperatureSourceComponent::TickComponent(
 				const FVector BonePos = SkeletalMeshComp->GetBoneLocation(BoneName, EBoneSpaces::WorldSpace);
 
 				const float r = FVector::Dist(BonePos, SourcePos);
-				
+
 				// If the bone is outside the diffusion radius, we need to remove its contribution
 				if (r > DiffusionRadius)
 				{
@@ -269,9 +276,9 @@ void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 	const float r = RadialSlice * DiffusionRadius;
 	const float TemperatureAtSlice = ComputeTemperature(r);
 	const float FlowAtSlice = ComputeFlow(r);
-	
+
 	// The arrows are useful but it is important to have access to numbers for tuning
-	FString Text = FString::Printf(TEXT("Temp: %.3f°C\nFlow: %.3f°C/s"), 
+	FString Text = FString::Printf(TEXT("Temp: %.3f°C\nFlow: %.3f°C/s"),
 		TemperatureAtSlice, FlowAtSlice);
 	DebugText->SetText(FText::FromString(Text));
 
@@ -306,7 +313,6 @@ void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 			Arrow->SetHiddenInGame(true);
 			Arrow->SetSimulatePhysics(false);
 			Arrow->SetEnableGravity(false);
-			//Arrow->SetMobility(EComponentMobility::Static);
 			Arrow->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			Arrow->RegisterComponent();
 			DebugArrows.Add(Arrow);
@@ -319,8 +325,8 @@ void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 
 		constexpr float GoldenAngle = 2.39996323f;
 		const float Azimuth = i * GoldenAngle;
-		const float z = 1.0f - t;
-		const float r_xy = FMath::Sqrt(1.0f - z * z);
+		const float z = 1.f - t;
+		const float r_xy = FMath::Sqrt(1.f - z * z);
 
 		FVector Dir;
 		Dir.X = r_xy * FMath::Cos(Azimuth);
@@ -364,11 +370,8 @@ void UFretteTemperatureSourceComponent::UpdateMaterial() const
 	HeatMaterialInstance->SetScalarParameterValue("MaxTemperature", WorldSettings->MaxTemperature);
 }
 
-void UFretteTemperatureSourceComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UFretteTemperatureSourceComponent::UpdateDebug()
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	OverlapSphere->SetSphereRadius(DiffusionRadius);
 	DebugSphereInner->SetSphereRadius(SourceRadius);
 	const float TextSize = DiffusionRadius / 4.f;
 	DebugText->SetRelativeLocation(FVector(0, 0, DiffusionRadius + 0.5 * TextSize));
@@ -377,11 +380,26 @@ void UFretteTemperatureSourceComponent::PostEditChangeProperty(FPropertyChangedE
 
 	if (SphereMesh)
 	{
-		float Scale = DiffusionRadius / 50.f;
+		const float Scale = DiffusionRadius / 50.f;
 		SphereMesh->SetRelativeScale3D(FVector(Scale));
+	}
+	
+	if (FloorDiskMesh)
+	{
+		const float Scale = RadialSlice * DiffusionRadius / 50.0f;
+		FloorDiskMesh->SetRelativeScale3D(FVector(Scale, Scale, 0.01f));
+		FloorDiskMesh->SetVisibility(ShowArrows != ETemperatureSourceArrowRole::None || bShowNumbersAtSlice);
 	}
 
 	UpdateMaterial();
 	UpdateDebugArrows();
+}
+
+void UFretteTemperatureSourceComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	OverlapSphere->SetSphereRadius(DiffusionRadius);
+	UpdateDebug();
 }
 #endif

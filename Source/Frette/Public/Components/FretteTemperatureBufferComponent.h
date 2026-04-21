@@ -1,20 +1,19 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "FretteTemperatureZoneComponent.generated.h"
+#include "FretteTemperatureBufferComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class FRETTE_API UFretteTemperatureZoneComponent : public UActorComponent
+class FRETTE_API UFretteTemperatureBufferComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	UFretteTemperatureZoneComponent();
+	UFretteTemperatureBufferComponent();
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -25,12 +24,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UShapeComponent> OverlapShape;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (Units = "Celsius"))
-	float Temperature = -30;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (ClampMin = "0.0", ClampMax = "1.0",
+		ToolTip = "This is a number betwwen 0 and 1 for which 0 means no effect on temperature flows and 1 means the flows are completely cancelled."))
+	float ThermalImpedance = 0.5;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (ForceUnggits = "°C/s"))
-	float Flow = -12;
-
 	UPROPERTY()
 	TSet<TObjectPtr<ACharacter>> OverlappingCharacters;
 	

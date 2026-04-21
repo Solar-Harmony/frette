@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FretteTemperatureBufferComponent.h"
 #include "GameplayTagContainer.h"
 #include "BodyPart/FretteBodyPartTags.h"
 #include "Components/ActorComponent.h"
@@ -76,6 +77,9 @@ public:
 	void ClearBodyPartTemperatureContribution(FGameplayTag BodyPartTag, FGuid SourceId);
 	void ClearBodyPartTemperatureContribution(FName BoneName, FGuid SourceId);
 	void ClearBodyPartTemperatureContributions(FGuid SourceId);
+	
+	void AddBuffer(UFretteTemperatureBufferComponent* buffer, float ThermalImpedance);
+	void ClearBuffer(UFretteTemperatureBufferComponent* buffer);
 
 protected:
 	UFretteTemperatureComponent();
@@ -90,7 +94,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ClampMin="0.0", Units="Celsius",
 		ToolTip="Temperature difference below which damping reduces the applied temperature change. This prevents oscillations and ensures smooth convergence toward the target temperature."))
-	float DampingThreshold = 10;
+	float DampingThreshold = 5;
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ForceUnits="°C/s", ClampMin="0.0",
 		ToolTip="Diffusion strength between neighboring body parts. Each degree of temperature difference generates this much temperature change per second (scaled by thermal impedance)."))
@@ -119,5 +123,6 @@ protected:
 	TMap<FGameplayTag, FGameplayTagContainer> BoneTagNeighbours;
 
 	FTimerHandle TemperatureTickHandle;
-	float CurrentTemperature = 0;
+	
+	TMap<UFretteTemperatureBufferComponent*, float> BufferThermalImpedances;
 };

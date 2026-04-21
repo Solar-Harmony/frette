@@ -64,15 +64,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float ComputeFlow(float r) const;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY()
 	TObjectPtr<USphereComponent> OverlapSphere;
 
 	UPROPERTY()
 	TSet<TObjectPtr<ACharacter>> OverlappingCharacters;
 
 	#if WITH_EDITORONLY_DATA
+	void UpdateDebug();
 	void UpdateMaterial() const;
-
 	void UpdateDebugArrows();
 
 	UPROPERTY()
@@ -86,12 +86,15 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<UStaticMeshComponent> SphereMesh;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMeshComponent> FloorDiskMesh;
 
-	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> HeatMaterialInstance;
-
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInterface> HeatMaterial;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> HeatMaterialInstance;
 
 	UPROPERTY()
 	TObjectPtr<AFretteWorldSettings> WorldSettings;

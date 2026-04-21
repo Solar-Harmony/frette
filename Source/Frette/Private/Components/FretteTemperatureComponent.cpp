@@ -102,27 +102,35 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 				// When correcting overshooting or returning to ambient temp, big temperature differences can take ages to close up
 				// so we will make big differences cause the ambient flow to be faster
 				const float DynamicAmbient = AmbientFlow * (1.f + (TempDiff / 30.f));
+				
+				// If there are active buffers, we find the max thermal impedance out of them and apply it to DynamicAmbient. Note
+				// that this is so slightly overlapping buffers are not a problem. There is no full support for mixing buffers because
+				// that kinda doesn't make sense anyway.
+				float MaxBufferThermalImpedance = 0;
+				for (const auto Imp : BufferThermalImpedances)
+					MaxBufferThermalImpedance = FMath::Max(MaxBufferThermalImpedance, Imp.Value);
+				const float ConstrainedAmbient = (1.f - MaxBufferThermalImpedance) * DynamicAmbient;
 
 				float EffectiveFlow = 0.0f;
 				if (NetFlow > 0 && Temperature > NetTemperature)
 				{
 					// Flow contributions want to increase temp beyond the target temp so let's go back down with ambient flow
-					EffectiveFlow = -DynamicAmbient;
+					EffectiveFlow = -ConstrainedAmbient;
 				}
 				else if (NetFlow < 0 && Temperature < NetTemperature)
 				{
 					// Flow contributions want to decrease temp beyond the target temp so let's go back up with ambient flow
-					EffectiveFlow = DynamicAmbient;
+					EffectiveFlow = ConstrainedAmbient;
 				}
 				else if (NetFlow == 0 && Temperature > NetTemperature)
 				{
 					// No flow contributions and we need to go down to the target temp
-					EffectiveFlow = -DynamicAmbient;
+					EffectiveFlow = -ConstrainedAmbient;
 				}
 				else if (NetFlow == 0 && Temperature < NetTemperature)
 				{
 					// No flow contributions and we need to go up to the target temp
-					EffectiveFlow = DynamicAmbient;
+					EffectiveFlow = ConstrainedAmbient;
 				}
 				else
 				{
@@ -152,8 +160,8 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 				DeltaTemp *= TimeBetweenTemperatureChange;
 
 				// TODO: Remove this log spam lol
-				UE_LOG(LogFrette, Log, TEXT("Temp integrator: Tag[%s] Temp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] DynamicAmbient[%.3f] EffectiveFlow[%.3f] NeighboursFlow[%.3f] DeltaTime[%.3f] Damping[%.3f] DeltaTemp[%.3f]"),
-					*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, EffectiveFlow, BoneTagNeighboursFlow, TimeBetweenTemperatureChange, Damping, DeltaTemp);
+				UE_LOG(LogFrette, Log, TEXT("Temp integrator: Tag[%s] Temp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] DynamicAmbientFlow[%.3f] ConstrainedAmbientFlow[%.3f] EffectiveFlow[%.3f] NeighboursFlow[%.3f] DeltaTime[%.3f] Damping[%.3f] DeltaTemp[%.3f]"),
+					*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, ConstrainedAmbient, EffectiveFlow, BoneTagNeighboursFlow, TimeBetweenTemperatureChange, Damping, DeltaTemp);
 
 				BoneDeltaTemp.Add(BoneTag, DeltaTemp);
 			}
@@ -208,4 +216,14 @@ void UFretteTemperatureComponent::ClearBodyPartTemperatureContributions(FGuid So
 		if (It->Key.SourceId == SourceId)
 			It.RemoveCurrent();
 	}
+}
+
+void UFretteTemperatureComponent::AddBuffer(UFretteTemperatureBufferComponent* buffer, float ThermalImpedance)
+{
+	BufferThermalImpedances.Add(buffer, ThermalImpedance);
+}
+
+void UFretteTemperatureComponent::ClearBuffer(UFretteTemperatureBufferComponent* buffer)
+{
+	BufferThermalImpedances.Remove(buffer);
 }
