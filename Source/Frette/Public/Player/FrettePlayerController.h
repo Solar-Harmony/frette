@@ -39,6 +39,7 @@ public:
 	
 protected:
 	virtual void SetupInputComponent() override;
+	void ToggleSettingsMenu();
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnRep_PlayerState() override;
 
@@ -70,8 +71,17 @@ private:
 
 	UFretteAbilitySystemComponent* GetASC();
 
-	UPROPERTY(EditDefaultsOnly, Category="Input")
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Input")
 	TObjectPtr<UInputAction> InteractAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Frette")
+	TSubclassOf<UUserWidget> SettingsMenuClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> SettingsMenuInstance;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Frette|Input")
+	TObjectPtr<UInputAction> ToggleSettingsMenuAction;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UFretteInteractorComponent> Interactor;

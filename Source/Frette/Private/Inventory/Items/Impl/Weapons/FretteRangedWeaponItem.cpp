@@ -14,6 +14,9 @@ bool UFretteRangedWeaponItem::TryUseAmmo()
 
 int UFretteRangedWeaponItem::Reload()
 {
+	if (NumBulletsLoaded > 0)
+		return -1;
+	
 	const TSubclassOf<UFretteStackableItemDataAsset> AmmoClass = GetData()->AmmoType.GetClass();
 	UFretteStackableItem* AmmoItem = Cast<UFretteStackableItem>(GetOwningInventory()->GetFirstItemFromAsset(AmmoClass));
 	if (AmmoItem == nullptr)

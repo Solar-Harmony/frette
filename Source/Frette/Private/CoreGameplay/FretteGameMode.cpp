@@ -62,8 +62,8 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	}
 
 	Info.Type = bIsPrimaryClue ? EClueType::MainObjective : EClueType::PointOfInterest;
-	Info.LandmarkName = UFretteClueTemplateSet::PickRandom(POI->DisplayNames);
-	Info.LandmarkDescription = UFretteClueTemplateSet::PickRandom(POI->Descriptions);
+	Info.LandmarkName = UFretteClueTemplateSet::PickRandomText(POI->DisplayNames);
+	Info.LandmarkDescription = UFretteClueTemplateSet::PickRandomText(POI->Descriptions);
 	Info.LandmarkLoot = INVTEXT("RIEN PANTOUTE (not implemented)");
 
 	const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
