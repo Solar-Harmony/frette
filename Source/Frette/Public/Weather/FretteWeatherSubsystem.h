@@ -2,11 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Weather/FretteWeatherState.h"
 #include "FretteWeatherSubsystem.generated.h"
 
-class UFretteWeatherConfig;
-class UFretteWeatherDataAsset;
-class AFretteWorldSettings;
+class APostProcessVolume;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogFretteWeather, Log, All);
 
@@ -15,42 +14,25 @@ inline TAutoConsoleVariable CVarFretteWeatherReport(
 		false,
 		TEXT("Displays information about weather on-screen."));
 
-USTRUCT(BlueprintType)
-struct FRETTE_API FFretteActiveWeather
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFretteWeatherDataAsset> WeatherData = nullptr;
-	
-	UPROPERTY(BlueprintReadOnly)
-	float TimeRemaining = 0.0f;
-};
-
 UCLASS()
-class FRETTE_API UFretteWeatherSubsystem : public UWorldSubsystem, public FTickableGameObject
+class FRETTE_API UFretteWeatherSubsystem : public UWorldSubsystem
 {
     GENERATED_BODY()
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual bool IsTickable() const override;
-	virtual void Tick(float DeltaTime) override;
-	
-	virtual TStatId GetStatId() const override { return TStatId(); }
+	virtual void Deinitialize() override;
+
+	void ApplyWeatherState(const FFretteWeatherState& State);
 	
 	UFUNCTION(BlueprintPure)
-	int GetTemperature() const { return CurrentTemperature; }
+	int GetTemperature() const { return CachedTemperature; }
 	
 private:
-	FFretteActiveWeather ActiveWeather;
-	FFretteActiveWeather NextWeather;
-	float ActiveToNextWeatherFac = 1.0f;
-	
-	int CurrentTemperature = 0;
+	int CachedTemperature = 0;
 	
 	UPROPERTY()
-	TObjectPtr<UFretteWeatherConfig> Config;
-	
-	FFretteActiveWeather ChooseNextWeather() const;
+	TWeakObjectPtr<APostProcessVolume> CachedPostProcessVolume;
+
+	void FindPostProcessVolume();
 };

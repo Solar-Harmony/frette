@@ -22,4 +22,8 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, meta=(Units="Seconds", ClampMin=1))
 	int EndTransitionDuration = 10;
+	
+	UPROPERTY(EditDefaultsOnly, meta=(ClampMin=0))
+	float FogIntensity = 0.5f;
 };
+
