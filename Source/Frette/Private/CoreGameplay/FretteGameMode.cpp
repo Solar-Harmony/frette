@@ -1,4 +1,5 @@
 #include "CoreGameplay/FretteGameMode.h"
+#include "Weather/FretteWeatherComponent.h"
 
 #include "EngineUtils.h"
 #include "Character/FretteNotificationsComponent.h"
@@ -9,6 +10,11 @@
 #include "CoreGameplay/FretteLandmark.h"
 #include "CoreGameplay/FretteMainObjective.h"
 #include "Frette/Frette.h"
+
+AFretteGameMode::AFretteGameMode()
+{
+	WeatherComponent = CreateDefaultSubobject<UFretteWeatherComponent>(TEXT("WeatherComponent"));
+}
 
 void AFretteGameMode::UpdateTimeBeforeNextPrimaryClue()
 {
