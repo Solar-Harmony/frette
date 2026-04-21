@@ -5,6 +5,7 @@
 #include "FretteClueTemplateSet.h"
 #include "CoreGameplay/FretteClue.h"
 #include "GameFramework/GameModeBase.h"
+#include "Weather/FretteWeatherComponent.h"
 #include "FretteGameMode.generated.h"
 
 class UFretteClueTemplateSet;
@@ -22,6 +23,8 @@ class AFretteGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	AFretteGameMode();
+
 	// Picks a clue, notifies clients
 	FText GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template);
 
@@ -39,6 +42,9 @@ protected:
 	AFretteMainObjective* GetMainObjective() const { return MainObjective; }
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UFretteWeatherComponent> WeatherComponent;
+
 	UPROPERTY(Transient)
 	TObjectPtr<AFretteMainObjective> MainObjective;
 
