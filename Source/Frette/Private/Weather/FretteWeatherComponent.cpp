@@ -24,6 +24,7 @@ void UFretteWeatherComponent::BeginPlay()
 
 	if (Config == nullptr)
 	{
+		PrimaryComponentTick.bCanEverTick = false;
 		FRETTE_LOGC(Weather, Log, "No weather config set, weather won't work.");
 		return;
 	}
