@@ -47,11 +47,11 @@ public:
 
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
-	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
-	float HorizontalLookSensitivity = 1.f;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite, Category="Frette|Look")
+	float HorizontalLookSensitivity = 1.0f;
 	
-	UPROPERTY(EditDefaultsOnly, Category="Frette|Look")
-	float VerticalLookSensitivity = 1.f;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite, Category="Frette|Look")
+	float VerticalLookSensitivity = 1.0f;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UFretteCompassComponent> CompassComponent;
