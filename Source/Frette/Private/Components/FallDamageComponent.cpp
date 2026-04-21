@@ -17,6 +17,11 @@ void UFallDamageComponent::BeginPlay()
 
 	MovementComponent = OwnerCharacter->GetCharacterMovement();
 	check(MovementComponent);
+	
+	if (Config == nullptr)
+	{
+		FRETTE_LOG(Error, "Missing Fall Damage Config for %s.", OwnerCharacter->GetName());
+	}
 
 	BindMovementEvents();
 }
@@ -52,7 +57,8 @@ void UFallDamageComponent::OnJumpApexReached()
 
 void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 {
-	ensureMsgf(Config, TEXT("FallDamageComponent missing Config Data Asset"));
+	precondition(Config != nullptr, "Missing fall damage config for %s.", OwnerCharacter->GetName());
+	
 	if (DistanceFallen > Config->MinFallHeight)
 		return;
 

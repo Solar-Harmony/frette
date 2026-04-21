@@ -25,6 +25,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
 	TObjectPtr<UFretteInventoryItemDataAsset> ItemData;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
+	bool bHasPhysics = true;
+	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
 	bool bDestroyOnPickUp = true;
 	

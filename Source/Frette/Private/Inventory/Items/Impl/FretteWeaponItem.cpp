@@ -1,11 +1,17 @@
 #include "Inventory/Items/Impl/FretteWeaponItem.h"
 
+#include "Character/FretteBaseCharacter.h"
 #include "GameFramework/Character.h"
 #include "Inventory/FretteInventoryComponent.h"
 
 void UFretteWeaponItem::OnEquipped()
 {
 	Super::OnEquipped();
+	const AFretteBaseCharacter* Character = Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
+
+	if (!Character->HasAuthority())
+		return;
+	
 	const UFretteWeaponItemDataAsset* ItemData = Cast<UFretteWeaponItemDataAsset>(GetData());
 	SpawnEquipmentActor(ItemData);
 }

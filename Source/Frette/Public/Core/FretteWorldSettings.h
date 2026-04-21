@@ -1,6 +1,8 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
+#include "Weather/FretteWeatherConfig.h"
+#include "Weather/FretteWeatherDataAsset.h"
 #include "FretteWorldSettings.generated.h"
 
 UCLASS()
@@ -21,4 +23,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category="Frette|Temperature", meta = (Units = "Seconds"))
 	float TimeBeforeTemperatureUpdates = 0.5;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UFretteWeatherConfig> WeatherConfig;
 };

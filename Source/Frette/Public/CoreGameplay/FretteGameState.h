@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "Net/UnrealNetwork.h"
+#include "Weather/FretteWeatherState.h"
 #include "FretteGameState.generated.h"
 
 UENUM(BlueprintType)
@@ -25,12 +26,18 @@ class AFretteGameState : public AGameStateBase
 public:
 	FOnGameOver OnGameOver;
 
+	UPROPERTY(ReplicatedUsing=OnRep_WeatherState)
+	FFretteWeatherState WeatherState;
+
+	UFUNCTION()
+	void OnRep_WeatherState() const;
+
 private:
 	UPROPERTY(ReplicatedUsing=OnRep_GameOutcome)
 	EGameOutcome GameOutcome = EGameOutcome::InProgress;
 
 	UFUNCTION()
-	void OnRep_GameOutcome()
+	void OnRep_GameOutcome() const
 	{
 		OnGameOver.Broadcast(GameOutcome);
 	}
@@ -39,5 +46,6 @@ private:
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 		DOREPLIFETIME(ThisClass, GameOutcome);
+		DOREPLIFETIME(ThisClass, WeatherState);
 	}
 };

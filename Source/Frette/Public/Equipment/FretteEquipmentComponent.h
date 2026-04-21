@@ -24,10 +24,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void UnequipItem(UFretteSlottableItem* Item) const;
 
-	//J'ai besoin que cela run sur le client aussi pour le animation layer
-	UFUNCTION(Client, Reliable)
-	void Client_OnItemEquipped(UFretteSlottableItem* Item) const;
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnItemEquipped(UFretteSlottableItem* Item) const;
 
-	UFUNCTION(Client, Reliable)
-	void Client_OnItemUnequipped(UFretteSlottableItem* Item) const;
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnItemUnequipped(UFretteSlottableItem* Item) const;
 };

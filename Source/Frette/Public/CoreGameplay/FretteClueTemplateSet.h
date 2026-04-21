@@ -20,6 +20,19 @@ struct FFretteClueInfo
 	FText CardinalDirection = INVTEXT("ERR_CARDINAL_DIRECTION_UNSET");
 };
 
+USTRUCT(BlueprintType)
+struct FFretteClueTemplate
+{
+	GENERATED_BODY()
+
+	// not used yet
+	UPROPERTY(EditDefaultsOnly)
+	FString ItemName;
+
+	UPROPERTY(EditDefaultsOnly, meta = (MultiLine = true))
+	FText ClueText;
+};
+
 // Represents a medium, like a personal letter, business letter etc.
 // available variables:
 // {Objective} - name of the main objective
@@ -34,16 +47,16 @@ class UFretteClueTemplateSet : public UDataAsset
 
 public:
 	// For dud clues. Cannot use any info!
-	UPROPERTY(EditDefaultsOnly, meta = (MultiLine = true))
-	TArray<FText> LoreClueTemplates;
+	UPROPERTY(EditDefaultsOnly, meta = (TitleProperty = "ItemName"))
+	TArray<FFretteClueTemplate> LoreClueTemplates;
 	
 	// For the main objective. Cannot use POI loot info.
-	UPROPERTY(EditDefaultsOnly, meta = (MultiLine = true))
-	TArray<FText> PrimaryClueTemplates;
+	UPROPERTY(EditDefaultsOnly, meta = (TitleProperty = "ItemName"))
+	TArray<FFretteClueTemplate> PrimaryClueTemplates;
 	
 	// For the landmarks with random loot
-	UPROPERTY(EditDefaultsOnly, meta = (MultiLine = true))
-	TArray<FText> SecondaryClueTemplates;
+	UPROPERTY(EditDefaultsOnly, meta = (TitleProperty = "ItemName"))
+	TArray<FFretteClueTemplate> SecondaryClueTemplates;
 	
 	FText GenerateClueText(const FFretteClueInfo& Info) const
 	{
@@ -65,13 +78,22 @@ public:
 		
 		return FText::Format(Template, Args);
 	}
-
-	static FText PickRandom(const TArray<FText>& Templates)
+	
+	static FText PickRandomText(const TArray<FText>& Templates)
 	{
 		if (Templates.Num() == 0)
 			return INVTEXT("<NO TEMPLATE AVAILABLE>");
 		
 		const int32 Index = FMath::RandRange(0, Templates.Num() - 1);
 		return Templates[Index];
+	}
+
+	static FText PickRandom(const TArray<FFretteClueTemplate>& Templates)
+	{
+		if (Templates.Num() == 0)
+			return INVTEXT("<NO TEMPLATE AVAILABLE>");
+		
+		const int32 Index = FMath::RandRange(0, Templates.Num() - 1);
+		return Templates[Index].ClueText;
 	}
 };

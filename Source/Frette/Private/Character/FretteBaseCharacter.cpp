@@ -6,11 +6,38 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/FretteAttributeSet.h"
 
+void AFretteBaseCharacter::Die()
+{
+	bIsDead = true;
+}
+
 AFretteBaseCharacter::AFretteBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	FallDamageComponent = CreateDefaultSubobject<UFallDamageComponent>(TEXT("FallDamageComponent"));
 	SetReplicates(true);
+
+	BodyPartComponent = CreateDefaultSubobject<UFretteBodyPartComponent>(TEXT("BodyPartComponent"));
+	BodyPartComponent->SetIsReplicated(true);
+
+	BodyTemperatureComponent = CreateDefaultSubobject<UFretteTemperatureComponent>(TEXT("BodyTemperatureComponent"));
+	BodyTemperatureComponent->SetIsReplicated(true);
+}
+
+void AFretteBaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//Force l'update de la position des bones sur le serveur
+	//Fix un problem avec le aim et la position du gun selon le serveur vs client
+	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+}
+
+void AFretteBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFretteBaseCharacter, bIsAiming);
+
 }
 
 void AFretteBaseCharacter::ApplyStartupEffects()
@@ -30,6 +57,10 @@ void AFretteBaseCharacter::ApplyStartupEffects()
 
 	ApplyDefaultAttributeEffect(EffectContext);
 	ApplyDefaultStartupEffect(EffectContext);
+	
+	if (!IsValid(ArchetypeLoadout))
+		return;
+	
 	AbilitySystemComponent->GrantAbilities(ArchetypeLoadout, this);
 }
 
@@ -71,3 +102,5 @@ void AFretteBaseCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data)
 		MovementComp->MaxWalkSpeed = Data.NewValue;
 	}
 }
+
+void AFretteBaseCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity) {}
