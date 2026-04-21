@@ -24,7 +24,9 @@ public class FretteEditor : ModuleRules
 				"SlateCore",
 				"UnrealEd",
 				"SourceControl",
-				"MessageLog"
+				"MessageLog",
+				"PropertyEditor",
+				"Frette"
 			}
 		);
 	}

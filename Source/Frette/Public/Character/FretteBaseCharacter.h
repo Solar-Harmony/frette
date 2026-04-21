@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "Components/FallDamageComponent.h"
+#include "Components/FretteTemperatureComponent.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Equipment/FretteEquipmentComponent.h"
 #include "GameFramework/Character.h"
 #include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
@@ -17,11 +19,25 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadWrite)
+	bool GetIsDead() const { return bIsDead; }
+
+	UPROPERTY(BlueprintReadWrite, Replicated)
 	bool bIsAiming = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFretteTemperatureComponent> BodyTemperatureComponent;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void Die();
 
 protected:
 	AFretteBaseCharacter();
+	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY()
 	TObjectPtr<UFretteAbilitySystemComponent> AbilitySystemComponent;
 
@@ -43,6 +59,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	int CharacterLevel = 1;
 
+	UPROPERTY()
+	bool bIsDead = false;
+
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
 
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
@@ -53,4 +72,8 @@ protected:
 	virtual void InitAbilityActorInfo();
 	void SubToAttributeChanges();
 	void OnMaxSpeedChanged(const FOnAttributeChangeData& Data) const;
+
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_HandleDeath(FVector DeathVelocity);
+
 };

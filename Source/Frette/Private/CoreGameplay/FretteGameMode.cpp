@@ -56,8 +56,8 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	}
 
 	Info.Type = bIsPrimaryClue ? EClueType::MainObjective : EClueType::PointOfInterest;
-	Info.LandmarkName = UFretteClueTemplateSet::PickRandom(POI->DisplayNames);
-	Info.LandmarkDescription = UFretteClueTemplateSet::PickRandom(POI->Descriptions);
+	Info.LandmarkName = UFretteClueTemplateSet::PickRandomText(POI->DisplayNames);
+	Info.LandmarkDescription = UFretteClueTemplateSet::PickRandomText(POI->Descriptions);
 	Info.LandmarkLoot = INVTEXT("RIEN PANTOUTE (not implemented)");
 
 	const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
@@ -181,7 +181,7 @@ void AFretteGameMode::BeginPlay()
 	precondition(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.");
 
 	const int32 TotalLandmarks = NearLandmarks.Num() + FarLandmarks.Num();
-	precondition(NumCluesPlaced >= TotalLandmarks, "%d clues placed but only %d total landmarks exist.", NumCluesPlaced, TotalLandmarks);
+	precondition(NumCluesPlaced >= TotalLandmarks, "There are %d landmarks in the level but only %d clues were placed.", TotalLandmarks, NumCluesPlaced);
 	
 	UpdateTimeBeforeNextPrimaryClue();
 }
