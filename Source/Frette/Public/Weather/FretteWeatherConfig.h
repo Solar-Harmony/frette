@@ -13,10 +13,10 @@ public:
 	UPROPERTY(EditAnywhere, Category="Frette|Weather")
 	bool bUseDynamicWeather;
 	
-	UPROPERTY(EditAnywhere, Category="Frette|Weather")
+	UPROPERTY(EditAnywhere, Category="Frette|Weather", meta=(InlineEditConditionToggle))
 	bool bOverrideWeatherDuration;
 	
-	UPROPERTY(EditAnywhere, Category="Frette|Weather", meta=(EditCondition="bOverrideWeatherDuration", InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, Category="Frette|Weather", meta=(EditCondition="bOverrideWeatherDuration"))
 	int OverriddenWeatherDuration;
 	
 	UPROPERTY(EditAnywhere, Category="Frette|Weather", meta=(EditCondition="!bUseDynamicWeather", EditConditionHides))

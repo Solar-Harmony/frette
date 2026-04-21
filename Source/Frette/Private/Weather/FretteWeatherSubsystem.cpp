@@ -40,7 +40,5 @@ void UFretteWeatherSubsystem::ApplyWeatherState(const FFretteWeatherState& State
 			State.ActiveWeatherData->FogIntensity,
 			State.NextWeatherData->FogIntensity,
 			State.ActiveToNextWeatherBlendingFactor);
-
-		// TODO(weather): do something on client side
 	}
 }
