@@ -16,6 +16,16 @@ void UFretteWeaponItem::OnEquipped()
 	SpawnEquipmentActor(ItemData);
 }
 
+void UFretteWeaponItem::OnUnequipped()
+{
+	Super::OnUnequipped();
+
+	if (SpawnedActor)
+	{
+		SpawnedActor->Destroy();
+		SpawnedActor = nullptr;
+	}
+}
 void UFretteWeaponItem::SpawnEquipmentActor(const UFretteWeaponItemDataAsset* ItemData)
 {
 	APawn* OwningPawn = Cast<APawn>(GetOwningInventory()->GetOwner());
