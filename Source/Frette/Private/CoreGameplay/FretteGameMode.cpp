@@ -117,7 +117,7 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 		if (!RewardName.IsEmptyOrWhitespace())
 		{
 			Info.LandmarkLoot = RewardName;
-		}s
+		}
 	}
 
 	Info.Type = bIsPrimaryClue ? EClueType::MainObjective : EClueType::PointOfInterest;
