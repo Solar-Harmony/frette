@@ -115,12 +115,16 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 		if (!RewardName.IsEmptyOrWhitespace())
 		{
 			Info.LandmarkLoot = RewardName;
-		}
+		}s
 	}
 
 	Info.Type = bIsPrimaryClue ? EClueType::MainObjective : EClueType::PointOfInterest;
 	Info.LandmarkName = UFretteClueTemplateSet::PickRandomText(POI->DisplayNames);
 	Info.LandmarkDescription = UFretteClueTemplateSet::PickRandomText(POI->Descriptions);
+	if (Info.LandmarkName.IsEmptyOrWhitespace() || Info.LandmarkDescription.IsEmptyOrWhitespace())
+	{
+		FRETTE_LOG(Warning, "Landmark %s has empty display name or description, clue text will be wrong.", POI);
+	}
 
 	const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
 	const ECardinalDirection CardinalDirection = UFretteGameplayStatics::DirVectorToCardinal(Direction);
