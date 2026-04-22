@@ -58,6 +58,11 @@ void AFrettePickupBase::Server_OnInteract_Implementation(AFrettePlayerCharacter*
 
 void AFrettePickupBase::OnConstruction(const FTransform& Transform)
 {
+	UpdateVisuals();
+}
+
+void AFrettePickupBase::UpdateVisuals()
+{
 	if (!IsValid(ItemData))
 		return;
 	
@@ -67,6 +72,18 @@ void AFrettePickupBase::OnConstruction(const FTransform& Transform)
 	
 	// TODO: I've heard that LoadAsync has caveats but dont remember, should recheck when have time
 	ItemData->Mesh.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateUObject(this, &AFrettePickupBase::OnItemMeshLoaded));
+}
+
+void AFrettePickupBase::OnRep_ItemData()
+{
+	UpdateVisuals();
+}
+
+void AFrettePickupBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AFrettePickupBase, ItemData);
 }
 
 void AFrettePickupBase::OnInteractDelegate(AFrettePlayerCharacter* Interactor)
