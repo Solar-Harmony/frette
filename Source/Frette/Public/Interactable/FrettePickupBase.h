@@ -10,10 +10,9 @@ class AFrettePlayerCharacter;
 class UFretteInteractableComponent;
 
 /*
- * An interactible item in the world. 
- * Does nothing by default, subclass and implement OnPickUp or OnPickUp_Implementation to add functionality.
+ * An interactible that creates an item and adds it to the interactor's inventory.
  */
-UCLASS(Abstract)
+UCLASS()
 class FRETTE_API AFrettePickupBase : public AActor, public IFretteInteractableInterface
 {
 	GENERATED_BODY()

@@ -4,12 +4,18 @@
 #include "Engine/DataAsset.h"
 #include "FretteClueGenerationDataAsset.generated.h"
 
+class UFretteInventoryItemDataAsset;
+
 UCLASS()
 class FRETTE_API UFretteClueGenerationDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 	
 public:
+	// Items that will be generated nearby
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayThumbnail = "false"))
+	TArray<TObjectPtr<UFretteInventoryItemDataAsset>> SecondaryClueRewards;
+	
 	// The secondary ratio is the rest
 	UPROPERTY(EditAnywhere)
 	float PrimaryCluesRatioTarget = 0.3f;
@@ -30,7 +36,6 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	float DesiredGameDuration = 60.f * 20;
-	
 	
 	// No primary clue can ever be given before it has been this amount of time (s) since the last time we got one
 	UPROPERTY(EditAnywhere)
