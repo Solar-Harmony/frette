@@ -22,10 +22,10 @@ struct FTemperatureContribution
 		, Flow(Flow) {}
 
 	UPROPERTY()
-	float Temperature;
+	float Temperature = 0.0f;
 
 	UPROPERTY()
-	float Flow;
+	float Flow = 0.0f;
 };
 
 USTRUCT(BlueprintType)
