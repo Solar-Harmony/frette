@@ -66,6 +66,48 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 #define FRETTE_PRIVATE_ENSURE_6(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
 #define FRETTE_PRIVATE_ENSURE_7(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
 
+#define fail(...) \
+	BOOST_PP_OVERLOAD(FRETTE_PRIVATE_FAIL_, __VA_ARGS__)(__VA_ARGS__)
+
+#define FRETTE_PRIVATE_FAIL_1(Condition) \
+	([&]() -> bool { \
+		if (UNLIKELY(!(Condition))) \
+		{ \
+			Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString()); \
+			UE_DEBUG_BREAK(); \
+			return true; \
+		} \
+		return false; \
+	}())
+
+#define FRETTE_PRIVATE_FAIL_2(Condition, Msg) \
+	([&]() -> bool { \
+		if (UNLIKELY(!(Condition))) \
+		{ \
+			Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString(TEXT(Msg))); \
+			UE_DEBUG_BREAK(); \
+			return true; \
+		} \
+		return false; \
+	}())
+
+#define FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, ...) \
+	([&]() -> bool { \
+		if (UNLIKELY(!(Condition))) \
+		{ \
+			Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString::Printf(TEXT(Format), FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__))); \
+			UE_DEBUG_BREAK(); \
+			return true; \
+		} \
+		return false; \
+	}())
+
+#define FRETTE_PRIVATE_FAIL_3(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_FAIL_4(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_FAIL_5(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_FAIL_6(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
+#define FRETTE_PRIVATE_FAIL_7(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
+
 
 namespace Frette::Private
 {
@@ -99,7 +141,8 @@ namespace Frette::Private
 		return Tag.ToString();
 	}
 
-	FORCEINLINE FString ToTCHAR(const UObjectBaseUtility* Object)
+	template <typename T>
+	FORCEINLINE auto ToTCHAR(const T* Object) -> std::enable_if_t<std::is_base_of_v<UObjectBaseUtility, T>, FString>
 	{
 		return GetNameSafe(Object);
 	}

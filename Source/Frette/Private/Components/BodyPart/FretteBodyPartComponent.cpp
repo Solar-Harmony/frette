@@ -2,9 +2,11 @@
 
 #include "Character/FretteBaseCharacter.h"
 #include "GameplayTagContainer.h"
+#include "Character/FrettePlayerCharacter.h"
 #include "Components/BodyPart/FretteBodyPartTags.h"
 #include "Frette/Frette.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/FrettePlayerController.h"
 
 namespace
 {
@@ -84,30 +86,47 @@ void UFretteBodyPartComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME(UFretteBodyPartComponent, BodyPartInstances);
 }
 
+bool UFretteBodyPartComponent::Ciboire_DeleteMoiPasCalisse() const
+{
+	const AFrettePlayerCharacter* TabarnakDe = Cast<AFrettePlayerCharacter>(GetOwner());
+	if (TabarnakDe == nullptr)
+		return false;
+
+	const AFrettePlayerController* Calisse = Cast<AFrettePlayerController>(TabarnakDe->GetController());
+	if (Calisse == nullptr)
+		return false;
+
+	return Calisse->bFretteCinematicMode;
+}
+
 void UFretteBodyPartComponent::AddValueFromBodyPartTag(const FGameplayTag BodyPartTag, const float Value, const FGameplayTag ValueType)
 {
-	if (GetOwnerRole() == ROLE_Authority)
+	if (GetOwnerRole() != ROLE_Authority)
+		return;
+	
+	if (!BodyPartTag.IsValid())
+		return;
+	
+	if (Ciboire_DeleteMoiPasCalisse())
+		return;
+	
+	if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
 	{
-		UE_LOG(LogFrette, Log, TEXT("Adding %f of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
+		const FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
+		// FIXME: Not using a proper value delta, also not sure about the way i do it
+		const FFretteBodyPartChangeEvent ChangeEvent(BodyPartTag, ValueType, Result.AccumulatedValue, Value);
+		Client_NotifyBodyPartChange(ChangeEvent);
 		
-		if (BodyPartTag.IsValid())
-		{
-			if (UFretteBodyPartInstance* BodyPart = FindBodyPart(BodyPartTag))
-			{
-				const FFretteBodyPartContext Result = BodyPart->AddValueByTag(Value, ValueType);
-				// FIXME: Not using a proper value delta, also not sure about the way i do it
-				const FFretteBodyPartChangeEvent ChangeEvent(BodyPartTag, ValueType, Result.AccumulatedValue, Value);
-				Client_NotifyBodyPartChange(ChangeEvent);
-			}
-		}
+		UE_LOG(LogFrette, Log, TEXT("Added %f of %s to body part %s"), Value, *ValueType.ToString(), *BodyPartTag.ToString());
 	}
+
 }
 
 void UFretteBodyPartComponent::AddValueFromBoneName(const FName BoneName, const float Value, const FGameplayTag ValueType)
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
-		FGameplayTag BodyPartTag = GetBodyPartFromBoneName(BoneName);
+		const FGameplayTag BodyPartTag = GetBodyPartFromBoneName(BoneName);
 		AddValueFromBodyPartTag(BodyPartTag, Value, ValueType);
 	}
 }
@@ -173,12 +192,17 @@ float UFretteBodyPartComponent::GetValueFromBodyPart(FGameplayTag BodyPartTag, F
 
 void UFretteBodyPartComponent::AddValueToAllParts(float Value, FGameplayTag ValueType)
 {
-	if (GetOwnerRole() == ROLE_Authority)
+	if (GetOwnerRole() != ROLE_Authority)
+		return;
+	
+	if (Ciboire_DeleteMoiPasCalisse())
+		return;
+	
+	for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 	{
-		for (UFretteBodyPartInstance* Instance : BodyPartInstances)
+		if (Instance)
 		{
-			if (Instance)
-				Instance->AddValueByTag(Value, ValueType);
+			Instance->AddValueByTag(Value, ValueType);
 		}
 	}
 }

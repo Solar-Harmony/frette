@@ -49,6 +49,8 @@ public:
 	virtual void ReadyForReplication() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
+	bool Ciboire_DeleteMoiPasCalisse() const;
+	
 	UFretteBodyPartInstance* FindBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag) const;
 
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")

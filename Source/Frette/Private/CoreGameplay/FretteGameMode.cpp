@@ -2,6 +2,7 @@
 #include "Weather/FretteWeatherComponent.h"
 
 #include "EngineUtils.h"
+#include "NavigationSystem.h"
 #include "Character/FretteNotificationsComponent.h"
 #include "Components/FretteGameplayStatics.h"
 #include "CoreGameplay/FretteClue.h"
@@ -14,6 +15,55 @@
 AFretteGameMode::AFretteGameMode()
 {
 	WeatherComponent = CreateDefaultSubobject<UFretteWeatherComponent>(TEXT("WeatherComponent"));
+}
+
+FText AFretteGameMode::SpawnPointOfInterestReward(const AFretteLandmark* Landmark) const
+{
+	if (fail(!Cfg->SecondaryClueRewards.IsEmpty(), "No secondary clue rewards are configured. Clues will not spawn any rewards."))
+		return INVTEXT("");
+	
+	UNavigationSystemV1* Navmesh = UNavigationSystemV1::GetCurrent(GetWorld());
+	if (fail(IsValid(Navmesh), "No navmesh found in the level, clue reward generation won't work."))
+		return INVTEXT("");
+
+	FNavLocation NavLocation;
+	const FVector SearchExtent = FVector(500.0f, 500.0f, 500.0f);	
+	const bool bFound = Navmesh->ProjectPointToNavigation(Landmark->GetActorLocation(),NavLocation, SearchExtent);
+	if (!bFound)
+	{
+		FRETTE_LOG(Warning, "Failed to find a navmesh location near landmark %s for clue reward. Reward won't be spawned.", Landmark);
+		return INVTEXT("");
+	}
+	
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
+	const int Idx = FMath::RandRange(0, Cfg->SecondaryClueRewards.Num() - 1);
+	UFretteInventoryItemDataAsset* RewardItemData = Cfg->SecondaryClueRewards[Idx];
+	if (fail(IsValid(RewardItemData), "Null entry in secondary clues rewards items list."))
+		return INVTEXT("");
+	
+	const FTransform SpawnTransform = FTransform(NavLocation.Location);
+	AFrettePickupBase* Pickup = GetWorld()->SpawnActorDeferred<AFrettePickupBase>(
+		AFrettePickupBase::StaticClass(),
+		SpawnTransform,
+		nullptr,
+		nullptr,
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+	);
+	
+	if (Pickup == nullptr)
+	{
+		FRETTE_LOG(Warning, "Failed to spawn item pickup actor for clue reward near landmark %s.", Landmark);
+		return INVTEXT("");
+	}
+	
+	Pickup->ItemData = RewardItemData;
+	Pickup->FinishSpawning(SpawnTransform);
+	
+	FRETTE_LOG(Log, "Spawned item pickup for clue reward near landmark %s. Coords: %s, Item: %s", Landmark, *SpawnTransform.GetLocation().ToString(), RewardItemData->GetName());
+	
+	return RewardItemData->DisplayName;
 }
 
 void AFretteGameMode::UpdateTimeBeforeNextPrimaryClue()
@@ -60,11 +110,23 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 		UE_LOG(LogFrette, Warning, TEXT("Failed to generate clue: no more landmarks available!"));
 		return Template->GenerateClueText(Info);
 	}
+	
+	if (PickedType == EClueType::PointOfInterest)
+	{
+		const FText RewardName = SpawnPointOfInterestReward(POI);
+		if (!RewardName.IsEmptyOrWhitespace())
+		{
+			Info.LandmarkLoot = RewardName;
+		}
+	}
 
 	Info.Type = bIsPrimaryClue ? EClueType::MainObjective : EClueType::PointOfInterest;
 	Info.LandmarkName = UFretteClueTemplateSet::PickRandomText(POI->DisplayNames);
 	Info.LandmarkDescription = UFretteClueTemplateSet::PickRandomText(POI->Descriptions);
-	Info.LandmarkLoot = INVTEXT("RIEN PANTOUTE (not implemented)");
+	if (Info.LandmarkName.IsEmptyOrWhitespace() || Info.LandmarkDescription.IsEmptyOrWhitespace())
+	{
+		FRETTE_LOG(Warning, "Landmark %s has empty display name or description, clue text will be wrong.", POI);
+	}
 
 	const FVector2D Direction((POI->GetActorLocation() - Interactor->GetActorLocation()).GetSafeNormal());
 	const ECardinalDirection CardinalDirection = UFretteGameplayStatics::DirVectorToCardinal(Direction);

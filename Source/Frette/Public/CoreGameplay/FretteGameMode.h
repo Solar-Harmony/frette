@@ -69,6 +69,8 @@ private:
 	float LastPrimaryClueFoundTime = 0.0f;
 	float GameStartTime = 0.0f;
 	
+	FText SpawnPointOfInterestReward(const AFretteLandmark* Landmark) const;
+	
 	void UpdateTimeBeforeNextPrimaryClue();
 
 	EClueType PickNextClueType() const;
