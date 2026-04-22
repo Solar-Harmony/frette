@@ -224,6 +224,17 @@ float UFretteBodyPartComponent::GetNormalizedCriticalValue(FGameplayTag ValueTag
 	return FMath::Min(NormalizedValues);
 }
 
+void UFretteBodyPartComponent::ResetValueForAllBodyParts(FGameplayTag ValueType)
+{
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		for (const UFretteBodyPartInstance* Instance : BodyPartInstances)
+		{
+			AddValueFromBodyPartTag(Instance->GetBodyPartTag(), Instance->GetBodyPartData()->GetMaxValueForType(ValueType), ValueType);
+		}
+	}
+}
+
 void UFretteBodyPartComponent::OnRep_BodyPartInstances()
 {
 	BodyPartTagToInstanceMap.Empty(BodyPartInstances.Num());

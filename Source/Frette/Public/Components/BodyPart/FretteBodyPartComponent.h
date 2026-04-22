@@ -70,6 +70,7 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
 	float GetNormalizedCriticalValue(UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTag, bool bForFeedback) const;
+	void ResetValueForAllBodyParts(FGameplayTag ValueType);
 
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
 	bool AreBodyPartsInitialized() const { return BodyPartInstances.Num() > 0; }
