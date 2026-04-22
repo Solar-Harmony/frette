@@ -61,7 +61,7 @@ FText AFretteGameMode::SpawnPointOfInterestReward(const AFretteLandmark* Landmar
 	Pickup->ItemData = RewardItemData;
 	Pickup->FinishSpawning(SpawnTransform);
 	
-	FRETTE_LOG(Log, "Spawned item pickup for clue reward near landmark %s. Item: %s", Landmark, RewardItemData);
+	FRETTE_LOG(Log, "Spawned item pickup for clue reward near landmark %s. Coords: %s, Item: %s", Landmark, *SpawnTransform.GetLocation().ToString(), RewardItemData->GetName());
 	
 	return RewardItemData->DisplayName;
 }
