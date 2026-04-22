@@ -1,5 +1,4 @@
 #include "Inventory/Items/Impl/FretteWeaponItem.h"
-
 #include "Character/FretteBaseCharacter.h"
 #include "GameFramework/Character.h"
 #include "Inventory/FretteInventoryComponent.h"
@@ -16,6 +15,20 @@ void UFretteWeaponItem::OnEquipped()
 	SpawnEquipmentActor(ItemData);
 }
 
+void UFretteWeaponItem::OnUnequipped()
+{
+	Super::OnUnequipped();
+	
+	const AFretteBaseCharacter* Character = Cast<AFretteBaseCharacter>(GetOwningInventory()->GetOwner());
+	if (!Character->HasAuthority())
+		return;
+	
+	if (SpawnedActor)
+	{
+		SpawnedActor->Destroy();
+		SpawnedActor = nullptr;
+	}
+}
 void UFretteWeaponItem::SpawnEquipmentActor(const UFretteWeaponItemDataAsset* ItemData)
 {
 	APawn* OwningPawn = Cast<APawn>(GetOwningInventory()->GetOwner());
