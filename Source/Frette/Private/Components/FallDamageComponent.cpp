@@ -22,6 +22,12 @@ void UFallDamageComponent::BeginPlay()
 	{
 		FRETTE_LOG(Error, "Missing Fall Damage Config for %s.", OwnerCharacter->GetName());
 	}
+	
+	if (Config->DamageThresholds.IsEmpty())
+	{
+		this->Deactivate();
+		FRETTE_LOG(Warning, "No damage thresholds set for %s.).", OwnerCharacter->GetName());
+	}
 
 	BindMovementEvents();
 }
@@ -55,28 +61,51 @@ void UFallDamageComponent::OnJumpApexReached()
 	FallStartHeight = OwnerCharacter->GetActorLocation().Z;
 }
 
+//Va chercher le threshold de dégats le plus sévère que le joueur a atteint selon la distance tombé
+int32 UFallDamageComponent::FindWorstDamageThresholdIndex(float DistanceFallen) const
+{
+	return Config->DamageThresholds.FindLastByPredicate([DistanceFallen](const FFallDamageThreshold& Threshold) {
+			return DistanceFallen <= Threshold.FallHeight;
+		});
+}
+
+//Lerp le dégat selon le threshold précédent
+float UFallDamageComponent::CalculateFinalDamage(const float DistanceFallen, const int32 WorstThresholdIndex, const FFallDamageThreshold& Threshold) const
+{
+	float FinalDamage = Threshold.DamageValue;
+	const int32 PrevIndex = WorstThresholdIndex - 1;
+	if (PrevIndex >= 0)
+	{
+		const FFallDamageThreshold& PrevThreshold = Config->DamageThresholds[PrevIndex];
+		const float Alpha = FMath::GetMappedRangeValueClamped(
+			FVector2D(PrevThreshold.FallHeight, Threshold.FallHeight),
+			FVector2D(0.f, 1.f),
+			DistanceFallen
+			);
+		FinalDamage = FMath::Lerp(PrevThreshold.DamageValue, Threshold.DamageValue, Alpha);
+	}
+	return FinalDamage;
+}
+
 void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 {
-	precondition(Config != nullptr, "Missing fall damage config for %s.", OwnerCharacter->GetName());
-	
-	if (DistanceFallen > Config->MinFallHeight)
+	if (Config->DamageThresholds.Num() == 0 || DistanceFallen >= Config->DamageThresholds[0].FallHeight)
 		return;
 
-	const UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
-	FGameplayEffectContextHandle EffectContext = ASC->MakeEffectContext();
-	EffectContext.AddSourceObject(this);
+	const int32 WorstThresholdIndex = FindWorstDamageThresholdIndex(DistanceFallen);
+	
+	if (WorstThresholdIndex == INDEX_NONE)
+		return;
+	
+	const FFallDamageThreshold& Threshold = Config->DamageThresholds[WorstThresholdIndex];
 
-	const FGameplayEffectSpecHandle NewHandle = ASC->MakeOutgoingSpec(Config->FallDamageEffect, 1, EffectContext);
-	ensureMsgf(NewHandle.IsValid(), TEXT("Probably need to set the DamageEffect in the Config"));
+	const float FallDamage = CalculateFinalDamage(DistanceFallen, WorstThresholdIndex, Threshold);
 	
-	const float DamageAmount = Config->DamageCurve.GetRichCurveConst()->Eval(FMath::Abs(DistanceFallen));
-	NewHandle.Data->SetSetByCallerMagnitude(TAG_Effect_Movement_FallDamage, -DamageAmount);
+	UFretteBodyPartComponent* BodyPartComponent = OwnerCharacter->GetComponentByClass<UFretteBodyPartComponent>();
 	
-	UFretteBodyPartComponent* BodyPartComponent = Cast<UFretteBodyPartComponent>(OwnerCharacter->GetComponentByClass(UFretteBodyPartComponent::StaticClass()));
-	for (const FGameplayTag BoneTag : Config->AffectedBones)
+	for (const FGameplayTag BoneTag : Threshold.AffectedBones)
 	{
-		BodyPartComponent->AddValueFromBodyPartTag(BoneTag, -DamageAmount, TAG_BodyPartValues_Health);
+		BodyPartComponent->AddValueFromBodyPartTag(BoneTag, -FallDamage, TAG_BodyPartValues_Health);
+		FRETTE_LOG(Log, "%s took %d damage from falling %f cm", *OwnerCharacter->GetName(), FMath::TruncToInt32(FallDamage), DistanceFallen);
 	}
-	
-	FRETTE_LOG(Log, "%s took %d damage from falling %f cm", *OwnerCharacter->GetName(), FMath::TruncToInt32(DamageAmount), DistanceFallen);
 }
