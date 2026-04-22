@@ -21,7 +21,7 @@ public:
 	virtual EBodyPartEventType GetRelatedEvent() const override { return EBodyPartEventType::AccumulatedValue; }
 
 	UPROPERTY(EditDefaultsOnly)
-	int TotalValueThreshold;
+	float TotalValueThreshold;
 
 	//Vu que la température va être une seule valeur qui bouge entre -100 et 100,
 	//On peut dire si on veut que des éffet de froid se déclance genre en dessous de -20 

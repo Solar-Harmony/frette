@@ -27,8 +27,8 @@ class UFretteClotheItemDataAsset : public UFretteSlottableItemDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
-	int TemperatureModifier = 0;
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMax = "1.0"))
+	float ThermalImpedanceModifier = 0;
 
 	virtual const UClass* GetRuntimeItemClass() const override { return UFretteClothingItem::StaticClass(); }
 
