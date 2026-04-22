@@ -12,6 +12,8 @@
 #if WITH_EDITORONLY_DATA
 static bool bVisualizeTemperature = false;
 
+FOnVisualizationToggled UFretteTemperatureSourceComponent::OnVisualizationToggled;
+
 static void OnTemperatureVisualizationChanged(IConsoleVariable* Var)
 {
 	const bool bEnabled = Var->GetBool();
@@ -423,7 +425,11 @@ void UFretteTemperatureSourceComponent::UpdateMaterial() const
 
 void UFretteTemperatureSourceComponent::UpdateDebug()
 {
+	OverlapSphere->SetVisibility(bVisualizeTemperature);
+	
 	DebugSphereInner->SetSphereRadius(SourceRadius);
+	DebugSphereInner->SetVisibility(bVisualizeTemperature);
+	
 	const float TextSize = DiffusionRadius / 4.f;
 	DebugText->SetRelativeLocation(FVector(0, 0, DiffusionRadius + 0.5 * TextSize));
 	DebugText->SetWorldSize(TextSize);

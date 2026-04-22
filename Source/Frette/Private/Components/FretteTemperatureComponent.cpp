@@ -1,5 +1,6 @@
 #include "Components/FretteTemperatureComponent.h"
 
+#include "Character/FrettePlayerCharacter.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Frette/Frette.h"
 #include "GameFramework/GameStateBase.h"
@@ -158,16 +159,25 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 							* (TagTemp - Temperature) * BoneTagNeighboursDiffusionFlow;
 					}
 				}
-				DeltaTemp += BoneTagNeighboursFlow;
+				// Huge hack to cut off diffusion if it is conflicting with the flow
+				// TODO Fix diffusion that makes the whole thing balance with the other flows and reach false equilibrium points
+				// We will probably need a conflict factor and interpolation
+				//DeltaTemp += BoneTagNeighboursFlow;
 
 				// Wearing clothes shouldn't affect our capacity to heat up right?
-				if (!bUsingNetFlow || NetFlow > 0.f)
+				if (!bUsingNetFlow || NetFlow < 0.f)
 					DeltaTemp *= 1.f - FMath::Lerp(0.f, 0.95f, ThermalImpedance);
 
 				DeltaTemp *= WorldSettings->TimeBeforeTemperatureUpdates;
 
-				UE_LOG(LogFrette, Log, TEXT("Temp integrator: Tag[%s] Temp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] DynamicAmbientFlow[%.3f] ConstrainedAmbientFlow[%.3f] EffectiveFlow[%.3f] NeighboursFlow[%.3f] DeltaTime[%.3f] Damping[%.3f] DeltaTemp[%.3f]"),
-					*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, ConstrainedAmbient, EffectiveFlow, BoneTagNeighboursFlow, WorldSettings->TimeBeforeTemperatureUpdates, Damping, DeltaTemp);
+				#if WITH_EDITORONLY_DATA
+				if (Cast<AFrettePlayerCharacter>(GetOwner()))
+				{
+					// Only log spam for the player
+					UE_LOG(LogFrette, Log, TEXT("Temp integrator: Tag[%s] Temp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] DynamicAmbientFlow[%.3f] ConstrainedAmbientFlow[%.3f] EffectiveFlow[%.3f] NeighboursFlow[%.3f] DeltaTime[%.3f] Damping[%.3f] DeltaTemp[%.3f]"),
+						*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, ConstrainedAmbient, EffectiveFlow, BoneTagNeighboursFlow, WorldSettings->TimeBeforeTemperatureUpdates, Damping, DeltaTemp);
+				}
+				#endif
 
 				BoneDeltaTemp.Add(BoneTag, DeltaTemp);
 			}
