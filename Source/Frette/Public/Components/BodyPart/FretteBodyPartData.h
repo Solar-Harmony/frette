@@ -37,19 +37,19 @@ struct FFretteBodyPartValueTypeConfig
 	bool bIsCritical = false;
 	
 	UPROPERTY(EditAnywhere)
-	int MinValue = 0;
+	float MinValue = 0.f;
 	
 	UPROPERTY(EditAnywhere)
-	int StartValue = 100;
+	float StartValue = 100.f;
 	
 	UPROPERTY(EditAnywhere)
-	int MaxValue = 100;
+	float MaxValue = 100.f;
 	
 	UPROPERTY(EditAnywhere, Category="Feedback")
-	int FeedbackLowValue = 10;
+	float FeedbackLowValue = 10.f;
 	
 	UPROPERTY(EditAnywhere, Category="Feedback")
-	int FeedbackHighValue = 50;
+	float FeedbackHighValue = 50.f;
 };
 
 UCLASS()
@@ -75,22 +75,22 @@ public:
 		});
 	}
 
-	int GetMinValueForType(FGameplayTag Type) const
+	float GetMinValueForType(FGameplayTag Type) const
 	{
 		const auto* Config = GetValueTypeConfig(Type);
-		return Config ? Config->MinValue : 0;
+		return Config ? Config->MinValue : 0.f;
 	}
 	
-	int GetStartValueForType(FGameplayTag Type) const
+	float GetStartValueForType(FGameplayTag Type) const
 	{
 		const auto* Config = GetValueTypeConfig(Type);
-		return Config ? Config->StartValue : 100;
+		return Config ? Config->StartValue : 100.f;
 	};
 	
-	int GetMaxValueForType(FGameplayTag Type) const
+	float GetMaxValueForType(FGameplayTag Type) const
 	{
 		const auto* Config = GetValueTypeConfig(Type);
-		return Config ? Config->MaxValue : 100;
+		return Config ? Config->MaxValue : 100.f;
 	}
 	
 	#if WITH_EDITOR

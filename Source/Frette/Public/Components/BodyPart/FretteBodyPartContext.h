@@ -15,7 +15,7 @@ struct FFretteBodyPartContext
 	float ValueDelta = 0.f;
 
 	UPROPERTY()
-	int AccumulatedValue = 0;
+	float AccumulatedValue = 0.f;
 
 	UPROPERTY()
 	FGameplayTag EffectType;

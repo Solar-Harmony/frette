@@ -2,7 +2,7 @@
 
 bool UFretteAccumulatedValueRule::CheckCondition(FFretteBodyPartContext Context)
 {
-	const int32 CurrentStacks = Context.AccumulatedValue;
+	const float CurrentStacks = Context.AccumulatedValue;
 
 	switch (Comparison)
 	{

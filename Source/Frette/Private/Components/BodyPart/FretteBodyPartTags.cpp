@@ -8,3 +8,4 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Feet, "Frette.BodyPart.Feet");
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPartValues_Health, "Frette.BodyPartValues.Health");
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPartValues_Temperature, "Frette.BodyPartValues.Temperature");
+UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPartValues_ThermalImpedance, "Frette.BodyPartValues.ThermalImpedance");

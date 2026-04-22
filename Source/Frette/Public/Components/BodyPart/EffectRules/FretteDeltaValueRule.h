@@ -16,7 +16,7 @@ public:
 	virtual EBodyPartEventType GetRelatedEvent() const override { return EBodyPartEventType::DeltaValue; }
 
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1"))
-	int Threshold;
+	float Threshold;
 
 protected:
 	virtual bool CheckCondition(FFretteBodyPartContext Context) override;

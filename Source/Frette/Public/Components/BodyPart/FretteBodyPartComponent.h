@@ -16,7 +16,7 @@ struct FFretteBodyPartChangeEvent
 	
 	FFretteBodyPartChangeEvent() = default;
 	
-	FFretteBodyPartChangeEvent(FGameplayTag InBodyPartTag, FGameplayTag InValueTag, int InNewValue, int InValueDelta)
+	FFretteBodyPartChangeEvent(FGameplayTag InBodyPartTag, FGameplayTag InValueTag, float InNewValue, float InValueDelta)
 		: BodyPartTag(InBodyPartTag)
 		, ValueTypeTag(InValueTag)
 		, NewValue(InNewValue)
@@ -29,10 +29,10 @@ struct FFretteBodyPartChangeEvent
 	FGameplayTag ValueTypeTag;
 	
 	UPROPERTY(BlueprintReadOnly)
-	int NewValue = 0;
+	float NewValue = 0.f;
 	
 	UPROPERTY(BlueprintReadOnly)
-	int ValueDelta = 0;
+	float ValueDelta = 0.f;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBodyPartValueChanged, const FFretteBodyPartChangeEvent&, ChangeEvent);
@@ -52,19 +52,19 @@ public:
 	UFretteBodyPartInstance* FindBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag) const;
 
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
-	int GetValueFromBodyPart(
+	float GetValueFromBodyPart(
 		UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag,
 		UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTypeTag) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Parts")
 	void AddValueFromBodyPartTag(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag,
-		int Value,
+		float Value,
 		UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
 
-	void AddValueFromBoneName(FName BoneName, int Value, FGameplayTag ValueType);
+	void AddValueFromBoneName(FName BoneName, float Value, FGameplayTag ValueType);
 
 	UFUNCTION(BlueprintCallable, Category = "Frette|Body Parts")
-	void AddValueToAllParts(int Value, UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
+	void AddValueToAllParts(float Value, UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueType);
 	
 	UFretteBodyPartInstance* GetInstanceFromBodyPartTag(FGameplayTag BodyPartTag); 
 	
@@ -81,6 +81,7 @@ public:
 	void Client_NotifyBodyPartChange(const FFretteBodyPartChangeEvent& ChangeEvent);
 
 	FGameplayTag GetBodyPartFromBoneName(FName BoneName) const;
+	bool GetRepresentativeBoneForTag(FGameplayTag BodyPartTag, FName& OutBoneName) const;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TArray<TObjectPtr<UFretteBodyPartData>> BodyPartData;
@@ -93,6 +94,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TObjectPtr<UFretteBonesToTagData> BoneTagDataAsset;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
+	TMap<FGameplayTag, FGameplayTagContainer> BoneTagNeighbours;
 
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_BodyPartInstances, BlueprintReadOnly)
@@ -101,7 +105,7 @@ protected:
 private:
 	UPROPERTY()
 	TMap<FGameplayTag, TObjectPtr<UFretteBodyPartInstance>> BodyPartTagToInstanceMap;
-	
-	bool Ciboire() const;
-};
 
+	UPROPERTY()
+	TMap<FGameplayTag, FName> BodyPartTagToRepresentativeBoneMap;
+};

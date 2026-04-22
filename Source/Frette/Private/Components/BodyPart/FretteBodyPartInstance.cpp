@@ -21,7 +21,7 @@ void UFretteBodyPartInstance::Initialize(UFretteBodyPartData* InSourceData, AFre
 	SetMinDeltaValueThreshold();
 }
 
-int& UFretteBodyPartInstance::FindOrAddAccumulatedValue(const FGameplayTag& Tag)
+float& UFretteBodyPartInstance::FindOrAddAccumulatedValue(const FGameplayTag& Tag)
 {
 	FFretteAccumulatedValueEntry* Existing = AccumulatedValues.FindByPredicate(
 		[&Tag](const FFretteAccumulatedValueEntry& Entry) { return Entry.Tag == Tag; });
@@ -50,35 +50,36 @@ void UFretteBodyPartInstance::SetMinDeltaValueThreshold()
 	}
 }
 
-FFretteBodyPartContext UFretteBodyPartInstance::AddValueByTag(const int Value, const FGameplayTag Tag)
+FFretteBodyPartContext UFretteBodyPartInstance::AddValueByTag(const float Value, const FGameplayTag Tag)
 {
 	const UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
 		return FFretteBodyPartContext();
 
 	const float ClampedDelta = ClampDelta(Value, Tag);
-	if (ClampedDelta == 0.f)
-		return FFretteBodyPartContext();
+	// TODO fix this shite that fucks up when delta is 0
+	//if (ClampedDelta == 0.f)
+	//	return FFretteBodyPartContext();
 
-	const int CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
-
-	FRETTE_LOG(Log, "%s of %s's %s changed by %f, now %d", *Tag.ToString(), *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), ClampedDelta, CurrentValue);
-
+	const float CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
+	
+	FRETTE_LOG(Log, "%s of %s's %s changed by %f, now %f", *Tag.ToString(), *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), ClampedDelta, CurrentValue);
+	
 	FFretteBodyPartContext Context;
 	CheckDeltaRules(Tag, Context, ClampedDelta);
 	CheckAccumulatedValueRules(Tag, Context, CurrentValue);
-
+	
 	return Context;
 }
 
-int UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Tag)
+float UFretteBodyPartInstance::ClampDelta(const float Value, const FGameplayTag Tag)
 {
-	const int AccumulatedValue = FindOrAddAccumulatedValue(Tag);
-	const int NewValue = AccumulatedValue + Value;
+	const float AccumulatedValue = FindOrAddAccumulatedValue(Tag);
+	const float NewValue = AccumulatedValue + Value;
 
-	const int Min = SourceData->GetMinValueForType(Tag);
-	const int Max = SourceData->GetMaxValueForType(Tag);
-	int ClampedDelta;
+	const float Min = SourceData->GetMinValueForType(Tag);
+	const float Max = SourceData->GetMaxValueForType(Tag);
+	float ClampedDelta;
 
 	if (NewValue < Min || NewValue > Max)
 	{
@@ -92,9 +93,9 @@ int UFretteBodyPartInstance::ClampDelta(const int Value, const FGameplayTag Tag)
 	return ClampedDelta;
 }
 
-void UFretteBodyPartInstance::CheckDeltaRules(const FGameplayTag Tag, FFretteBodyPartContext& Context, const int ClampedDelta) const
+void UFretteBodyPartInstance::CheckDeltaRules(const FGameplayTag Tag, FFretteBodyPartContext& Context, const float ClampedDelta) const
 {
-	int PositiveClampedValue = abs(ClampedDelta);
+	float PositiveClampedValue = FMath::Abs(ClampedDelta);
 
 	if (PositiveClampedValue >= MinValueDelta)
 	{
@@ -103,7 +104,7 @@ void UFretteBodyPartInstance::CheckDeltaRules(const FGameplayTag Tag, FFretteBod
 	}
 }
 
-void UFretteBodyPartInstance::CheckAccumulatedValueRules(const FGameplayTag Tag, FFretteBodyPartContext& Context, const int CurrentValue) const
+void UFretteBodyPartInstance::CheckAccumulatedValueRules(const FGameplayTag Tag, FFretteBodyPartContext& Context, const float CurrentValue) const
 {
 	Context.AccumulatedValue = CurrentValue;
 	Context.EffectType = Tag;
@@ -163,7 +164,7 @@ void UFretteBodyPartInstance::ApplyGameplayEffects(const TArray<TSubclassOf<UGam
 void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplayEffect>> Effects) const
 {
 	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
-
+	
 	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
 		return;
 

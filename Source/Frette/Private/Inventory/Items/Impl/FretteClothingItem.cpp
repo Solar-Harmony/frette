@@ -1,6 +1,7 @@
 ﻿#include "Inventory/Items/Impl/FretteClothingItem.h"
 
 #include "Components/FretteTemperatureComponent.h"
+#include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Inventory/FretteInventoryComponent.h"
 
 void UFretteClothingItem::OnEquipped()
@@ -23,9 +24,10 @@ void UFretteClothingItem::UpdateBodyPartTemperatureModifier(const bool bIsEquipp
 
 	const UFretteClotheItemDataAsset* ItemData = Cast<UFretteClotheItemDataAsset>(GetData());
 
-	UFretteTemperatureComponent* TemperatureComponent = Cast<UFretteTemperatureComponent>(OwningPawn->GetComponentByClass(UFretteTemperatureComponent::StaticClass()));
+	UFretteBodyPartComponent* BodyPartComponent = Cast<UFretteBodyPartComponent>(OwningPawn->GetComponentByClass(UFretteBodyPartComponent::StaticClass()));
 
 	FGameplayTag AffectedBodyPartTag = ItemData->ItemSlotTag;
-	const int ModifierToApply = bIsEquipping ? ItemData->TemperatureModifier : -ItemData->TemperatureModifier;
-	TemperatureComponent->AddBodyPartTemperatureModifier(ModifierToApply, AffectedBodyPartTag);
+	
+	const float ModifierToApply = bIsEquipping ? ItemData->ThermalImpedanceModifier : -ItemData->ThermalImpedanceModifier;
+	BodyPartComponent->AddValueFromBodyPartTag(AffectedBodyPartTag, ModifierToApply, TAG_BodyPartValues_ThermalImpedance);
 }

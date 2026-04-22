@@ -80,7 +80,8 @@ public:
 		return nullptr;
 	}
 	
-	UFretteInventoryItem* GetFirstItemFromAsset(TSubclassOf<UFretteInventoryItemDataAsset> AssetClass)
+	UFUNCTION(BlueprintPure)
+	UFretteInventoryItem* GetFirstItemFromAsset(TSubclassOf<UFretteInventoryItemDataAsset> AssetClass) const
 	{
 		if (GetOwner()->HasAuthority())
 		{
