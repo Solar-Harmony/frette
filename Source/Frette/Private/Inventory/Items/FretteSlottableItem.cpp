@@ -32,6 +32,7 @@ void UFretteSlottableItem::OnUnequipped()
 
 	if (USkeletalMeshComponent* Mesh = Character->GetMesh())
 	{
+		//TODO: Devra link un layer de unnarmed
 		Mesh->LinkAnimClassLayers(GetData()->AnimLayer);
 	}
 
