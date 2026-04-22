@@ -44,6 +44,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
+	
+	UFUNCTION(BlueprintCallable)
+	void HandleRagdoll(FVector DeathVelocity);
+	void RecoverFromRagdoll();
 
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
@@ -80,7 +84,7 @@ protected:
 	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
 
 	virtual void Multicast_HandleDeath_Implementation(FVector FinalVelocity) override;
-
+	
 private:
 	virtual void InitAbilityActorInfo() override;
 };

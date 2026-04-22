@@ -158,12 +158,17 @@ void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathV
 
 	bUseControllerRotationYaw = false;
 
-	GetMesh()->Stop();
-	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
-	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
-	GetMesh()->SetPhysicsLinearVelocity(DeathVelocity, false, FName("pelvis"));
+	HandleRagdoll(DeathVelocity);
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
 		PlayerController->DisableInput(PlayerController);
+}
+
+void AFrettePlayerCharacter::HandleRagdoll(FVector DeathVelocity)
+{
+	GetMesh()->Stop();
+	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
+	GetMesh()->SetPhysicsLinearVelocity(DeathVelocity, false, FName("pelvis"));
 }
