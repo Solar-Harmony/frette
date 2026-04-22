@@ -1,5 +1,6 @@
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 
+#include "Character/FretteBaseCharacter.h"
 #include "GameplayTagContainer.h"
 #include "Components/BodyPart/FretteBodyPartTags.h"
 #include "Frette/Frette.h"

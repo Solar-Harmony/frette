@@ -1,5 +1,6 @@
 #include "Components/BodyPart/FretteBodyPartInstance.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Character/FretteBaseCharacter.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Components/BodyPart/FretteBodyPartContext.h"
 #include "Components/BodyPart/EffectRules/FretteDeltaValueRule.h"

@@ -8,12 +8,6 @@
 UFretteTemperatureComponent::UFretteTemperatureComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	
-	BoneTagNeighbours.Add(TAG_BodyPart_Head, FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{ TAG_BodyPart_Torso }));
-	BoneTagNeighbours.Add(TAG_BodyPart_Torso, FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{ TAG_BodyPart_Head, TAG_BodyPart_Hands, TAG_BodyPart_Legs }));
-	BoneTagNeighbours.Add(TAG_BodyPart_Hands, FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{ TAG_BodyPart_Torso }));
-	BoneTagNeighbours.Add(TAG_BodyPart_Legs, FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{ TAG_BodyPart_Torso, TAG_BodyPart_Feet }));
-	BoneTagNeighbours.Add(TAG_BodyPart_Feet, FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{ TAG_BodyPart_Legs }));
 }
 
 void UFretteTemperatureComponent::OnRegister()
@@ -150,11 +144,15 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 
 				// Diffusion from neighboring bone tags
 				float BoneTagNeighboursFlow = 0;
-				for (const auto& Tag : BoneTagNeighbours.FindChecked(BoneTag))
+				FGameplayTagContainer* BoneTagNeighbours = BodyPartComponent->BoneTagNeighbours.Find(BoneTag);
+				if (BoneTagNeighbours != nullptr)
 				{
-					const float TagTemp = BodyPartComponent->GetValueFromBodyPart(Tag, TemperatureEffectTag);
-					const float TagThermalImpedance = BodyPartComponent->GetValueFromBodyPart(Tag, ThermalImpedanceEffectTag);
-					BoneTagNeighboursFlow += (1.f - TagThermalImpedance) * (TagTemp - Temperature) * BoneTagNeighboursDiffusionFlow;
+					for (const auto& Tag : BodyPartComponent->BoneTagNeighbours.FindChecked(BoneTag))
+					{
+						const float TagTemp = BodyPartComponent->GetValueFromBodyPart(Tag, TemperatureEffectTag);
+						const float TagThermalImpedance = BodyPartComponent->GetValueFromBodyPart(Tag, ThermalImpedanceEffectTag);
+						BoneTagNeighboursFlow += (1.f - TagThermalImpedance) * (TagTemp - Temperature) * BoneTagNeighboursDiffusionFlow;
+					}
 				}
 				DeltaTemp += BoneTagNeighboursFlow;
 
@@ -163,9 +161,8 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 				
 				DeltaTemp *= WorldSettings->TimeBeforeTemperatureUpdates;
 
-				// TODO: Remove this log spam lol
-				UE_LOG(LogFrette, Log, TEXT("Temp integrator: Tag[%s] Temp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] DynamicAmbientFlow[%.3f] ConstrainedAmbientFlow[%.3f] EffectiveFlow[%.3f] NeighboursFlow[%.3f] DeltaTime[%.3f] Damping[%.3f] DeltaTemp[%.3f]"),
-					*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, ConstrainedAmbient, EffectiveFlow, BoneTagNeighboursFlow, WorldSettings->TimeBeforeTemperatureUpdates, Damping, DeltaTemp);
+				//UE_LOG(LogFrette, Log, TEXT("Temp integrator: Tag[%s] Temp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] DynamicAmbientFlow[%.3f] ConstrainedAmbientFlow[%.3f] EffectiveFlow[%.3f] NeighboursFlow[%.3f] DeltaTime[%.3f] Damping[%.3f] DeltaTemp[%.3f]"),
+				//	*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, ConstrainedAmbient, EffectiveFlow, BoneTagNeighboursFlow, WorldSettings->TimeBeforeTemperatureUpdates, Damping, DeltaTemp);
 
 				BoneDeltaTemp.Add(BoneTag, DeltaTemp);
 			}

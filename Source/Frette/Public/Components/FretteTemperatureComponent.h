@@ -109,9 +109,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AFretteWorldSettings> WorldSettings;
 
-	UPROPERTY()
-	TMap<FGameplayTag, FGameplayTagContainer> BoneTagNeighbours;
-
 	FTimerHandle TemperatureTickHandle;
 	
 	TMap<UFretteTemperatureBufferComponent*, float> BufferThermalImpedances;

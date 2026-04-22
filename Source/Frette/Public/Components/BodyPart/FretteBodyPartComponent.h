@@ -94,6 +94,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
 	TObjectPtr<UFretteBonesToTagData> BoneTagDataAsset;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")
+	TMap<FGameplayTag, FGameplayTagContainer> BoneTagNeighbours;
 
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_BodyPartInstances, BlueprintReadOnly)
