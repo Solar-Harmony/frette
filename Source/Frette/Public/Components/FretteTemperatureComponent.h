@@ -83,8 +83,8 @@ protected:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ClampMin="0.0", Units="Celsius",
-		ToolTip="Temperature difference below which damping reduces the applied temperature change. This prevents oscillations and ensures smooth convergence toward the target temperature."))
-	float DampingThreshold = 5;
+		ToolTip="Temperature difference below which damping reduces the applied temperature change. This prevents oscillations and ensures smooth convergence toward the target temperature. High values may cause weird stationnary points."))
+	float DampingThreshold = 3.f;
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ForceUnits="°C/s", ClampMin="0.0",
 		ToolTip="Diffusion strength between neighboring body parts. Each degree of temperature difference generates this much temperature change per second (scaled by thermal impedance)."))

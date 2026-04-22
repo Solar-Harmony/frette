@@ -9,13 +9,35 @@
 #include "GameFramework/Character.h"
 #include "Weather/FretteWeatherComponent.h"
 
+#if WITH_EDITORONLY_DATA
+static bool bVisualizeTemperature = false;
+
+FOnVisualizationToggled UFretteTemperatureSourceComponent::OnVisualizationToggled;
+
+static void OnTemperatureVisualizationChanged(IConsoleVariable* Var)
+{
+	const bool bEnabled = Var->GetBool();
+
+	AsyncTask(ENamedThreads::GameThread, [bEnabled]() {
+		UFretteTemperatureSourceComponent::OnVisualizationToggled.Broadcast(bEnabled);
+	});
+}
+
+static FAutoConsoleVariableRef CVarFretteVisualizeTemperature(
+	TEXT("Frette.Temperature.Visualize"),
+	bVisualizeTemperature,
+	TEXT("displays beautiful visualizations of heat and flow fields"),
+	FConsoleVariableDelegate::CreateStatic(&OnTemperatureVisualizationChanged)
+	);
+#endif
+
 // Sets default values for this component's properties
 UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 {
 	bUseAttachParentBound = true;
 
 	PrimaryComponentTick.bCanEverTick = true;
-	
+
 	UniqueId = FGuid::NewGuid();
 
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
@@ -79,6 +101,8 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 		if (MaterialAsset.Succeeded())
 			HeatMaterial = MaterialAsset.Object;
 	}
+	
+	OnVisualizationToggled.AddUObject(this, &UFretteTemperatureSourceComponent::ToggleVisualization);
 	#endif
 }
 
@@ -89,20 +113,20 @@ void UFretteTemperatureSourceComponent::OnRegister()
 	if (UWorld* World = GetWorld())
 		WorldSettings = Cast<AFretteWorldSettings>(World->GetWorldSettings());
 
-#if WITH_EDITORONLY_DATA
+	#if WITH_EDITORONLY_DATA
 	if (IsValid(HeatMaterial) && !IsValid(HeatMaterialInstance))
 	{
 		HeatMaterialInstance = UMaterialInstanceDynamic::Create(HeatMaterial, this);
 		SphereMesh->SetMaterial(0, HeatMaterialInstance);
 	}
-#endif
+	#endif
 
 	if (OverlapSphere)
 		OverlapSphere->SetSphereRadius(DiffusionRadius);
 
-#if WITH_EDITORONLY_DATA
+	#if WITH_EDITORONLY_DATA
 	UpdateDebug();
-#endif
+	#endif
 }
 
 void UFretteTemperatureSourceComponent::BeginPlay()
@@ -143,7 +167,7 @@ void UFretteTemperatureSourceComponent::DisableSource()
 float UFretteTemperatureSourceComponent::ComputeTemperature(float r) const
 {
 	float AmbientTemperature = GetSafeAmbientTemperature(GetWorld());
-	
+
 	if (r <= SourceRadius)
 		return SourceTemperature;
 	if (r >= DiffusionRadius)
@@ -308,7 +332,7 @@ void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 		TemperatureAtSlice, FlowAtSlice);
 	DebugText->SetText(FText::FromString(Text));
 
-	if (ShowArrows == ETemperatureSourceArrowRole::None)
+	if (ShowArrows == ETemperatureSourceArrowRole::None || !bVisualizeTemperature)
 	{
 		for (const auto Arrow : DebugArrows)
 			Arrow->SetVisibility(false);
@@ -401,23 +425,28 @@ void UFretteTemperatureSourceComponent::UpdateMaterial() const
 
 void UFretteTemperatureSourceComponent::UpdateDebug()
 {
+	OverlapSphere->SetVisibility(bVisualizeTemperature);
+	
 	DebugSphereInner->SetSphereRadius(SourceRadius);
+	DebugSphereInner->SetVisibility(bVisualizeTemperature);
+	
 	const float TextSize = DiffusionRadius / 4.f;
 	DebugText->SetRelativeLocation(FVector(0, 0, DiffusionRadius + 0.5 * TextSize));
 	DebugText->SetWorldSize(TextSize);
-	DebugText->SetVisibility(bShowNumbersAtSlice);
+	DebugText->SetVisibility(bShowNumbersAtSlice && bVisualizeTemperature);
 
 	if (SphereMesh)
 	{
 		const float Scale = DiffusionRadius / 50.f;
 		SphereMesh->SetRelativeScale3D(FVector(Scale));
+		SphereMesh->SetVisibility(bVisualizeTemperature);
 	}
 
 	if (FloorDiskMesh)
 	{
 		const float Scale = RadialSlice * DiffusionRadius / 50.0f;
 		FloorDiskMesh->SetRelativeScale3D(FVector(Scale, Scale, 0.01f));
-		FloorDiskMesh->SetVisibility(ShowArrows != ETemperatureSourceArrowRole::None || bShowNumbersAtSlice);
+		FloorDiskMesh->SetVisibility((ShowArrows != ETemperatureSourceArrowRole::None || bShowNumbersAtSlice) && bVisualizeTemperature);
 	}
 
 	UpdateMaterial();
@@ -429,6 +458,11 @@ void UFretteTemperatureSourceComponent::PostEditChangeProperty(FPropertyChangedE
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	OverlapSphere->SetSphereRadius(DiffusionRadius);
+	UpdateDebug();
+}
+
+void UFretteTemperatureSourceComponent::ToggleVisualization(bool bArg)
+{
 	UpdateDebug();
 }
 #endif

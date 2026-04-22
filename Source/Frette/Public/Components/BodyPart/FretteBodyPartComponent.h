@@ -49,6 +49,8 @@ public:
 	virtual void ReadyForReplication() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
+	bool Ciboire_DeleteMoiPasCalisse() const;
+	
 	UFretteBodyPartInstance* FindBodyPart(UPARAM(meta = (Categories = "Frette.BodyPart")) FGameplayTag BodyPartTag) const;
 
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
@@ -70,6 +72,7 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
 	float GetNormalizedCriticalValue(UPARAM(meta = (Categories = "Frette.BodyPartValues")) FGameplayTag ValueTag, bool bForFeedback) const;
+	void ResetValueForAllBodyParts(FGameplayTag ValueType);
 
 	UFUNCTION(BlueprintPure, Category = "Frette|Body Parts")
 	bool AreBodyPartsInitialized() const { return BodyPartInstances.Num() > 0; }

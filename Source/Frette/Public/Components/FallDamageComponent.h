@@ -17,7 +17,7 @@ class FRETTE_API UFallDamageComponent : public UActorComponent
 
 public:
 	virtual void BeginPlay() override;
-	
+
 protected:
 	void BindMovementEvents();
 	void ApplyFallDamage(float DistanceFallen) const;
@@ -30,6 +30,8 @@ protected:
 
 	UFUNCTION()
 	void OnJumpApexReached();
+	int32 FindWorstDamageThresholdIndex(float DistanceFallen) const;
+	float CalculateFinalDamage(float DistanceFallen, int32 WorstThresholdIndex, const FFallDamageThreshold& Threshold) const;
 
 	UPROPERTY()
 	TObjectPtr<ACharacter> OwnerCharacter;

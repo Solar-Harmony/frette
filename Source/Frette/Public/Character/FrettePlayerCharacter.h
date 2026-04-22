@@ -25,6 +25,7 @@ public:
 	UFretteEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
 
 	AFrettePlayerCharacter();
+	void SetupPlayerCollisions();
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
@@ -39,11 +40,17 @@ public:
 	FOnPlayerDied OnPlayerDied;
 
 	virtual void Die() override;
+	
+	virtual void Revive() override;
 
 	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) override;
 
 	UFUNCTION(BlueprintCallable)
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
+	
+	UFUNCTION(BlueprintCallable)
+	void HandleRagdoll(FVector DeathVelocity);
+	void RecoverFromRagdoll();
 
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
@@ -55,6 +62,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UFretteCompassComponent> CompassComponent;
+	
+	UPROPERTY(EditDefaultsOnly)
+	float ReviveTimer = 5.0f;
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;
@@ -80,6 +90,9 @@ protected:
 	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
 
 	virtual void Multicast_HandleDeath_Implementation(FVector FinalVelocity) override;
+	virtual void Multicast_HandleRevive_Implementation() override;
+	
+	void UnRagdoll();
 
 private:
 	virtual void InitAbilityActorInfo() override;

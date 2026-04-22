@@ -32,6 +32,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Die();
+	
+	UFUNCTION(BlueprintCallable)
+	virtual void Revive();
 
 protected:
 	AFretteBaseCharacter();
@@ -76,4 +79,6 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_HandleDeath(FVector DeathVelocity);
 
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_HandleRevive();
 };

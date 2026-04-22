@@ -16,7 +16,7 @@ struct FFretteClueInfo
 	FText LandmarkName = INVTEXT("ERR_LANDMARK_NAME_UNSET");
 	FText LandmarkDescription = INVTEXT("ERR_LANDMARK_DESC_UNSET");
 	FText ObjectiveName = INVTEXT("ERR_OBJECTIVE_NAME_UNSET");
-	FText LandmarkLoot = INVTEXT("ERR_LANDMARK_LOOT_UNSET");
+	FText LandmarkLoot = INVTEXT("ERR_LANDMARK_LOOT_UNSET_OR_EMPTY");
 	FText CardinalDirection = INVTEXT("ERR_CARDINAL_DIRECTION_UNSET");
 };
 

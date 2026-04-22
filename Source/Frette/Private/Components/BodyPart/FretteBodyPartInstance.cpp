@@ -57,15 +57,18 @@ FFretteBodyPartContext UFretteBodyPartInstance::AddValueByTag(const float Value,
 		return FFretteBodyPartContext();
 
 	const float ClampedDelta = ClampDelta(Value, Tag);
-	// TODO fix this shite that fucks up when delta is 0
-	//if (ClampedDelta == 0.f)
-	//	return FFretteBodyPartContext();
+
+	FFretteBodyPartContext Context;
+	Context.AccumulatedValue = FindOrAddAccumulatedValue(Tag);
+	Context.ValueDelta = ClampedDelta;
+	
+	if (ClampedDelta == 0.f)
+		return Context;
 
 	const float CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
 	
 	FRETTE_LOG(Log, "%s of %s's %s changed by %f, now %f", *Tag.ToString(), *OwnerCharacter->GetName(), *GetBodyPartTag().ToString(), ClampedDelta, CurrentValue);
 	
-	FFretteBodyPartContext Context;
 	CheckDeltaRules(Tag, Context, ClampedDelta);
 	CheckAccumulatedValueRules(Tag, Context, CurrentValue);
 	
