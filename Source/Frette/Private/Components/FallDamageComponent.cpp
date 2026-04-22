@@ -22,6 +22,12 @@ void UFallDamageComponent::BeginPlay()
 	{
 		FRETTE_LOG(Error, "Missing Fall Damage Config for %s.", OwnerCharacter->GetName());
 	}
+	
+	if (Config->DamageThresholds.IsEmpty())
+	{
+		this->Deactivate();
+		FRETTE_LOG(Warning, "No damage thresholds set for %s.).", OwnerCharacter->GetName());
+	}
 
 	BindMovementEvents();
 }
@@ -58,19 +64,9 @@ void UFallDamageComponent::OnJumpApexReached()
 //Va chercher le threshold de dégats le plus sévère que le joueur a atteint selon la distance tombé
 int32 UFallDamageComponent::FindWorstDamageThresholdIndex(float DistanceFallen) const
 {
-	int32 WorstThresholdIndex = INDEX_NONE;
-	for (int32 i = 0; i < Config->DamageThresholds.Num(); ++i)
-	{
-		if (DistanceFallen <= Config->DamageThresholds[i].FallHeight)
-		{
-			WorstThresholdIndex = i;
-		}
-		else
-		{
-			break;
-		}
-	}
-	return WorstThresholdIndex;
+	return Config->DamageThresholds.FindLastByPredicate([DistanceFallen](const FFallDamageThreshold& Threshold) {
+			return DistanceFallen <= Threshold.FallHeight;
+		});
 }
 
 //Lerp le dégat selon le threshold précédent
@@ -93,7 +89,7 @@ float UFallDamageComponent::CalculateFinalDamage(const float DistanceFallen, con
 
 void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 {
-	if (DistanceFallen >= Config->DamageThresholds[0].FallHeight)
+	if (Config->DamageThresholds.Num() == 0 || DistanceFallen >= Config->DamageThresholds[0].FallHeight)
 		return;
 
 	const int32 WorstThresholdIndex = FindWorstDamageThresholdIndex(DistanceFallen);
@@ -105,7 +101,8 @@ void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 
 	const float FallDamage = CalculateFinalDamage(DistanceFallen, WorstThresholdIndex, Threshold);
 	
-	UFretteBodyPartComponent* BodyPartComponent = Cast<UFretteBodyPartComponent>(OwnerCharacter->GetComponentByClass(UFretteBodyPartComponent::StaticClass()));
+	UFretteBodyPartComponent* BodyPartComponent = OwnerCharacter->GetComponentByClass<UFretteBodyPartComponent>();
+	
 	for (const FGameplayTag BoneTag : Threshold.AffectedBones)
 	{
 		BodyPartComponent->AddValueFromBodyPartTag(BoneTag, -FallDamage, TAG_BodyPartValues_Health);
