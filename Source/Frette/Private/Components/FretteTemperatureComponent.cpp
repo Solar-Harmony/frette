@@ -86,8 +86,8 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 				// Truncate the net temp just to be safe
 				NetTemperature = FMath::Clamp(NetTemperature, WorldSettings->MinTemperature, WorldSettings->MaxTemperature);
 
-				float Temperature = BodyPartComponent->GetValueFromBodyPart(BoneTag, TemperatureEffectTag);
-				float ThermalImpedance = BodyPartComponent->GetValueFromBodyPart(BoneTag, ThermalImpedanceEffectTag);
+				const float Temperature = BodyPartComponent->GetValueFromBodyPart(BoneTag, TemperatureEffectTag);
+				const float ThermalImpedance = BodyPartComponent->GetValueFromBodyPart(BoneTag, ThermalImpedanceEffectTag);
 
 				if (Temperature < WorldSettings->MinTemperature || Temperature > WorldSettings->MaxTemperature)
 				{

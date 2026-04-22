@@ -57,8 +57,9 @@ FFretteBodyPartContext UFretteBodyPartInstance::AddValueByTag(const float Value,
 		return FFretteBodyPartContext();
 
 	const float ClampedDelta = ClampDelta(Value, Tag);
-	if (ClampedDelta == 0.f)
-		return FFretteBodyPartContext();
+	// TODO fix this shite that fucks up when delta is 0
+	//if (ClampedDelta == 0.f)
+	//	return FFretteBodyPartContext();
 
 	const float CurrentValue = FindOrAddAccumulatedValue(Tag) += ClampedDelta;
 	
