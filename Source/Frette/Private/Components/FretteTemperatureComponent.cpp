@@ -161,8 +161,8 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 				
 				DeltaTemp *= WorldSettings->TimeBeforeTemperatureUpdates;
 
-				//UE_LOG(LogFrette, Log, TEXT("Temp integrator: Tag[%s] Temp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] DynamicAmbientFlow[%.3f] ConstrainedAmbientFlow[%.3f] EffectiveFlow[%.3f] NeighboursFlow[%.3f] DeltaTime[%.3f] Damping[%.3f] DeltaTemp[%.3f]"),
-				//	*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, ConstrainedAmbient, EffectiveFlow, BoneTagNeighboursFlow, WorldSettings->TimeBeforeTemperatureUpdates, Damping, DeltaTemp);
+				UE_LOG(LogFrette, Log, TEXT("Temp integrator: Tag[%s] Temp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] DynamicAmbientFlow[%.3f] ConstrainedAmbientFlow[%.3f] EffectiveFlow[%.3f] NeighboursFlow[%.3f] DeltaTime[%.3f] Damping[%.3f] DeltaTemp[%.3f]"),
+					*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, ConstrainedAmbient, EffectiveFlow, BoneTagNeighboursFlow, WorldSettings->TimeBeforeTemperatureUpdates, Damping, DeltaTemp);
 
 				BoneDeltaTemp.Add(BoneTag, DeltaTemp);
 			}

@@ -28,6 +28,6 @@ void UFretteClothingItem::UpdateBodyPartTemperatureModifier(const bool bIsEquipp
 
 	FGameplayTag AffectedBodyPartTag = ItemData->ItemSlotTag;
 	
-	const int ModifierToApply = bIsEquipping ? ItemData->ThermalImpedanceModifier : -ItemData->ThermalImpedanceModifier;
+	const float ModifierToApply = bIsEquipping ? ItemData->ThermalImpedanceModifier : -ItemData->ThermalImpedanceModifier;
 	BodyPartComponent->AddValueFromBodyPartTag(AffectedBodyPartTag, ModifierToApply, TAG_BodyPartValues_ThermalImpedance);
 }
