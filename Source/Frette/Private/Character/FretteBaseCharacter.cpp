@@ -11,6 +11,11 @@ void AFretteBaseCharacter::Die()
 	bIsDead = true;
 }
 
+void AFretteBaseCharacter::Revive()
+{
+	bIsDead = false;
+}
+
 AFretteBaseCharacter::AFretteBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -102,5 +107,7 @@ void AFretteBaseCharacter::OnMaxSpeedChanged(const FOnAttributeChangeData& Data)
 		MovementComp->MaxWalkSpeed = Data.NewValue;
 	}
 }
+
+void AFretteBaseCharacter::Multicast_HandleRevive_Implementation() {}
 
 void AFretteBaseCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity) {}
