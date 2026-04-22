@@ -55,6 +55,7 @@ void UFallDamageComponent::OnJumpApexReached()
 	FallStartHeight = OwnerCharacter->GetActorLocation().Z;
 }
 
+//Va chercher le threshold de dégats le plus sévère que le joueur a atteint selon la distance tombé
 int32 UFallDamageComponent::FindWorstDamageThresholdIndex(float DistanceFallen) const
 {
 	int32 WorstThresholdIndex = INDEX_NONE;
@@ -92,27 +93,22 @@ float UFallDamageComponent::CalculateFinalDamage(const float DistanceFallen, con
 
 void UFallDamageComponent::ApplyFallDamage(float DistanceFallen) const
 {
-	if (DistanceFallen <= Config->DamageThresholds[0].FallHeight)
+	if (DistanceFallen >= Config->DamageThresholds[0].FallHeight)
 		return;
 
 	const int32 WorstThresholdIndex = FindWorstDamageThresholdIndex(DistanceFallen);
 	
+	if (WorstThresholdIndex == INDEX_NONE)
+		return;
+	
 	const FFallDamageThreshold& Threshold = Config->DamageThresholds[WorstThresholdIndex];
-	
-	float FallDamage = CalculateFinalDamage(DistanceFallen, WorstThresholdIndex, Threshold);
 
-	const UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
-	FGameplayEffectContextHandle EffectContext = ASC->MakeEffectContext();
-	EffectContext.AddSourceObject(this);
-	
-	const FGameplayEffectSpecHandle NewHandle = ASC->MakeOutgoingSpec(Threshold.Effect, 1, EffectContext);
-	ensureMsgf(NewHandle.IsValid(), TEXT("Probably need to set the DamageEffect in the Config"));
+	const float FallDamage = CalculateFinalDamage(DistanceFallen, WorstThresholdIndex, Threshold);
 	
 	UFretteBodyPartComponent* BodyPartComponent = Cast<UFretteBodyPartComponent>(OwnerCharacter->GetComponentByClass(UFretteBodyPartComponent::StaticClass()));
-	const float SeparatedDamage = FallDamage / Threshold.AffectedBones.Num();
 	for (const FGameplayTag BoneTag : Threshold.AffectedBones)
 	{
-		BodyPartComponent->AddValueFromBodyPartTag(BoneTag, -SeparatedDamage, TAG_BodyPartValues_Health);
-		FRETTE_LOG(Log, "%s took %d damage from falling %f cm", *OwnerCharacter->GetName(), FMath::TruncToInt32(SeparatedDamage), DistanceFallen);
+		BodyPartComponent->AddValueFromBodyPartTag(BoneTag, -FallDamage, TAG_BodyPartValues_Health);
+		FRETTE_LOG(Log, "%s took %d damage from falling %f cm", *OwnerCharacter->GetName(), FMath::TruncToInt32(FallDamage), DistanceFallen);
 	}
 }

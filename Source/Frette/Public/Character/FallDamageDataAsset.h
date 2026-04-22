@@ -16,9 +16,6 @@ struct FFallDamageThreshold
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0.0"))
 	float DamageValue = 0.f;
-	
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UGameplayEffect> Effect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (Categories = "Frette.BodyPart"))
 	TArray<FGameplayTag> AffectedBones;
