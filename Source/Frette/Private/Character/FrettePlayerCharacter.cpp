@@ -45,6 +45,16 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	CompassComponent = CreateDefaultSubobject<UFretteCompassComponent>(TEXT("Compass Component"));
 }
 
+void AFrettePlayerCharacter::SetupPlayerCollisions()
+{
+	GetMesh()->SetCollisionObjectType(ECC_CharacterMesh);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_CharacterMesh, ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_CharacterMesh, ECR_Ignore);
+}
+
 void AFrettePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -56,12 +66,9 @@ void AFrettePlayerCharacter::BeginPlay()
 	MeshComponent->SetAllBodiesSimulatePhysics(false);
 	MeshComponent->RecreatePhysicsState();
 
-	GetMesh()->SetCollisionObjectType(ECC_CharacterMesh);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
-	GetMesh()->SetCollisionResponseToChannel(ECC_CharacterMesh, ECR_Block);
-	GetMesh()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_CharacterMesh, ECR_Ignore);
+	SetupPlayerCollisions();
+
+	UE_LOG(LogTemp, Warning, TEXT("Mesh RelativeRot: %s"), *GetMesh()->GetRelativeRotation().ToString());
 
 }
 
@@ -166,4 +173,53 @@ void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathV
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
 		PlayerController->DisableInput(PlayerController);
+	
+	
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
+		//Reset la vie des bodyparts ce qui trigger le revive quand le joueur se faire retirer l'éffet de death
+		BodyPartComponent->ResetValueForAllBodyParts(TAG_BodyPartValues_Health);
+	}, ReviveTimer, false);
+}
+
+void AFrettePlayerCharacter::Revive()
+{
+	Multicast_HandleRevive();
+}
+
+void AFrettePlayerCharacter::Multicast_HandleRevive_Implementation()
+{
+	Super::Multicast_HandleRevive_Implementation();
+	
+	UnRagdoll();
+}
+
+void AFrettePlayerCharacter::UnRagdoll()
+{
+	USkeletalMeshComponent* PlayerMesh = GetMesh();
+
+	const FVector RagdollLocation = PlayerMesh->GetBoneLocation(FName("pelvis"));
+
+	SetActorLocation(RagdollLocation);
+
+	PlayerMesh->SetAllBodiesSimulatePhysics(false);
+	
+	SetupPlayerCollisions();
+	
+	bUseControllerRotationYaw = true;
+	
+	PlayerMesh->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	
+	PlayerMesh->SetRelativeLocationAndRotation(
+		FVector(0, 0, -GetCapsuleComponent()->GetScaledCapsuleHalfHeight()),
+		FRotator(0, -90.f, 0)
+	);
+
+	PlayerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+		PlayerController->EnableInput(PlayerController);
 }
