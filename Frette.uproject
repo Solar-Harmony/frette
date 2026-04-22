@@ -35,6 +35,14 @@
 			]
 		},
 		{
+			"Name": "StateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "ModelViewViewModel",
+			"Enabled": true
+		},
+		{
 			"Name": "GameplayAbilities",
 			"Enabled": true
 		},

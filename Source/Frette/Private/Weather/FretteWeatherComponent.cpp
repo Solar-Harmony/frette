@@ -10,7 +10,7 @@
 UFretteWeatherComponent::UFretteWeatherComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	PrimaryComponentTick.bStartWithTickEnabled = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
 void UFretteWeatherComponent::BeginPlay()
@@ -30,18 +30,20 @@ void UFretteWeatherComponent::BeginPlay()
 	}
 
 	PrimaryComponentTick.bCanEverTick = Config->bUseDynamicWeather;
-	
+
 	ActiveWeather = ChooseNextWeather();
 	NextWeather = ChooseNextWeather();
-	
+
 	if (ActiveWeather.WeatherData)
 	{
 		CurrentTemperature = ActiveWeather.WeatherData->AmbientTemperature;
 	}
-	
+
 	FRETTE_LOGC(Weather, Log, "Initial weather is '%s'.", ActiveWeather.WeatherData);
 
 	UpdateGameStateWeather();
+
+	SetComponentTickEnabled(true);
 }
 
 void UFretteWeatherComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -49,9 +51,9 @@ void UFretteWeatherComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	const bool bReport = CVarFretteWeatherReport.GetValueOnGameThread();
-	
+
 	ActiveWeather.TimeRemaining = FMath::Max(0.0f, ActiveWeather.TimeRemaining - DeltaTime);
-	
+
 	// are we done transitioning?
 	if (ActiveWeather.TimeRemaining <= 0.0f)
 	{
@@ -90,13 +92,13 @@ void UFretteWeatherComponent::TickComponent(float DeltaTime, ELevelTick TickType
 			GEngine->AddOnScreenDebugMessage(Key, 0.5f, FColor::Cyan, Msg, false, FVector2D(3.0f, 3.0f));
 		}
 	}
-	
+
 	// blend between current and next temps
 	CurrentTemperature = FMath::Lerp(
 		ActiveWeather.WeatherData->AmbientTemperature,
 		NextWeather.WeatherData->AmbientTemperature,
 		ActiveToNextWeatherBlendingFactor);
-	
+
 	if (bReport)
 	{
 		static uint64 Key = GetTypeHash(FName("FretteWeatherThermometer"));
@@ -115,7 +117,7 @@ FFretteActiveWeather UFretteWeatherComponent::ChooseNextWeather() const
 	const int TotalDuration = WeatherData->BaseDuration + FMath::RandRange(0, WeatherData->MaxAdditionalDuration) + WeatherData->EndTransitionDuration;
 	WeatherInstance.TimeRemaining = TotalDuration;
 	WeatherInstance.WeatherData = WeatherData;
-	
+
 	return WeatherInstance;
 }
 
@@ -123,7 +125,7 @@ void UFretteWeatherComponent::UpdateGameStateWeather() const
 {
 	AFretteGameState* GameState = GetWorld()->GetGameState<AFretteGameState>();
 	check(GameState != nullptr);
-	
+
 	FFretteWeatherState NewState;
 	NewState.ActiveWeatherData = ActiveWeather.WeatherData;
 	NewState.NextWeatherData = NextWeather.WeatherData;
@@ -133,7 +135,7 @@ void UFretteWeatherComponent::UpdateGameStateWeather() const
 	if (GameState->WeatherState != NewState)
 	{
 		GameState->WeatherState = NewState;
-		
+
 		// Listen server: OnRep is not automatically called on server
 		if (GetNetMode() == NM_ListenServer || GetNetMode() == NM_Standalone)
 		{

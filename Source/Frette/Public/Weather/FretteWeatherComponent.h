@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "CoreGameplay/FretteGameState.h"
+#include "GameFramework/GameStateBase.h"
 #include "Weather/FretteWeatherState.h"
 #include "FretteWeatherComponent.generated.h"
 
@@ -28,7 +30,7 @@ public:
 	UFretteWeatherComponent();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<UFretteWeatherConfig> Config;
@@ -42,3 +44,16 @@ private:
 	FFretteActiveWeather ChooseNextWeather() const;
 	void UpdateGameStateWeather() const;
 };
+
+static float GetSafeAmbientTemperature(UWorld* InWorld)
+{
+	if (!IsValid(InWorld))
+		return 0.0f;
+
+	AFretteGameState* GS = Cast<AFretteGameState>(InWorld->GetGameState());
+	if (!IsValid(GS))
+		return 0.0f;
+
+	return GS->WeatherState.CurrentAmbientTemperature;
+}
+

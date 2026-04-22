@@ -20,7 +20,7 @@ struct FFretteAccumulatedValueEntry
 	FGameplayTag Tag;
 
 	UPROPERTY()
-	int32 Value = 0;
+	float Value = 0.f;
 };
 
 UCLASS()
@@ -34,8 +34,8 @@ public:
 	FGameplayTag GetBodyPartTag() const { return SourceData->BodyPartTag; }
 
 	void Initialize(UFretteBodyPartData* InSourceData, AFretteBaseCharacter* Owner);
-	int32& FindOrAddAccumulatedValue(const FGameplayTag& Tag);
-	FFretteBodyPartContext AddValueByTag(int Value, FGameplayTag Tag);
+	float& FindOrAddAccumulatedValue(const FGameplayTag& Tag);
+	FFretteBodyPartContext AddValueByTag(float Value, FGameplayTag Tag);
 	void CheckAndApplyRules(EBodyPartEventType EventType, FGameplayTag Tag, const FFretteBodyPartContext& Context) const;
 
 	UPROPERTY(ReplicatedUsing=OnRep_AccumulatedValues)
@@ -53,9 +53,9 @@ private:
 	void RemoveGameplayAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities) const;
 	void BuildRuleLookup();
 	void SetMinDeltaValueThreshold();
-	int ClampDelta(int Value, FGameplayTag Tag);
-	void CheckDeltaRules(FGameplayTag Tag, FFretteBodyPartContext& Context, int ClampedDelta) const;
-	void CheckAccumulatedValueRules(FGameplayTag Tag, FFretteBodyPartContext& Context, int CurrentValue) const;
+	float ClampDelta(float Value, FGameplayTag Tag);
+	void CheckDeltaRules(FGameplayTag Tag, FFretteBodyPartContext& Context, float ClampedDelta) const;
+	void CheckAccumulatedValueRules(FGameplayTag Tag, FFretteBodyPartContext& Context, float CurrentValue) const;
 	const TArray<FFretteEffectRuleEntry>* GetRulesForEvent(const EBodyPartEventType EventType, const FGameplayTag& EffectTag) const;
 	TArray<FFretteEffectRuleEntry> GetRulesForEvent(const EBodyPartEventType EventType) const;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -65,8 +65,6 @@ private:
 
 	UPROPERTY(Replicated)
 	TObjectPtr<AFretteBaseCharacter> OwnerCharacter;
-
-	int MinValueDelta = 9999;
 
 	// Nécéssaire pour garder les regles instancier en vie sinon ils se font garbage collect
 	// et ça fait des crash quand on essaye d'y accéder
@@ -79,4 +77,6 @@ private:
 	TMap<EBodyPartEventType, TMap<FGameplayTag, TArray<FFretteEffectRuleEntry>>> EventTypeToRulesMap;
 
 	TMap<TSubclassOf<UGameplayAbility>, FGameplayAbilitySpecHandle> GrantedAbilityHandles;
+
+	float MinValueDelta = 9999.f;
 };
