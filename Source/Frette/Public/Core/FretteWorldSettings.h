@@ -15,6 +15,9 @@ public:
 	UPROPERTY(EditAnywhere, Category="Frette|Weather")
 	bool bEnableWeather = true;
 	
+	UPROPERTY(EditAnywhere, Category="Frette|Weather")
+	TObjectPtr<UFretteWeatherConfig> WeatherConfig;
+	
 	UPROPERTY(EditAnywhere, Category="Frette|Temperature", meta = (Units = "Celsius"))
 	float MinTemperature = -50; // deg c
 	
@@ -23,7 +26,4 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category="Frette|Temperature", meta = (Units = "Seconds"))
 	float TimeBeforeTemperatureUpdates = 0.5;
-	
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UFretteWeatherConfig> WeatherConfig;
 };

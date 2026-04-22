@@ -65,12 +65,6 @@ class FRETTE_API UFretteTemperatureComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
-	float TimeBetweenTemperatureChange = 0.5f;
-
-	UFUNCTION(BlueprintCallable)
-	void AddToAmbientTemperature(float NewAmbientTemperature);
-
 	UFUNCTION(BlueprintCallable)
 	void AddBodyPartTemperatureContribution(FTemperatureContribution Contribution, FGameplayTag BodyPartTag, FGuid SourceId);
 	void AddBodyPartTemperatureContribution(FTemperatureContribution Contribution, FName BoneName, FGuid SourceId);
@@ -87,10 +81,6 @@ protected:
 	virtual void BeginPlay() override;
 	void OnTemperatureTick();
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	//TODO: Temporaire le temps qu'on ai un vrai systeme de calcul de température ambiante selon l'environnement autour du joueur
-	UPROPERTY(EditAnywhere, BlueprintReadWrite);
-	float AmbientTemperature = -30;
 
 	UPROPERTY(EditDefaultsOnly, Category="Frette|Temperature", meta=(ClampMin="0.0", Units="Celsius",
 		ToolTip="Temperature difference below which damping reduces the applied temperature change. This prevents oscillations and ensures smooth convergence toward the target temperature."))

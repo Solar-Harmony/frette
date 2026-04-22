@@ -2,6 +2,8 @@
 
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Frette/Frette.h"
+#include "GameFramework/GameStateBase.h"
+#include "Weather/FretteWeatherComponent.h"
 
 UFretteTemperatureComponent::UFretteTemperatureComponent()
 {
@@ -46,6 +48,8 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 	{
 		if (!BodyPartComponent)
 			return;
+		
+		const float AmbientTemperature = GetSafeAmbientTemperature(GetWorld());
 
 		TMap<FGameplayTag, float> BoneFlowAccum;
 		TMap<FGameplayTag, float> BoneTempAccum;
@@ -157,11 +161,11 @@ void UFretteTemperatureComponent::OnTemperatureTick()
 				// For now, the thermal impedance will affect the flows globally
 				DeltaTemp *= 1.f - ThermalImpedance;
 				
-				DeltaTemp *= TimeBetweenTemperatureChange;
+				DeltaTemp *= WorldSettings->TimeBeforeTemperatureUpdates;
 
 				// TODO: Remove this log spam lol
 				UE_LOG(LogFrette, Log, TEXT("Temp integrator: Tag[%s] Temp[%.3f] NetTemp[%.3f] NetFlow[%.3f] AmbientFlow[%.3f] DynamicAmbientFlow[%.3f] ConstrainedAmbientFlow[%.3f] EffectiveFlow[%.3f] NeighboursFlow[%.3f] DeltaTime[%.3f] Damping[%.3f] DeltaTemp[%.3f]"),
-					*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, ConstrainedAmbient, EffectiveFlow, BoneTagNeighboursFlow, TimeBetweenTemperatureChange, Damping, DeltaTemp);
+					*(BoneTag.ToString().Replace(TEXT("Frette.BodyPart."), TEXT(""))), Temperature, NetTemperature, NetFlow, AmbientFlow, DynamicAmbient, ConstrainedAmbient, EffectiveFlow, BoneTagNeighboursFlow, WorldSettings->TimeBeforeTemperatureUpdates, Damping, DeltaTemp);
 
 				BoneDeltaTemp.Add(BoneTag, DeltaTemp);
 			}
@@ -190,11 +194,6 @@ void UFretteTemperatureComponent::AddBodyPartTemperatureContribution(const FTemp
 	FGameplayTag BodyPartTag = BodyPartComponent->GetBodyPartFromBoneName(BoneName);
 
 	AddBodyPartTemperatureContribution(Contribution, BodyPartTag, SourceId);
-}
-
-void UFretteTemperatureComponent::AddToAmbientTemperature(const float NewAmbientTemperature)
-{
-	AmbientTemperature += NewAmbientTemperature;
 }
 
 void UFretteTemperatureComponent::ClearBodyPartTemperatureContribution(FGameplayTag BodyPartTag, FGuid SourceId)

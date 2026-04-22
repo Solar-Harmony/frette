@@ -36,6 +36,10 @@ public:
 
 	UFUNCTION()
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
+	UFUNCTION()
+	void EnableSource();
+	void DisableSource();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
 	float SourceRadius = 1;
@@ -45,10 +49,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (Units = "Celsius"))
 	float SourceTemperature = 100;
-
-	// TODO Plug that into weather system
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (Units = "Celsius"))
-	float AmbientTemperature = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin="0.0", ClampMax="2.0",
 		ToolTip="Multiplier applied to the temperature gradient when computing heat flow. Higher values increase how strongly heat propagates outward from the source. The best way to tune it is to use show numbers and flow arrows."))
@@ -112,6 +112,7 @@ public:
 	bool bShowNumbersAtSlice = false;
 
 	FGuid UniqueId;
+	bool bEnabled = true;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	#endif

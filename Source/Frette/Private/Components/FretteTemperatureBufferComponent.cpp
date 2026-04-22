@@ -70,7 +70,7 @@ void UFretteTemperatureBufferComponent::BeginPlay()
 		PrimitiveComponent->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnOverlapEnd);
 	}
 
-	if (!ensure(BoundOverlapColliders.IsEmpty()))
+	if (!ensure(!BoundOverlapColliders.IsEmpty()))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UFretteTemperatureBufferComponent: No primitive components matching configured thermal buffer tags found on %s"), *Owner->GetName());
 	}

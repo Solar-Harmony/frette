@@ -10,6 +10,8 @@
 #include "Components/TextRenderComponent.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Components/BodyPart/FretteBodyPartData.h"
+#include "GameFramework/GameStateBase.h"
+#include "Weather/FretteWeatherComponent.h"
 
 // Sets default values for this component's properties
 UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
@@ -110,7 +112,7 @@ void UFretteTemperatureSourceComponent::BeginPlay()
 	Super::BeginPlay();
 
 	SetComponentTickEnabled(false);
-	
+
 	SetComponentTickInterval(0.5f);
 
 	OverlapSphere->OnComponentBeginOverlap.AddDynamic(
@@ -121,8 +123,30 @@ void UFretteTemperatureSourceComponent::BeginPlay()
 		&UFretteTemperatureSourceComponent::OnEndOverlap);
 }
 
+void UFretteTemperatureSourceComponent::EnableSource()
+{
+	bEnabled = true;
+	SetComponentTickEnabled(!OverlappingCharacters.IsEmpty());
+}
+
+void UFretteTemperatureSourceComponent::DisableSource()
+{
+	bEnabled = false;
+	SetComponentTickEnabled(false);
+
+	// Make sure to clear all contributions
+	for (const auto Character : OverlappingCharacters)
+	{
+		UFretteTemperatureComponent* TempComp =
+			Character->FindComponentByClass<UFretteTemperatureComponent>();
+		TempComp->ClearBodyPartTemperatureContributions(UniqueId);
+	}
+}
+
 float UFretteTemperatureSourceComponent::ComputeTemperature(float r) const
 {
+	float AmbientTemperature = GetSafeAmbientTemperature(GetWorld());
+	
 	if (r <= SourceRadius)
 		return SourceTemperature;
 	if (r >= DiffusionRadius)
@@ -230,6 +254,8 @@ void UFretteTemperatureSourceComponent::TickComponent(
 
 					if (bBlocked)
 					{
+						const float AmbientTemperature = GetSafeAmbientTemperature(GetWorld());
+
 						Flow *= ObstructionFactor;
 						Temp = FMath::Lerp(AmbientTemperature, Temp, ObstructionFactor);
 					}
@@ -250,10 +276,7 @@ void UFretteTemperatureSourceComponent::OnBeginOverlap(UPrimitiveComponent* Over
 
 	OverlappingCharacters.Add(Character);
 
-	if (!OverlappingCharacters.IsEmpty())
-	{
-		SetComponentTickEnabled(true);
-	}
+	SetComponentTickEnabled(!OverlappingCharacters.IsEmpty() && bEnabled);
 }
 
 void UFretteTemperatureSourceComponent::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -270,10 +293,7 @@ void UFretteTemperatureSourceComponent::OnEndOverlap(UPrimitiveComponent* Overla
 		TemperatureComponent->ClearBodyPartTemperatureContributions(UniqueId);
 	}
 
-	if (OverlappingCharacters.IsEmpty())
-	{
-		SetComponentTickEnabled(false);
-	}
+	SetComponentTickEnabled(!OverlappingCharacters.IsEmpty() && bEnabled);
 }
 
 #if WITH_EDITORONLY_DATA
@@ -303,7 +323,7 @@ void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 		Quantity = ((TemperatureAtSlice - WorldSettings->MinTemperature)
 			/ (WorldSettings->MaxTemperature - WorldSettings->MinTemperature)) * 200.f;
 	else if (ShowArrows == ETemperatureSourceArrowRole::Flow)
-		Quantity = FlowAtSlice * 20.f;
+		Quantity = FlowAtSlice * 30.f;
 
 	for (int32 i = 0; i < NumberArrows; i++)
 	{
@@ -371,6 +391,9 @@ void UFretteTemperatureSourceComponent::UpdateMaterial() const
 	if (!IsValid(HeatMaterialInstance) || !IsValid(WorldSettings))
 		return;
 
+	// This may be used for vis in the game or outside the game so let's be safe
+	float AmbientTemperature = GetSafeAmbientTemperature(GetWorld());
+
 	HeatMaterialInstance->SetScalarParameterValue("InnerRadius", SourceRadius);
 	HeatMaterialInstance->SetScalarParameterValue("OuterRadius", DiffusionRadius);
 	HeatMaterialInstance->SetScalarParameterValue("SourceTemperature", SourceTemperature);
@@ -392,7 +415,7 @@ void UFretteTemperatureSourceComponent::UpdateDebug()
 		const float Scale = DiffusionRadius / 50.f;
 		SphereMesh->SetRelativeScale3D(FVector(Scale));
 	}
-	
+
 	if (FloorDiskMesh)
 	{
 		const float Scale = RadialSlice * DiffusionRadius / 50.0f;
