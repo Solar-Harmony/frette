@@ -37,8 +37,10 @@ public:
 	UFUNCTION()
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void EnableSource();
+	
+	UFUNCTION(BlueprintCallable)
 	void DisableSource();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
@@ -72,6 +74,9 @@ public:
 	
 	UPROPERTY()
 	TObjectPtr<AFretteWorldSettings> WorldSettings;
+
+	bool bEnabled = true;
+	FGuid UniqueId;
 
 	#if WITH_EDITORONLY_DATA
 	void UpdateDebug();
@@ -110,10 +115,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature")
 	bool bShowNumbersAtSlice = false;
-
-	FGuid UniqueId;
-	bool bEnabled = true;
-
+	
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	#endif
 };

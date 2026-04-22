@@ -1,16 +1,12 @@
 ﻿#include "Components/FretteTemperatureSourceComponent.h"
 
-#include "AssetTypeCategories.h"
-#include "BaseGizmos/GizmoElementArrowHead.h"
 #include "Components/ArrowComponent.h"
 #include "Components/DrawSphereComponent.h"
 #include "Components/FretteTemperatureComponent.h"
-#include "GameFramework/Character.h"
-#include "Components/InstancedStaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Components/BodyPart/FretteBodyPartComponent.h"
 #include "Components/BodyPart/FretteBodyPartData.h"
-#include "GameFramework/GameStateBase.h"
+#include "GameFramework/Character.h"
 #include "Weather/FretteWeatherComponent.h"
 
 // Sets default values for this component's properties
@@ -19,7 +15,7 @@ UFretteTemperatureSourceComponent::UFretteTemperatureSourceComponent()
 	bUseAttachParentBound = true;
 
 	PrimaryComponentTick.bCanEverTick = true;
-
+	
 	UniqueId = FGuid::NewGuid();
 
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
@@ -93,18 +89,20 @@ void UFretteTemperatureSourceComponent::OnRegister()
 	if (UWorld* World = GetWorld())
 		WorldSettings = Cast<AFretteWorldSettings>(World->GetWorldSettings());
 
+#if WITH_EDITORONLY_DATA
 	if (IsValid(HeatMaterial) && !IsValid(HeatMaterialInstance))
 	{
 		HeatMaterialInstance = UMaterialInstanceDynamic::Create(HeatMaterial, this);
 		SphereMesh->SetMaterial(0, HeatMaterialInstance);
 	}
+#endif
 
 	if (OverlapSphere)
 		OverlapSphere->SetSphereRadius(DiffusionRadius);
 
-	#if WITH_EDITORONLY_DATA
+#if WITH_EDITORONLY_DATA
 	UpdateDebug();
-	#endif
+#endif
 }
 
 void UFretteTemperatureSourceComponent::BeginPlay()
@@ -137,8 +135,7 @@ void UFretteTemperatureSourceComponent::DisableSource()
 	// Make sure to clear all contributions
 	for (const auto Character : OverlappingCharacters)
 	{
-		UFretteTemperatureComponent* TempComp =
-			Character->FindComponentByClass<UFretteTemperatureComponent>();
+		UFretteTemperatureComponent* TempComp = Character->FindComponentByClass<UFretteTemperatureComponent>();
 		TempComp->ClearBodyPartTemperatureContributions(UniqueId);
 	}
 }
