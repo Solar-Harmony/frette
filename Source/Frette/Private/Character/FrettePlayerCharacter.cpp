@@ -165,10 +165,7 @@ void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathV
 
 	bUseControllerRotationYaw = false;
 
-	GetMesh()->Stop();
-	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
-	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
-	GetMesh()->SetPhysicsLinearVelocity(DeathVelocity, false, FName("pelvis"));
+	HandleRagdoll(DeathVelocity);
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
@@ -180,6 +177,14 @@ void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathV
 		//Reset la vie des bodyparts ce qui trigger le revive quand le joueur se faire retirer l'éffet de death
 		BodyPartComponent->ResetValueForAllBodyParts(TAG_BodyPartValues_Health);
 	}, ReviveTimer, false);
+}
+
+void AFrettePlayerCharacter::HandleRagdoll(FVector DeathVelocity)
+{
+	GetMesh()->Stop();
+	GetMesh()->SetCollisionProfileName(FName("Ragdoll"));
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName("pelvis"), true, true);
+	GetMesh()->SetPhysicsLinearVelocity(DeathVelocity, false, FName("pelvis"));
 }
 
 void AFrettePlayerCharacter::Revive()

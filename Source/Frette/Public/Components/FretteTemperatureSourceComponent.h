@@ -8,6 +8,8 @@
 #include "Core/FretteWorldSettings.h"
 #include "FretteTemperatureSourceComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnVisualizationToggled, bool);
+
 UENUM(BlueprintType)
 enum class ETemperatureSourceArrowRole : uint8
 {
@@ -22,6 +24,7 @@ class FRETTE_API UFretteTemperatureSourceComponent : public USceneComponent
 	GENERATED_BODY()
 
 public:
+	void ToggleVisualization(bool bArg);
 	UFretteTemperatureSourceComponent();
 	void OnRegister();
 
@@ -117,5 +120,7 @@ public:
 	bool bShowNumbersAtSlice = false;
 	
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	
+	static FOnVisualizationToggled OnVisualizationToggled;
 	#endif
 };

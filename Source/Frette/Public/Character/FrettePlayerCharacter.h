@@ -47,6 +47,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UFretteInventoryComponent* GetPlayerInventory() const { return PlayerInventory; }
+	
+	UFUNCTION(BlueprintCallable)
+	void HandleRagdoll(FVector DeathVelocity);
+	void RecoverFromRagdoll();
 
 	UFretteNotificationsComponent* GetNotifications() const { return NotificationsComponent; }
 
