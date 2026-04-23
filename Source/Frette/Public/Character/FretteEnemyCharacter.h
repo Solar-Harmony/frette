@@ -9,9 +9,7 @@
 #include "FretteEnemyCharacter.generated.h"
 
 class UPawnSensingComponent;
-/**
- * 
- */
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDied, AFretteEnemyCharacter*, Character);
 
 UCLASS()
