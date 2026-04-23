@@ -157,7 +157,7 @@ void UFretteTemperatureSourceComponent::DisableSource()
 	SetComponentTickEnabled(false);
 
 	// Make sure to clear all contributions
-	for (const auto Character : OverlappingCharacters)
+	for (const auto& Character : OverlappingCharacters)
 	{
 		UFretteTemperatureComponent* TempComp = Character->FindComponentByClass<UFretteTemperatureComponent>();
 		TempComp->ClearBodyPartTemperatureContributions(UniqueId);
@@ -334,7 +334,7 @@ void UFretteTemperatureSourceComponent::UpdateDebugArrows()
 
 	if (ShowArrows == ETemperatureSourceArrowRole::None || !bVisualizeTemperature)
 	{
-		for (const auto Arrow : DebugArrows)
+		for (const auto& Arrow : DebugArrows)
 			Arrow->SetVisibility(false);
 		return;
 	}

@@ -171,7 +171,7 @@ void UFretteBodyPartInstance::RemoveGameplayEffects(TArray<TSubclassOf<UGameplay
 	if (!ensureMsgf(OwnerASC, TEXT("Owner character does not have an ability system component.")))
 		return;
 
-	for (const TSubclassOf Effect : Effects)
+	for (const TSubclassOf<UGameplayEffect>& Effect : Effects)
 	{
 		OwnerASC->RemoveActiveGameplayEffectBySourceEffect(Effect, OwnerASC, 1);
 
