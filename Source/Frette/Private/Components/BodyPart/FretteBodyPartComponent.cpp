@@ -252,9 +252,13 @@ void UFretteBodyPartComponent::ResetValueForAllBodyParts(FGameplayTag ValueType)
 {
 	if (GetOwnerRole() == ROLE_Authority)
 	{
-		for (const UFretteBodyPartInstance* Instance : BodyPartInstances)
+		for (UFretteBodyPartInstance* Instance : BodyPartInstances)
 		{
-			AddValueFromBodyPartTag(Instance->GetBodyPartTag(), Instance->GetBodyPartData()->GetMaxValueForType(ValueType), ValueType);
+			//Reset la valeur a sa valeur de start
+			float CurrentValue = Instance->FindOrAddAccumulatedValue(ValueType);
+			float StartValue = Instance->GetBodyPartData()->GetStartValueForType(ValueType);
+            float Delta = StartValue - CurrentValue;
+			AddValueFromBodyPartTag(Instance->GetBodyPartTag(), Delta, ValueType);
 		}
 	}
 }

@@ -42,7 +42,7 @@ void AFretteBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProp
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AFretteBaseCharacter, bIsAiming);
-
+	DOREPLIFETIME(AFretteBaseCharacter, bIsDead);
 }
 
 void AFretteBaseCharacter::ApplyStartupEffects()

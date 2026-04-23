@@ -149,10 +149,13 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 
 void AFrettePlayerCharacter::Die()
 {
-	Super::Die();
-
 	if (!HasAuthority())
 		return;
+
+	if (bIsDead)
+		return;
+
+	Super::Die();
 
 	Multicast_HandleDeath(GetCharacterMovement()->Velocity);
 	OnPlayerDied.Broadcast(this);
@@ -160,6 +163,11 @@ void AFrettePlayerCharacter::Die()
 
 void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathVelocity)
 {
+	if (!HasAuthority())
+	{
+		Super::Die();
+	}
+	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
 
@@ -172,11 +180,15 @@ void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathV
 		PlayerController->DisableInput(PlayerController);
 	
 	
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
-		//Reset la vie des bodyparts ce qui trigger le revive quand le joueur se faire retirer l'éffet de death
-		BodyPartComponent->ResetValueForAllBodyParts(TAG_BodyPartValues_Health);
-	}, ReviveTimer, false);
+	if (HasAuthority())
+	{
+		FTimerHandle TimerHandle;
+		GetWorldTimerManager().SetTimer(TimerHandle, [this]() {
+			Revive();
+			BodyPartComponent->ResetValueForAllBodyParts(TAG_BodyPartValues_Health);
+			BodyPartComponent->ResetValueForAllBodyParts(TAG_BodyPartValues_Temperature);
+		}, ReviveTimer, false);
+	}
 }
 
 void AFrettePlayerCharacter::HandleRagdoll(FVector DeathVelocity)
@@ -189,6 +201,7 @@ void AFrettePlayerCharacter::HandleRagdoll(FVector DeathVelocity)
 
 void AFrettePlayerCharacter::Revive()
 {
+	Super::Revive(); 
 	Multicast_HandleRevive();
 }
 

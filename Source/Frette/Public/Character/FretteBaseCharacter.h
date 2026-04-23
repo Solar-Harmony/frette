@@ -19,6 +19,7 @@ class FRETTE_API AFretteBaseCharacter : public ACharacter, public IAbilitySystem
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
 	bool GetIsDead() const { return bIsDead; }
 
 	UPROPERTY(BlueprintReadWrite, Replicated)
@@ -62,7 +63,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	int CharacterLevel = 1;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool bIsDead = false;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }

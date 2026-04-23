@@ -117,7 +117,7 @@ void UFretteBodyPartInstance::CheckAccumulatedValueRules(const FGameplayTag Tag,
 	Context.SourceData = SourceData;
 	CheckAndApplyRules(EBodyPartEventType::LimitReached, Tag, Context);
 }
-
+//BUG: Si deux partie donne le même éffet de mort un va donner l'éffet et l'autre va remove l'éffet car lui n'est pas a un max/min
 void UFretteBodyPartInstance::CheckAndApplyRules(const EBodyPartEventType EventType, const FGameplayTag Tag, const FFretteBodyPartContext& Context) const
 {
 	const TArray<FFretteEffectRuleEntry>* Rules = GetRulesForEvent(EventType, Tag);
