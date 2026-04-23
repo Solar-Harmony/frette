@@ -9,9 +9,7 @@
 #include "FretteEnemyCharacter.generated.h"
 
 class UPawnSensingComponent;
-/**
- * 
- */
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDied, AFretteEnemyCharacter*, Character);
 
 UCLASS()
@@ -22,7 +20,7 @@ class FRETTE_API AFretteEnemyCharacter : public AFretteBaseCharacter
 public:
 	virtual void Die() override;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDied OnDied;
 
 	FVector PatrolOrigin;
