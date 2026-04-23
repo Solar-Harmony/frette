@@ -47,6 +47,9 @@ void AFretteEnemyCharacter::BeginPlay()
 
 void AFretteEnemyCharacter::OnTargetPerceived(AActor* Actor, FAIStimulus Stimulus)
 {
+	if (bIsDead)
+		return;
+	
 	AFrettePlayerCharacter* Player = Cast<AFrettePlayerCharacter>(Actor);
 
 	if (!Player)
@@ -108,6 +111,9 @@ void AFretteEnemyCharacter::Die()
 void AFretteEnemyCharacter::Multicast_HandleDeath_Implementation(FVector FinalVelocity)
 {
 	Super::Multicast_HandleDeath_Implementation(FinalVelocity);
+	
+	TargetedPlayer = nullptr;
+	AiPerception->Deactivate();
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->DisableMovement();
