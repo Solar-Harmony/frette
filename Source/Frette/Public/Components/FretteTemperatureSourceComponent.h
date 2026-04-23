@@ -55,7 +55,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta = (Units = "Celsius"))
 	float SourceTemperature = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin="0.0", ClampMax="2.0",
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Frette|Temperature", meta=(ClampMin="0.0", ClampMax="5.0",
 		ToolTip="Multiplier applied to the temperature gradient when computing heat flow. Higher values increase how strongly heat propagates outward from the source. The best way to tune it is to use show numbers and flow arrows."))
 	float FlowStrength = 1;
 
