@@ -1,5 +1,7 @@
 ﻿#include "Components/FretteGameplayStatics.h"
 
+#include "Util/FretteCollisionChannels.h"
+
 ECardinalDirection UFretteGameplayStatics::DirVectorToCardinal(const FVector2D& Dir)
 {
 	check(!Dir.IsNearlyZero());
@@ -36,7 +38,7 @@ bool UFretteGameplayStatics::ProjectActorToFloor(AActor* Actor, USceneComponent*
 	
 	FHitResult Hit;
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(ProjectActorToFloor), false, Actor);
-	if (!Actor->GetWorld()->LineTraceSingleByProfile(Hit, TraceStart, TraceEnd, CollisionProfile.Name, QueryParams))
+	if (!Actor->GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Landscape, QueryParams))
 		return false;
 
 	const float NewZ = Origin.Z + Hit.Location.Z - CombinedBounds.Min.Z + ZOffset;
