@@ -9,7 +9,7 @@ public class FretteTarget : TargetRules
 	{
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V6;
-
+		bUseLoggingInShipping = true;
 		ExtraModuleNames.AddRange(new string[] { "Frette" });
 		RegisterModulesCreatedByRider();
 	}
