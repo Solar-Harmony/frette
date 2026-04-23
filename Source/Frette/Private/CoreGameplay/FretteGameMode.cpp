@@ -80,7 +80,7 @@ void AFretteGameMode::UpdateTimeBeforeNextPrimaryClue()
 		+ FMath::RandRange(0.f, Cfg->TimeUncertainty * MinTimePerPrimaryClue);
 }
 
-FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template)
+TPair<FText, bool> AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template)
 {
 	FFretteClueInfo Info;
 
@@ -95,7 +95,7 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 		Info.Type = EClueType::Dud;
 		NumDudCluesFound++;
 		NumCluesFound++;
-		return Template->GenerateClueText(Info);
+		return { Template->GenerateClueText(Info), false };
 	}
 	else if (PickedType == EClueType::MainObjective)
 	{
@@ -108,7 +108,7 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	if (POI == nullptr)
 	{
 		UE_LOG(LogFrette, Warning, TEXT("Failed to generate clue: no more landmarks available!"));
-		return Template->GenerateClueText(Info);
+		return { Template->GenerateClueText(Info), false };
 	}
 	
 	if (PickedType == EClueType::PointOfInterest)
@@ -153,7 +153,7 @@ FText AFretteGameMode::GenerateClue(const AFrettePlayerCharacter* Interactor, co
 	NumCluesFound++;
 
 	UE_LOG(LogFrette, Log, TEXT("Clue generated. Leads to landmark: %s, is near objective: %d"), *POI->GetName(), bIsPrimaryClue);
-	return Template->GenerateClueText(Info);
+	return { Template->GenerateClueText(Info), PickedType == EClueType::MainObjective };
 }
 
 void AFretteGameMode::ProbeForObjective(const AFrettePlayerCharacter* PlayerCharacter)

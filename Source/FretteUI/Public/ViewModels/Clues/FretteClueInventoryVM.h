@@ -16,6 +16,7 @@ public:
 	{
 		OwningInventory = Item->GetOwningInventory();
 		UE_MVVM_SET_PROPERTY_VALUE(ItemID, Item->Id);
+		UE_MVVM_SET_PROPERTY_VALUE(bIsPrimary, Item->bIsPrimary);
 		UE_MVVM_SET_PROPERTY_VALUE(DisplayName, Item->GetUntypedData()->DisplayName);
 		UE_MVVM_SET_PROPERTY_VALUE(Icon, Item->GetUntypedData()->Icon.LoadSynchronous()); // TODO: Use async load.
 	}
@@ -29,6 +30,9 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	FText DisplayName;
+	
+	UPROPERTY(BlueprintReadOnly, FieldNotify)
+	bool bIsPrimary;
 
 	UPROPERTY(BlueprintReadOnly, FieldNotify)
 	TObjectPtr<UTexture2D> Icon;

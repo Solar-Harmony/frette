@@ -5,6 +5,7 @@
 #include "Interactable/FretteInteractableComponent.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Inventory/Items/FretteStackableItem.h"
+#include "Net/UnrealNetwork.h"
 
 AFrettePickupBase::AFrettePickupBase()
 {
@@ -113,5 +114,11 @@ void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* Loaded
 		StaticMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 		StaticMesh->SetEnableGravity(true);
 		StaticMesh->SetMassOverrideInKg(NAME_None, 100.0f, true);
+	}
+
+	StaticMesh->SetRelativeScale3D(ItemData->OverrideScale);
+	if (!ItemData->OverrideMaterial.IsNull())
+	{
+		StaticMesh->SetMaterial(0, ItemData->OverrideMaterial.LoadSynchronous());
 	}
 }

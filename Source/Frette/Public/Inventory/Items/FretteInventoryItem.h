@@ -65,6 +65,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UStaticMesh> Mesh;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FVector OverrideScale = FVector(1.0f, 1.0f, 1.0f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UMaterialInterface> OverrideMaterial;
+	
 	UPROPERTY(EditDefaultsOnly, Category="Consumable")
 	bool bConsumeOnUse = false;
 	

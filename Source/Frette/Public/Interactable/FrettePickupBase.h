@@ -59,6 +59,7 @@ private:
 	UFUNCTION()
 	void OnRep_ItemData();
 
+
 	void UpdateVisuals();
 
 	void OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject) const;

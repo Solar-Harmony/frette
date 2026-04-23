@@ -26,7 +26,7 @@ public:
 	AFretteGameMode();
 
 	// Picks a clue, notifies clients
-	FText GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template);
+	TPair<FText, bool> GenerateClue(const AFrettePlayerCharacter* Interactor, const UFretteClueTemplateSet* Template);
 
 	// Checks if player is close enough to collect the objective
 	void ProbeForObjective(const AFrettePlayerCharacter* PlayerCharacter);

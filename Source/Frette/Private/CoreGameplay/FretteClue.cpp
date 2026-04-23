@@ -12,11 +12,12 @@ void AFretteClue::OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UF
 	precondition(IsValid(ClueTemplate));
 
 	AFretteGameMode* GameMode = CastChecked<AFretteGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	const FText ClueText = GameMode->GenerateClue(Interactor, ClueTemplate);
+	const TPair<FText, bool> ClueText = GameMode->GenerateClue(Interactor, ClueTemplate);
 	UFretteClueItem* ClueItem = CastChecked<UFretteClueItem>(AddedItem);
-	ClueItem->ClueText = ClueText;
+	ClueItem->ClueText = ClueText.Key;
+	ClueItem->bIsPrimary = ClueText.Value;
 	ClueItem->GetOwningInventory()->ChangeItem_Implementation(ClueItem);
 
 	AFrettePlayerController* PlayerController = CastChecked<AFrettePlayerController>(Interactor->GetController());
-	PlayerController->Client_OnClueGenerated(ClueText);
+	PlayerController->Client_OnClueGenerated(ClueText.Key);
 }

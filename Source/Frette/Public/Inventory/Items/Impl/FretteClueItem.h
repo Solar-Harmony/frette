@@ -17,12 +17,16 @@ class UFretteClueItem : public UFretteInventoryItem
 
 public:
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadOnly, meta = (ExposeOnSpawn = true))
+	bool bIsPrimary;
+	
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadOnly, meta = (ExposeOnSpawn = true))
 	FText ClueText;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override
 	{
 		Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 		DOREPLIFETIME(ThisClass, ClueText);
+		DOREPLIFETIME(ThisClass, bIsPrimary);
 	}
 	
 private:
