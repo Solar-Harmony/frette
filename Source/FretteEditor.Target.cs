@@ -9,7 +9,6 @@ public class FretteEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V6;
-
 		ExtraModuleNames.AddRange(new string[] { "Frette" });
 		RegisterModulesCreatedByRider();
 	}
