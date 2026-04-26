@@ -53,7 +53,8 @@ void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& Inp
 
 void UFretteAbilitySystemComponent::GrantAbility(const FFretteGameplayAbilityConfig& AbilityConfig, UObject* SourceObject)
 {
-	precondition(AbilityConfig.IsValid(), "Tried to apply an invalid ability config.");
+	unless(AbilityConfig.IsValid(), "Tried to apply an invalid ability config.")
+		return;
 	
 	FGameplayAbilitySpec Spec(AbilityConfig.Ability, AbilityConfig.AbilityLevel);
 	Spec.SourceObject = SourceObject;
@@ -64,10 +65,12 @@ void UFretteAbilitySystemComponent::GrantAbility(const FFretteGameplayAbilityCon
 
 void UFretteAbilitySystemComponent::RevokeAbility(const FFretteGameplayAbilityConfig& AbilityConfig)
 {
-	precondition(AbilityConfig.IsValid(), "Tried to revoke an invalid ability config.");
+	unless(AbilityConfig.IsValid(), "Tried to revoke an invalid ability config.")
+		return;
 	
 	const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(AbilityConfig.InputTag);
-	precondition(Handle != nullptr && Handle->IsValid(), "Tried to revoke an ability that wasn't granted.");
+	unless(Handle != nullptr && Handle->IsValid(), "Tried to revoke an ability that wasn't granted.")
+		return;
 
 	ClearAbility(*Handle);
 }
@@ -90,13 +93,17 @@ void UFretteAbilitySystemComponent::RevokeAbilities(const TArray<FFretteGameplay
 
 void UFretteAbilitySystemComponent::GrantAbilities(const UFretteAbilitySetDataAsset* AbilitySet, UObject* SourceObject)
 {
-	precondition(AbilitySet, "Tried to grant abilities from a null ability set.");
+	unless(AbilitySet, "Tried to grant abilities from a null ability set.")
+		return;
+	
 	GrantAbilities(AbilitySet->AbilityConfigs, SourceObject);
 }
 
 void UFretteAbilitySystemComponent::RevokeAbilities(const UFretteAbilitySetDataAsset* AbilitySet)
 {
-	precondition(AbilitySet, "Tried to revoke abilities from a null ability set.");
+	unless(AbilitySet, "Tried to revoke abilities from a null ability set.") 
+		return;
+	
 	RevokeAbilities(AbilitySet->AbilityConfigs);
 }
 

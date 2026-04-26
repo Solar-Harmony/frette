@@ -46,7 +46,8 @@ void AFretteEnemySpawner::BeginPlay()
 		return;
 
 	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
-	precondition(NavSystem != nullptr, "No Navigation System found in the world. Please add a NavMeshBoundsVolume to your level.");
+	unless(NavSystem != nullptr, "Missing NavMeshBoundsVolume in the level. Frette enemy spawner will not work.")
+		return;
 
 	for (int i = 0; i < MaxSpawnedEntities; ++i)
 	{
@@ -56,7 +57,8 @@ void AFretteEnemySpawner::BeginPlay()
 
 void AFretteEnemySpawner::SpawnEntity()
 {
-	ensureAlwaysMsgf(EntityToSpawn, TEXT("EntityToSpawn is not set in %s. Please set it in the Blueprint."), *GetName());
+	unless(EntityToSpawn, "EntityToSpawn is not set in %s. Please set it in the Blueprint.", *GetName())
+		return;
 
 	const FVector SpawnLocation = GetRandomNavPoint();
 
@@ -78,7 +80,7 @@ void AFretteEnemySpawner::SpawnEntity()
 	RemainingSpawnedEntities++;
 }
 
-void AFretteEnemySpawner::OnEntityDied(AFretteEnemyCharacter* entity)
+void AFretteEnemySpawner::OnEntityDied(AFretteEnemyCharacter* Entity)
 {
 	RemainingSpawnedEntities--;
 

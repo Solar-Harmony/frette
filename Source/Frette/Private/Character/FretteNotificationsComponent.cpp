@@ -5,7 +5,9 @@
 
 void UFretteNotificationsComponent::Notify(const AFrettePlayerCharacter* PlayerCharacter, const FText& Message)
 {
-	precondition(PlayerCharacter != nullptr, "Tried to send notification on null player character");
+	unless(PlayerCharacter != nullptr, "Tried to send notification on null player character")
+		return;
+	
 	PlayerCharacter->GetNotifications()->Send(Message);
 }
 

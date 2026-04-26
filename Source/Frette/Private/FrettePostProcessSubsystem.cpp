@@ -31,7 +31,8 @@ void UFrettePostProcessSubsystem::OnWorldInitialized()
 	// TODO: Don't use hardcoded path
 	const FString MPCPath = TEXT("/Game/Materials/FretteInteractableMaterialParams.FretteInteractableMaterialParams");
 	const UMaterialParameterCollection* MPC = Cast<UMaterialParameterCollection>(StaticLoadObject(UMaterialParameterCollection::StaticClass(), nullptr, *MPCPath));
-	precondition(IsValid(MPC), "Failed to load Material Parameter Collection for interactible outlines! Make sure the asset exists at the specified path.");
+	unless(IsValid(MPC), "Failed to load Material Parameter Collection for interactible outlines! Make sure the asset exists at the specified path.")
+		return;
 
 	OutlineMPCI = World->GetParameterCollectionInstance(MPC);
 }
