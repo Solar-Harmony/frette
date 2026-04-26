@@ -5,7 +5,7 @@
 #include "boost/preprocessor.hpp"
 #include "Logging/MessageLog.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
+FRETTE_API DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 
 /**
  * Frette smart format function. Same as FString::Printf but:
