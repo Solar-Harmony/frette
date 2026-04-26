@@ -31,7 +31,8 @@ UFretteInventoryItem* UFretteInventoryComponent::GetItemByIndexEditor(int32 Idx)
 void UFretteInventoryComponent::UseItem_Implementation(int32 ItemId)
 {
 	UFretteInventoryItem* ItemToUse = GetItem(ItemId);
-	precondition(ItemToUse, "Inventory: Cannot select item #%d because it was not found in this inventory.", ItemId);
+	unless(ItemToUse, "Inventory: Cannot select item #%d because it was not found in this inventory.", ItemId)
+		return;
 
 	ItemToUse->Use();
 	
@@ -46,8 +47,11 @@ void UFretteInventoryComponent::UseItem_Implementation(int32 ItemId)
 
 void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataAsset* ItemData)
 {
-	precondition(IsReadyForReplication() && GetOwner()->HasAuthority());
-	precondition(IsValid(ItemData), "Inventory: Cannot add item: item data asset is invalid.");
+	unless(IsReadyForReplication() && GetOwner()->HasAuthority()) 
+		return;
+	
+	unless(IsValid(ItemData), "Inventory: Cannot add item: item data asset is invalid.") 
+		return;
 
 	UFretteInventoryItem* Item = ItemData->CreateRuntimeItem(this);
 	AddReplicatedSubObject(Item);
@@ -56,15 +60,22 @@ void UFretteInventoryComponent::AddItem_Implementation(UFretteInventoryItemDataA
 
 void UFretteInventoryComponent::ChangeItem_Implementation(UFretteInventoryItem* ItemToChange)
 {
-	precondition(GetOwner()->HasAuthority());
-	precondition(Inventory.IsValidItem(ItemToChange), "Inventory: Cannot change item because it is invalid.");
+	unless(GetOwner()->HasAuthority()) 
+		return;
+	
+	unless(Inventory.IsValidItem(ItemToChange), "Inventory: Cannot change item because it is invalid.")
+		return;
+	
 	Inventory.ChangeEntry(ItemToChange);
 }
 
 void UFretteInventoryComponent::RemoveItem_Implementation(int32 ItemId)
 {
-	precondition(GetOwner()->HasAuthority());
-	precondition(Inventory.HasEntry(ItemId), "Inventory: Cannot remove item #%d because this inventory has no item with that ID.", ItemId);
+	unless(GetOwner()->HasAuthority()) 
+		return;
+	
+	unless(Inventory.HasEntry(ItemId), "Inventory: Cannot remove item #%d because this inventory has no item with that ID.", ItemId)
+		return;
 
 	Inventory.RemoveEntry(ItemId);
 }

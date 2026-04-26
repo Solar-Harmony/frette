@@ -7,58 +7,74 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 
-// Helper macro to clean up logging calls
-// - Auto-wraps the format string with TEXT()
-// - Auto-converts text arguments to TCHAR* (FString, FName, FText)
-// Usage:
-// FRETTE_LOG(Log, "Message with no args.");
-// FRETTE_LOG(Warning, "Message with args: %d, %s", Arg1, Arg2);
-#define FRETTE_PRIVATE_WRAP(r, data, elem) Frette::Private::PrintArg(Frette::Private::ToTCHAR(elem))
+/**
+ * Frette smart format function. Same as FString::Printf but:
+ * - auto-wraps format string with TEXT()
+ * - auto-converts most common types to TCHAR*, no more forgetting *
+ */
+#define FretteFmt(Format, ...) \
+	FString::Printf(TEXT(Format), FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__))
 
 #define FRETTE_PRIVATE_MAP_ARGS(func, ...) \
 	BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(FRETTE_PRIVATE_WRAP, func, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__)))
 
+#define FRETTE_PRIVATE_WRAP(r, data, elem) Frette::Private::PrintArg(Frette::Private::ToTCHAR(elem))
+
+/**
+ * Frette logging function.
+ * 
+ * Usage:
+ * FLOG(Frette, Log, "Message with no args.");
+ * FLOG(Frette, Warning, "Message with args: %d, %s", Arg1, Arg2);
+ * 
+ * Same as UE_LOG() with extra conveniences:
+ * - Prepends Log to the logging category
+ * - Auto-wraps the format string with TEXT()
+ * - Auto-converts text and UObject* arguments to TCHAR*
+ */
 #define FRETTE_LOG(Verbosity, Format, ...) \
 	UE_LOG(LogFrette, Verbosity, TEXT(Format) __VA_OPT__(, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__)))
 
 #define FRETTE_LOGC(Category, Verbosity, Format, ...) \
 	UE_LOG(LogFrette##Category, Verbosity, TEXT(Format) __VA_OPT__(, FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__)))
 
-#define FretteFmt(Format, ...) \
-	FString::Printf(TEXT(Format), FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__));
+#define FRETTE_GET_FIRST(First, ...) First
 
-// Helper for more readable precondition early returns. If the condition is FALSE, breaks + print msg then returns.
-// Note: format str will be auto-wrapped with TEXT(), and args will be auto-converted to TCHAR* if possible.
-// Usage:
-// require(Condition);
-// require(Condition, "Message with no args.");
-// require(Condition, "Message with args: %d, %s", Arg1, Arg2);
-#define precondition(...) \
-	BOOST_PP_OVERLOAD(FRETTE_PRIVATE_ENSURE_, __VA_ARGS__)(__VA_ARGS__) \
+/**
+ * Frette early return assert macro. Expands similarly to `if (!ensure(Condition)`, but with extra conveniences.
+ * 
+ * Usage:
+ * unless(bCondition) return;
+ * unless(bCondition, "Message with no args.") return;
+ * unless(bCondition, "Message with args: %d, %s, %s", MyInteger, MyUObject, MyFText) 
+ *     return;
+ * 
+ * Differences from Epic's ensure():
+ * - unless() prints simplified call site information instead of a full verbose callstack
+ * - unless() does not cause a hitch on first hit assert
+ * - unless() also prints to Message Log and brings it in focus to prevent asserts from slipping through
+ * - unless() auto-converts format arguments to TCHAR* for common types (FString, FName, FText, UObject*, FGameplayTag, and more)
+ * - unless() auto-wraps the format string with TEXT()
+ * 
+ * Use unless() instead of ensure() for early returns (function preconditions). 
+ * Your error handling will be more readable and more concise. 
+ */
+#define unless(...) \
+	if ([&]() -> bool { \
+		if (UNLIKELY(!(FRETTE_GET_FIRST(__VA_ARGS__)))) \
+		{ \
+			BOOST_PP_OVERLOAD(FRETTE_PRIVATE_ENSURE_, __VA_ARGS__)(__VA_ARGS__) \
+			UE_DEBUG_BREAK(); \
+			return true; \
+		} \
+			return false; \
+	}())
 
 #define FRETTE_PRIVATE_ENSURE_1(Condition) \
-	if (UNLIKELY(!(Condition))) \
-	{ \
-		Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString()); \
-		UE_DEBUG_BREAK(); \
-		return; \
-	}
+	Frette::Private::FretteEnsureImpl(TEXT(#Condition), FString());
 
 #define FRETTE_PRIVATE_ENSURE_2(Condition, Msg) \
-	if (UNLIKELY(!(Condition))) \
-	{ \
-		Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString(TEXT(Msg))); \
-		UE_DEBUG_BREAK(); \
-		return; \
-	}
-
-#define FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, ...) \
-	if (UNLIKELY(!(Condition))) \
-	{ \
-		Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString::Printf(TEXT(Format), FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__))); \
-		UE_DEBUG_BREAK(); \
-		return; \
-	}
+	Frette::Private::FretteEnsureImpl(TEXT(#Condition), FString(TEXT(Msg)));
 
 #define FRETTE_PRIVATE_ENSURE_3(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
 #define FRETTE_PRIVATE_ENSURE_4(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
@@ -66,51 +82,27 @@ DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 #define FRETTE_PRIVATE_ENSURE_6(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
 #define FRETTE_PRIVATE_ENSURE_7(Condition, Format, ...) FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, __VA_ARGS__)
 
-#define fail(...) \
-	BOOST_PP_OVERLOAD(FRETTE_PRIVATE_FAIL_, __VA_ARGS__)(__VA_ARGS__)
-
-#define FRETTE_PRIVATE_FAIL_1(Condition) \
-	([&]() -> bool { \
-		if (UNLIKELY(!(Condition))) \
-		{ \
-			Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString()); \
-			UE_DEBUG_BREAK(); \
-			return true; \
-		} \
-		return false; \
-	}())
-
-#define FRETTE_PRIVATE_FAIL_2(Condition, Msg) \
-	([&]() -> bool { \
-		if (UNLIKELY(!(Condition))) \
-		{ \
-			Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString(TEXT(Msg))); \
-			UE_DEBUG_BREAK(); \
-			return true; \
-		} \
-		return false; \
-	}())
-
-#define FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, ...) \
-	([&]() -> bool { \
-		if (UNLIKELY(!(Condition))) \
-		{ \
-			Frette::Private::ReportPreconditionFailure(TEXT(#Condition), FString::Printf(TEXT(Format), FRETTE_PRIVATE_MAP_ARGS(Frette::Private::ToTCHAR, __VA_ARGS__))); \
-			UE_DEBUG_BREAK(); \
-			return true; \
-		} \
-		return false; \
-	}())
-
-#define FRETTE_PRIVATE_FAIL_3(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
-#define FRETTE_PRIVATE_FAIL_4(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
-#define FRETTE_PRIVATE_FAIL_5(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
-#define FRETTE_PRIVATE_FAIL_6(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
-#define FRETTE_PRIVATE_FAIL_7(Condition, Format, ...) FRETTE_PRIVATE_FAIL_VARARGS(Condition, Format, __VA_ARGS__)
-
+#define FRETTE_PRIVATE_ENSURE_VARARGS(Condition, Format, ...) \
+	Frette::Private::FretteEnsureImpl(TEXT(#Condition), FretteFmt(Format, __VA_ARGS__));
 
 namespace Frette::Private
 {
+	FORCEINLINE const TCHAR* PrintArg(const FString& Str)
+	{
+		return *Str;
+	}
+
+	FORCEINLINE const TCHAR* PrintArg(const TCHAR* TCHARPtr)
+	{
+		return TCHARPtr;
+	}
+
+	template <typename T>
+	FORCEINLINE const T& PrintArg(const T& Value)
+	{
+		return Value;
+	}
+	
 	FORCEINLINE const FString& ToTCHAR(const FString& Str)
 	{
 		return Str;
@@ -148,31 +140,14 @@ namespace Frette::Private
 	}
 	
 	template<typename T>
-	FORCEINLINE FString ToTCHAR(const TObjectPtr<T>& ObjectPtr)
+	FORCEINLINE auto ToTCHAR(const TObjectPtr<T>& ObjectPtr) -> std::enable_if_t<std::is_base_of_v<UObjectBaseUtility, T>, FString>
 	{
-		static_assert(std::is_base_of_v<UObjectBaseUtility, T>, "T must derive from Object");
 		return GetNameSafe(ObjectPtr);
 	}
 
 	// fallback case for types that don't use %s
 	template <typename T>
 	FORCEINLINE const T& ToTCHAR(const T& Value)
-	{
-		return Value;
-	}
-
-	FORCEINLINE const TCHAR* PrintArg(const FString& Str)
-	{
-		return *Str;
-	}
-
-	FORCEINLINE const TCHAR* PrintArg(const TCHAR* TCHARPtr)
-	{
-		return TCHARPtr;
-	}
-
-	template <typename T>
-	FORCEINLINE const T& PrintArg(const T& Value)
 	{
 		return Value;
 	}
@@ -185,24 +160,14 @@ namespace Frette::Private
 		static constexpr int32 CallerFrameIndex = 2;
 		uint64 Addresses[NumFrames] = {};
 		FPlatformStackWalk::CaptureStackBackTrace(Addresses, NumFrames);
-
+		
 		ANSICHAR Buffer[1024] = {};
 		FPlatformStackWalk::ProgramCounterToHumanReadableString(CallerFrameIndex, Addresses[CallerFrameIndex], Buffer, sizeof(Buffer));
-		FString Raw(ANSI_TO_TCHAR(Buffer));
+		const FString Raw(ANSI_TO_TCHAR(Buffer));
 		return Raw;
 	}
 
-	FORCEINLINE void LogMessageErr(const FString& Message)
-	{
-#if WITH_EDITOR
-		FMessageLog Log("FretteAssert");
-		Log.SuppressLoggingToOutputLog(true);
-		Log.Error(FText::FromString(Message));
-		Log.Open();
-#endif
-	}
-
-	FORCEINLINE void ReportPreconditionFailure(const TCHAR* ConditionStr, const FString& Reason)
+	FORCEINLINE void FretteEnsureImpl(const TCHAR* ConditionStr, const FString& Reason)
 	{
 		const FString Location = CaptureCaller();
 		FString FullMessage;
@@ -215,6 +180,12 @@ namespace Frette::Private
 			FullMessage = FString::Printf(TEXT("Precondition failed: %s\nLocation: %s\nReason: %s"), ConditionStr, *Location, *Reason);
 		}
 		UE_LOG(LogFrette, Error, TEXT("%s"), *FullMessage);
-		LogMessageErr(FullMessage);
+		
+#if WITH_EDITOR
+		FMessageLog Log("FretteAssert");
+		Log.SuppressLoggingToOutputLog(true);
+		Log.Error(FText::FromString(FullMessage));
+		Log.Open();
+#endif
 	}
 }

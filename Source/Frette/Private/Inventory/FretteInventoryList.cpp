@@ -69,7 +69,7 @@ void FFretteInventoryList::AddEntry(UFretteInventoryItem* ItemToAdd)
 {
 	check(Owner.IsValid());
 	check(Owner->GetOwner()->HasAuthority());
-	precondition(IsValidItem(ItemToAdd, true));
+	unless(IsValidItem(ItemToAdd, true)) return;
 
 	FFretteInventoryListEntry& Entry = Entries.AddDefaulted_GetRef();
 	Entry.Item = ItemToAdd;
@@ -85,10 +85,10 @@ void FFretteInventoryList::ChangeEntry(UFretteInventoryItem* ItemToChange)
 {
 	check(Owner.IsValid());
 	check(Owner->GetOwner()->HasAuthority());
-	precondition(IsValidItem(ItemToChange));
+	unless(IsValidItem(ItemToChange)) return;
 
 	const int32 Idx = GetIndexById(ItemToChange->Id);
-	precondition(Idx != INDEX_NONE, "Inventory: Cannot change item #%d because it was not found in this inventory.", ItemToChange->Id);
+	unless(Idx != INDEX_NONE, "Inventory: Cannot change item #%d because it was not found in this inventory.", ItemToChange->Id) return;
 
 	FFretteInventoryListEntry& Entry = Entries[Idx];
 	Entry.Item = ItemToChange;
@@ -103,10 +103,12 @@ void FFretteInventoryList::RemoveEntry(int32 ItemId)
 {
 	check(Owner.IsValid());
 	check(Owner->GetOwner()->HasAuthority());
-	precondition(Entries.Num() > 0, "Inventory: Cannot remove item because inventory is empty.");
+	unless(Entries.Num() > 0, "Inventory: Cannot remove item because inventory is empty.") 
+		return;
 
 	const int32 Idx = GetIndexById(ItemId);
-	precondition(Idx != INDEX_NONE, "Inventory: Cannot remove item #%d because it was not found in this inventory.", ItemId);
+	unless(Idx != INDEX_NONE, "Inventory: Cannot remove item #%d because it was not found in this inventory.", ItemId) 
+		return;
 	
 	const int32 LastIdx = Entries.Num() - 1;
 	UFretteInventoryItem* ItemToRemove = Entries[Idx].Item;
@@ -317,16 +319,17 @@ void UFretteInventoryComponent::ServerDumpInventory_Implementation()
 
 static void ExecDumpInventory(UWorld* World)
 {
-	precondition(World);
+	unless(World != nullptr) return;
 
 	const APlayerController* PC = World->GetFirstPlayerController();
-	precondition(PC);
+	unless(PC != nullptr) return;
 
 	const APawn* Pawn = PC->GetPawn();
-	precondition(Pawn);
+	unless(Pawn != nullptr) return;
 
 	UFretteInventoryComponent* InventoryComp = Pawn->FindComponentByClass<UFretteInventoryComponent>();
-	precondition(InventoryComp, "DumpInventory: No inventory component found on pawn %s", *Pawn->GetName());
+	unless(InventoryComp, "DumpInventory: No inventory component found on pawn %s", *Pawn->GetName())
+		return;
 
 	InventoryComp->DumpInventory();
 }

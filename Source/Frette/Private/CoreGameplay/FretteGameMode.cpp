@@ -19,11 +19,11 @@ AFretteGameMode::AFretteGameMode()
 
 FText AFretteGameMode::SpawnPointOfInterestReward(const AFretteLandmark* Landmark) const
 {
-	if (fail(!Cfg->SecondaryClueRewards.IsEmpty(), "No secondary clue rewards are configured. Clues will not spawn any rewards."))
+	unless(!Cfg->SecondaryClueRewards.IsEmpty(), "No secondary clue rewards are configured. Clues will not spawn any rewards.")
 		return INVTEXT("");
 	
 	UNavigationSystemV1* Navmesh = UNavigationSystemV1::GetCurrent(GetWorld());
-	if (fail(IsValid(Navmesh), "No navmesh found in the level, clue reward generation won't work."))
+	unless(IsValid(Navmesh), "No navmesh found in the level, clue reward generation won't work.")
 		return INVTEXT("");
 
 	FNavLocation NavLocation;
@@ -40,7 +40,7 @@ FText AFretteGameMode::SpawnPointOfInterestReward(const AFretteLandmark* Landmar
 	
 	const int Idx = FMath::RandRange(0, Cfg->SecondaryClueRewards.Num() - 1);
 	UFretteInventoryItemDataAsset* RewardItemData = Cfg->SecondaryClueRewards[Idx];
-	if (fail(IsValid(RewardItemData), "Null entry in secondary clues rewards items list."))
+	unless(IsValid(RewardItemData), "Null entry in secondary clues rewards items list.")
 		return INVTEXT("");
 	
 	const FTransform SpawnTransform = FTransform(NavLocation.Location);
@@ -208,11 +208,14 @@ void AFretteGameMode::BeginPlay()
 
 	for (TActorIterator<AFretteMainObjective> It(GetWorld()); It; ++It)
 	{
-		precondition(MainObjective == nullptr, "Multiple main objectives found in the level! There should be only one.");
+		unless(MainObjective == nullptr, "Multiple main objectives found in the level! There should be only one.")
+			return;
+		
 		MainObjective = *It;
 	}
 
-	precondition(IsValid(MainObjective), "No main objective found in the level! Make sure to place one in the level.");
+	unless(IsValid(MainObjective), "No main objective found in the level! Make sure to place one in the level.")
+		return;
 
 	const FVector2D ObjectiveLocation2D(MainObjective->GetActorLocation());
 	const float NearObjectiveRadiusSq = FMath::Square(MainObjective->NearObjectiveRadiusCm);
@@ -245,11 +248,15 @@ void AFretteGameMode::BeginPlay()
 		NumCluesPlaced++;
 	}
 
-	precondition(NearLandmarks.Num() > 0, "No landmarks placed within the objective's radius. Primary clues won't be possible.");
-	precondition(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.");
+	unless(NearLandmarks.Num() > 0, "No landmarks placed within the objective's radius. Primary clues won't be possible.")
+		return;
+	
+	unless(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.")
+		return;
 
 	const int32 TotalLandmarks = NearLandmarks.Num() + FarLandmarks.Num();
-	precondition(NumCluesPlaced >= TotalLandmarks, "There are %d landmarks in the level but only %d clues were placed.", TotalLandmarks, NumCluesPlaced);
+	unless(NumCluesPlaced >= TotalLandmarks, "There are %d landmarks in the level but only %d clues were placed.", TotalLandmarks, NumCluesPlaced)
+		return;
 	
 	UpdateTimeBeforeNextPrimaryClue();
 }

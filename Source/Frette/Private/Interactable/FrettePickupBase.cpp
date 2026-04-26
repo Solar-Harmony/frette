@@ -67,7 +67,8 @@ void AFrettePickupBase::UpdateVisuals()
 	if (!IsValid(ItemData))
 		return;
 	
-	precondition(!ItemData->Mesh.IsNull(), "Pickup actor '%s' has no mesh specified, so it will be invisible during play!", *GetName())
+	unless(!ItemData->Mesh.IsNull(), "Pickup actor '%s' has no mesh specified, so it will be invisible during play!", *GetName())
+		return;
 	
 	Interactable->Message = FText::Format(NSLOCTEXT("Frette", "PickUpMessage", "[E] pick up {0}"), ItemData->DisplayName);
 	
@@ -104,7 +105,8 @@ void AFrettePickupBase::Client_OnInteract_Implementation(AFrettePlayerCharacter*
 void AFrettePickupBase::OnItemMeshLoaded(const FSoftObjectPath&, UObject* LoadedObject) const
 {
 	UStaticMesh* Mesh = Cast<UStaticMesh>(LoadedObject);
-	precondition(IsValid(Mesh), "Failed to load mesh for item '%s'.", GetNameSafe(ItemData));
+	unless(IsValid(Mesh), "Failed to load mesh for item '%s'.", ItemData)
+		return;
 	
 	StaticMesh->SetStaticMesh(Mesh);	
 	StaticMesh->SetSimulatePhysics(bHasPhysics);

@@ -81,13 +81,13 @@ void UFretteInteractorComponent::Interact()
 void UFretteInteractorComponent::Server_Interact_Implementation(AActor* Interactable)
 {
 	// TODO: the server should validate by raycasting again, to prevent cheating
-	precondition(IsValid(Interactable));
+	unless(IsValid(Interactable)) return;
 
 	const UFretteInteractableComponent* InteractableComponent = Interactable->GetComponentByClass<UFretteInteractableComponent>();
-	precondition(IsValid(InteractableComponent))
+	unless(IsValid(InteractableComponent)) return;
 
 	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
-	precondition(IsValid(Interactor));
+	unless(IsValid(Interactor)) return;
 
 	InteractableComponent->OnInteract.Broadcast(Interactor);
 }
@@ -107,13 +107,13 @@ void UFretteInteractorComponent::EndInteract()
 
 void UFretteInteractorComponent::Server_EndInteract_Implementation(AActor* Interactable)
 {
-	precondition(IsValid(Interactable));
+	unless(IsValid(Interactable)) return;
 
 	const UFretteInteractableComponent* InteractableComponent = Interactable->GetComponentByClass<UFretteInteractableComponent>();
-	precondition(IsValid(InteractableComponent))
+	unless(IsValid(InteractableComponent)) return;
 
 	AFrettePlayerCharacter* Interactor = PlayerController->GetPawn<AFrettePlayerCharacter>();
-	precondition(IsValid(Interactor));
+	unless(IsValid(Interactor)) return;
 
 	InteractableComponent->OnInteractEnd.Broadcast(Interactor);
 }

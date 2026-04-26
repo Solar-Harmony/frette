@@ -8,8 +8,8 @@
 
 void AFretteClue::OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem)
 {
-	precondition(ItemData.IsA<UFretteClueItemDataAsset>());
-	precondition(IsValid(ClueTemplate));
+	unless(ItemData.IsA<UFretteClueItemDataAsset>()) return;
+	unless(IsValid(ClueTemplate)) return;
 
 	AFretteGameMode* GameMode = CastChecked<AFretteGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	const TPair<FText, bool> ClueText = GameMode->GenerateClue(Interactor, ClueTemplate);

@@ -36,7 +36,7 @@ protected:
 	FVector GetRandomNavPoint() const;
 
 	UFUNCTION()
-	void OnEntityDied(AFretteEnemyCharacter* entity);
+	void OnEntityDied(AFretteEnemyCharacter* Entity);
 
 	#if WITH_EDITORONLY_DATA
 	UPROPERTY()
