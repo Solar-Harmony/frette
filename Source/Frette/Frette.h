@@ -7,6 +7,23 @@
 
 FRETTE_API DECLARE_LOG_CATEGORY_EXTERN(LogFrette, Log, All);
 
+/*
+ * Always executes this function on the server.
+ * If component has authority, calls the implementation directly. 
+ * Otherwise, executes a Server RPC. 
+ */
+#define RUN_ON_SERVER(Func, ...) \
+	{ \
+		if (GetOwner()->HasAuthority()) \
+		{ \
+			Server_##Func##_Implementation(__VA_ARGS__); \
+		} \
+		else \
+		{ \
+			Server_##Func(__VA_ARGS__); \
+		} \
+	}
+
 /**
  * Frette smart format function. Same as FString::Printf but:
  * - auto-wraps format string with TEXT()
