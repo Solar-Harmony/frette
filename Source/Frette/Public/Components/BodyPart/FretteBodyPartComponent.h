@@ -83,7 +83,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_NotifyBodyPartChange(const FFretteBodyPartChangeEvent& ChangeEvent);
 
+	UFUNCTION(BlueprintPure)
 	FGameplayTag GetBodyPartFromBoneName(FName BoneName) const;
+	
 	bool GetRepresentativeBoneForTag(FGameplayTag BodyPartTag, FName& OutBoneName) const;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Frette|Body Parts")

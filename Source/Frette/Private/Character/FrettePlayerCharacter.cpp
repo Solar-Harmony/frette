@@ -38,8 +38,8 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment Component"));
 	EquipmentComponent->SetIsReplicated(true);
+	
 	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("Notifications Component"));
-	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("NotificationsComponent_Internal"));
 	NotificationsComponent->SetIsReplicated(true);
 	
 	CompassComponent = CreateDefaultSubobject<UFretteCompassComponent>(TEXT("Compass Component"));
