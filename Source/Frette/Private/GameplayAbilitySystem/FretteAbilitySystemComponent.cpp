@@ -31,6 +31,12 @@ void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& Inp
 	if (const FGameplayAbilitySpecHandle* Handle = InputAbilityMap.Find(InputTag); Handle->IsValid())
 	{
 		FGameplayAbilitySpec* AbilitySpec = FindAbilitySpecFromHandle(*Handle);
+		auto* FretteAbility = Cast<UFretteGameplayAbility>(AbilitySpec->GetPrimaryInstance());
+		if (FretteAbility == nullptr)
+		{
+			UE_LOG(LogAbilitySystemComponent, Error, TEXT("Ability %s must be a Frette Gameplay Ability."), *AbilitySpec->Ability->GetName());
+			return;
+		}
 
 		AbilitySpecInputReleased(*AbilitySpec);
 		if (AbilitySpec->IsActive())
@@ -39,7 +45,7 @@ void UFretteAbilitySystemComponent::AbilityInputReleased(const FGameplayTag& Inp
 			//(Si il est par exécution on va avoir un array d'instance qu'il va falloir gerer)
 			if (AbilitySpec->Ability->GetInstancingPolicy() == EGameplayAbilityInstancingPolicy::InstancedPerActor)
 			{
-				Cast<UFretteGameplayAbility>(AbilitySpec->GetPrimaryInstance())->OnInputReleased();
+				FretteAbility->OnInputReleased();
 			}
 			else
 			{
