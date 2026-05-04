@@ -2,6 +2,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Abilities/Tasks/AbilityTask_MoveToLocation.h"
 
 static TAutoConsoleVariable CVarMantlingDebug(
 	TEXT("Frette.Mantling.Debug"),
@@ -62,9 +63,24 @@ void UFretteMantlingAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		return;
 	}
 	
-	Player->SetActorLocation(TargetLocation);
+	UAbilityTask_MoveToLocation* MoveTask = UAbilityTask_MoveToLocation::MoveToLocation(
+		this, FName("MantlingMoveTask"), TargetLocation, MantlingDuration, nullptr, nullptr);
 	
-	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+	if (MoveTask)
+	{
+		MoveTask->OnTargetLocationReached.AddDynamic(this, &UFretteMantlingAbility::OnMoveCompleted);
+		MoveTask->ReadyForActivation();
+	}
+	else
+	{
+		Player->SetActorLocation(TargetLocation);
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+	}
+}
+
+void UFretteMantlingAbility::OnMoveCompleted()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
 TOptional<FHitResult> UFretteMantlingAbility::DetectWall(AFretteBaseCharacter* Player) const
@@ -138,4 +154,3 @@ bool UFretteMantlingAbility::HasEnoughSpaceAbove(const AFretteBaseCharacter* Pla
 
 	return !bHit;
 }
-

@@ -1,12 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Abilities/GameplayAbility.h"
+#include "GameplayAbilitySystem/FretteGameplayAbility.h"
 #include "Character/FretteBaseCharacter.h"
 #include "FretteMantlingAbility.generated.h"
 
 UCLASS()
-class UFretteMantlingAbility : public UGameplayAbility
+class UFretteMantlingAbility : public UFretteGameplayAbility
 {
 	GENERATED_BODY()
 
@@ -24,6 +24,12 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Mantling")
 	float MaxObstacleHeight = 150.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Mantling")
+	float MantlingDuration = 0.25f;
+
+	UFUNCTION()
+	void OnMoveCompleted();
 
 private:
 	TOptional<FHitResult> DetectWall(AFretteBaseCharacter* Player) const;
