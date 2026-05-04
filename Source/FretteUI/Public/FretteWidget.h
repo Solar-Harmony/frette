@@ -10,6 +10,12 @@ class FRETTEUI_API UFretteWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void NativePreConstruct() override
+	{
+		bAutomaticallyRegisterInputOnConstruction = true;
+	}
+	
 protected:
 	// allow implementing validation in widget blueprints
 	UFUNCTION(BlueprintNativeEvent, meta=(DisplayName = "Validate", DevelopmentOnly = true))

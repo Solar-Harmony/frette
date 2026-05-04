@@ -32,4 +32,10 @@ protected:
 		ViewModel->K2_Bind();
 		return ViewModel;
 	}
+	
+	template<typename T>
+	static auto CreateFretteViewModel(UObject* Outer, AFrettePlayerCharacter* InPlayerCharacter) -> TEnableIf<TIsDerivedFrom<T, UFretteViewModel>::Value, T*>::Type
+	{
+		return Cast<T>(CreateFretteViewModel(Outer, T::StaticClass(), InPlayerCharacter));
+	}
 };
