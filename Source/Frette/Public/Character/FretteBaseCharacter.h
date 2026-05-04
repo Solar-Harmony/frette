@@ -66,7 +66,7 @@ protected:
 	UPROPERTY(Replicated)
 	bool bIsDead = false;
 
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 

@@ -6,6 +6,7 @@
 #include "Components/FretteMantlingAbility.h"
 
 #include "Equipment/FretteEquipmentComponent.h"
+#include "Player/FrettePlayerState.h"
 #include "FrettePlayerCharacter.generated.h"
 
 class UFretteCompassComponent;
@@ -66,6 +67,13 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly)
 	float ReviveTimer = 5.0f;
+	
+	UFUNCTION(BlueprintPure)
+	UFretteAbilitySystemComponent* GetASC() const
+	{
+		AFrettePlayerState* State = GetPlayerState<AFrettePlayerState>();
+		return Cast<UFretteAbilitySystemComponent>(State->GetAbilitySystemComponent());
+	}
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;

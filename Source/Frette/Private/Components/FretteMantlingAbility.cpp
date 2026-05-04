@@ -1,8 +1,8 @@
 #include "Components/FretteMantlingAbility.h"
 
-#include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Abilities/Tasks/AbilityTask_MoveToLocation.h"
+#include "Components/CapsuleComponent.h"
 
 static TAutoConsoleVariable CVarMantlingDebug(
 	TEXT("Frette.Mantling.Debug"),
@@ -35,32 +35,45 @@ void UFretteMantlingAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		return;
 	}
 
+	// try to mantle over obstacle, otherwise perform a regular jump
+	if (!TryMantling(Player))
+	{
+		Player->Jump();
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+	} 
+	
+	// will EndAbility after mantling
+}
+
+void UFretteMantlingAbility::OnMoveCompleted()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+}
+
+bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
+{
 	TOptional<FHitResult> Wall = DetectWall(Player);
 	if (!Wall) 
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-		return;
+		return false;
 	}
 	
 	TOptional<FHitResult> Ledge = DetectLedge(Player, *Wall);
 	if (!Ledge)
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-		return;
+		return false;
 	}
 	
 	const FVector TargetLocation = Ledge->ImpactPoint + FVector(0.0f, 0.0f, Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 2.0f);
 
 	if (!FitsInSpace(Player, TargetLocation))
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-		return;
+		return false;
 	}
 	
 	if (!HasEnoughSpaceAbove(Player))
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-		return;
+		return false;
 	}
 	
 	UAbilityTask_MoveToLocation* MoveTask = UAbilityTask_MoveToLocation::MoveToLocation(
@@ -73,14 +86,11 @@ void UFretteMantlingAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	}
 	else
 	{
+		// TODO: should probably not happen
 		Player->SetActorLocation(TargetLocation);
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 	}
-}
-
-void UFretteMantlingAbility::OnMoveCompleted()
-{
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+	
+	return true;
 }
 
 TOptional<FHitResult> UFretteMantlingAbility::DetectWall(AFretteBaseCharacter* Player) const
@@ -126,14 +136,15 @@ TOptional<FHitResult> UFretteMantlingAbility::DetectLedge(AFretteBaseCharacter* 
 	return {};
 }
 
-bool UFretteMantlingAbility::FitsInSpace(AFretteBaseCharacter* Player, const FVector& Location) const
+bool UFretteMantlingAbility::FitsInSpace(const AFretteBaseCharacter* Player, const FVector& Location) const
 {
-	const FCollisionShape Shape = Player->GetCapsuleComponent()->GetCollisionShape();
+	FCollisionShape Shape = Player->GetCapsuleComponent()->GetCollisionShape();
+	Shape.SetCapsule(Shape.GetCapsuleRadius() * 0.8f, Shape.GetCapsuleHalfHeight() * 0.9f);
 	const bool bHit = GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, ECC_Visibility, Shape);
 	
 	if (CVarMantlingDebug.GetValueOnAnyThread())
 	{
-		DrawDebugCapsule(GetWorld(), Location, Shape.GetCapsuleHalfHeight(), Shape.GetCapsuleRadius(), FQuat::Identity, bHit ? FColor::Red : FColor::Green, false, 2.0f);
+		DrawDebugCapsule(GetWorld(), Location, Shape.GetCapsuleHalfHeight(), Shape.GetCapsuleRadius(), FQuat::Identity, bHit ? FColor::Red : FColor::Green, false, DebugDrawDuration, 0, DebugDrawThickness);
 	}
 
 	return !bHit;

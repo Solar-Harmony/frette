@@ -29,6 +29,11 @@ AFretteBaseCharacter::AFretteBaseCharacter()
 	BodyTemperatureComponent->SetIsReplicated(true);
 }
 
+UAbilitySystemComponent* AFretteBaseCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
 void AFretteBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();

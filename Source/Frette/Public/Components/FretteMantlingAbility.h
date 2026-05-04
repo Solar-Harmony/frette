@@ -32,8 +32,9 @@ protected:
 	void OnMoveCompleted();
 
 private:
+	bool TryMantling(AFretteBaseCharacter* Player);
 	TOptional<FHitResult> DetectWall(AFretteBaseCharacter* Player) const;
 	TOptional<FHitResult> DetectLedge(AFretteBaseCharacter* Player, const FHitResult& Wall) const;
 	bool HasEnoughSpaceAbove(const AFretteBaseCharacter* Player) const;
-	bool FitsInSpace(AFretteBaseCharacter* Player, const FVector& Location) const;
+	bool FitsInSpace(const AFretteBaseCharacter* Player, const FVector& Location) const;
 };

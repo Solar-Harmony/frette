@@ -139,6 +139,7 @@ void AFrettePlayerCharacter::InitAbilityActorInfo()
 {
 	AFrettePlayerState* State = GetPlayerState<AFrettePlayerState>();
 	check(State);
+	check(State);
 	AttributeSet = State->GetAttributeSet();
 	AbilitySystemComponent = Cast<UFretteAbilitySystemComponent>(State->GetAbilitySystemComponent());
 	AbilitySystemComponent->InitAbilityActorInfo(State, this);
