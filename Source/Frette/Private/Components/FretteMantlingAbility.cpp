@@ -11,7 +11,7 @@ static TAutoConsoleVariable CVarMantlingDebug(
 	ECVF_Cheat);
 
 static constexpr float DebugDrawDuration = 5.0f;
-static constexpr float DebugDrawThickness = 3.0f;
+static constexpr float DebugDrawThickness = 2.0f;
 
 UFretteMantlingAbility::UFretteMantlingAbility()
 {
@@ -117,8 +117,9 @@ TOptional<FHitResult> UFretteMantlingAbility::DetectWall(AFretteBaseCharacter* P
 TOptional<FHitResult> UFretteMantlingAbility::DetectLedge(AFretteBaseCharacter* Player, const FHitResult& Wall) const
 {
 	const FVector WallForward = -Wall.Normal;
-	const FVector Start = Wall.ImpactPoint + FVector(0.0f, 0.0f, MaxObstacleHeight) + (WallForward * 20.0f);
-	const FVector End = Wall.ImpactPoint + (WallForward * 20.0f);
+	const FVector Offset = WallForward * 50.0f;
+	const FVector Start = Wall.ImpactPoint + FVector(0.0f, 0.0f, MaxObstacleHeight) + Offset;
+	const FVector End = Wall.ImpactPoint + Offset;
 	const FCollisionShape Shape = FCollisionShape::MakeSphere(MaxLedgeGrabDistance);
 
 	FHitResult Hit;
@@ -152,9 +153,10 @@ bool UFretteMantlingAbility::FitsInSpace(const AFretteBaseCharacter* Player, con
 
 bool UFretteMantlingAbility::HasEnoughSpaceAbove(const AFretteBaseCharacter* Player) const
 {
-	const FCollisionShape PlayerShape = Player->GetCapsuleComponent()->GetCollisionShape();
+	FCollisionShape PlayerShape = Player->GetCapsuleComponent()->GetCollisionShape();
+	PlayerShape.SetCapsule(PlayerShape.GetCapsuleRadius() * 0.8f, PlayerShape.GetCapsuleHalfHeight() * 0.9f);
 	const FVector Start = Player->GetActorLocation();
-	const FVector End = Start + Player->GetActorUpVector() * MaxObstacleHeight;
+	const FVector End = Start + Player->GetActorUpVector() * PlayerShape.GetCapsuleHalfHeight() * 2.0f;
 
 	const bool bHit = GetWorld()->SweepTestByChannel(Start, End, FQuat::Identity, ECC_Visibility, PlayerShape);
 	

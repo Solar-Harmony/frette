@@ -247,17 +247,20 @@ void AFretteGameMode::BeginPlay()
 	{
 		NumCluesPlaced++;
 	}
-
-	unless(NearLandmarks.Num() > 0, "No landmarks placed within the objective's radius. Primary clues won't be possible.")
-		return;
 	
-	unless(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.")
-		return;
-
-	const int32 TotalLandmarks = NearLandmarks.Num() + FarLandmarks.Num();
-	unless(NumCluesPlaced >= TotalLandmarks, "There are %d landmarks in the level but only %d clues were placed.", TotalLandmarks, NumCluesPlaced)
-		return;
+	if (GetLevel()->GetName() == "FretteWorld")
+	{
+		unless(NearLandmarks.Num() > 0, "No landmarks placed within the objective's radius. Primary clues won't be possible.")
+			return;
 	
+		unless(FarLandmarks.Num() > 0, "No landmarks placed outside the objective's radius. Secondary clues won't be possible.")
+			return;
+
+		const int32 TotalLandmarks = NearLandmarks.Num() + FarLandmarks.Num();
+		unless(NumCluesPlaced >= TotalLandmarks, "There are %d landmarks in the level but only %d clues were placed.", TotalLandmarks, NumCluesPlaced)
+			return;
+	}
+	 
 	UpdateTimeBeforeNextPrimaryClue();
 }
 
