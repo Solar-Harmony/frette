@@ -21,7 +21,6 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	SetReplicatingMovement(true);
 
 	FPMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("First Person Mesh"));
-
 	FPMesh->SetupAttachment(GetMesh());
 	FPMesh->SetOnlyOwnerSee(true);
 	FPMesh->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
@@ -38,14 +37,14 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment Component"));
 	EquipmentComponent->SetIsReplicated(true);
+	
 	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("Notifications Component"));
-	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("NotificationsComponent_Internal"));
 	NotificationsComponent->SetIsReplicated(true);
 	
 	CompassComponent = CreateDefaultSubobject<UFretteCompassComponent>(TEXT("Compass Component"));
 }
 
-void AFrettePlayerCharacter::SetupPlayerCollisions()
+void AFrettePlayerCharacter::SetupPlayerCollisions() const
 {
 	GetMesh()->SetCollisionObjectType(ECC_CharacterMesh);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Components/FretteMantlingAbility.h"
 
 #include "Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
@@ -25,7 +26,7 @@ public:
 	UFretteEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
 
 	AFrettePlayerCharacter();
-	void SetupPlayerCollisions();
+	void SetupPlayerCollisions() const;
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
@@ -85,6 +86,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
+	
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
