@@ -1,8 +1,9 @@
 #include "Components/FretteMantlingAbility.h"
 
 #include "DrawDebugHelpers.h"
-#include "Abilities/Tasks/AbilityTask_MoveToLocation.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Tasks/FretteMantlingObjectMoveTask.h"
 
 static TAutoConsoleVariable CVarMantlingDebug(
 	TEXT("Frette.Mantling.Debug"),
@@ -12,6 +13,7 @@ static TAutoConsoleVariable CVarMantlingDebug(
 
 static constexpr float DebugDrawDuration = 5.0f;
 static constexpr float DebugDrawThickness = 2.0f;
+static constexpr float MinObstacleHeight = 50.0f;
 
 UFretteMantlingAbility::UFretteMantlingAbility()
 {
@@ -58,13 +60,32 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 		return false;
 	}
 	
+	// Prevent mantling onto surfaces we can simply walk up
+	if (Wall->ImpactNormal.Z >= Player->GetCharacterMovement()->GetWalkableFloorZ())
+	{
+		return false;
+	}
+	
 	TOptional<FHitResult> Ledge = DetectLedge(Player, *Wall);
 	if (!Ledge)
 	{
 		return false;
 	}
 	
-	const FVector TargetLocation = Ledge->ImpactPoint + FVector(0.0f, 0.0f, Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 2.0f);
+	// Ensure the ledge is actually higher than the player's current location by a minimum threshold
+	const float CharacterBottom = Player->GetActorLocation().Z - Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	if (Ledge->ImpactPoint.Z <= CharacterBottom + MinObstacleHeight)
+	{
+		return false;
+	}
+	
+	FVector TargetLocation = Ledge->ImpactPoint + FVector(0.0f, 0.0f, Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 2.0f);
+
+	UPrimitiveComponent* LedgeComp = Ledge->GetComponent();
+	if (!LedgeComp)
+	{
+		return false;
+	}
 
 	if (!FitsInSpace(Player, TargetLocation))
 	{
@@ -75,13 +96,15 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 	{
 		return false;
 	}
+
+	const FVector TargetRelativeLocation = LedgeComp->GetComponentTransform().InverseTransformPosition(TargetLocation);
 	
-	UAbilityTask_MoveToLocation* MoveTask = UAbilityTask_MoveToLocation::MoveToLocation(
-		this, FName("MantlingMoveTask"), TargetLocation, MantlingDuration, nullptr, nullptr);
+	UFretteMantlingObjectMoveTask* MoveTask = UFretteMantlingObjectMoveTask::MantlingMoveToComponent(
+		this, FName("MantlingMoveTask"), LedgeComp, TargetRelativeLocation, MantlingDuration);
 	
 	if (MoveTask)
 	{
-		MoveTask->OnTargetLocationReached.AddDynamic(this, &UFretteMantlingAbility::OnMoveCompleted);
+		MoveTask->OnCompleted.AddDynamic(this, &UFretteMantlingAbility::OnMoveCompleted);
 		MoveTask->ReadyForActivation();
 	}
 	else
@@ -116,11 +139,16 @@ TOptional<FHitResult> UFretteMantlingAbility::DetectWall(AFretteBaseCharacter* P
 
 TOptional<FHitResult> UFretteMantlingAbility::DetectLedge(AFretteBaseCharacter* Player, const FHitResult& Wall) const
 {
-	const FVector WallForward = -Wall.Normal;
-	const FVector Offset = WallForward * 50.0f;
+	const float CapsuleRadius = Player->GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const FVector WallForward = FVector(-Wall.Normal.X, -Wall.Normal.Y, 0.0f).GetSafeNormal();
+	
+	// Dynamically calculate the horizontal depth needed to clear the slanted wall geometry
+	const float SlopePush = FMath::Max(0.0f, MaxObstacleHeight * (Wall.Normal.Z / FMath::Max(0.001f, Wall.Normal.Size2D())));
+	const FVector Offset = WallForward * (CapsuleRadius + SlopePush + 5.0f);
+	
 	const FVector Start = Wall.ImpactPoint + FVector(0.0f, 0.0f, MaxObstacleHeight) + Offset;
 	const FVector End = Wall.ImpactPoint + Offset;
-	const FCollisionShape Shape = FCollisionShape::MakeSphere(MaxLedgeGrabDistance);
+	const FCollisionShape Shape = FCollisionShape::MakeSphere(CapsuleRadius);
 
 	FHitResult Hit;
 	const bool bHit = GetWorld()->SweepSingleByChannel(Hit, Start, End, FQuat::Identity, ECC_Visibility, Shape);
