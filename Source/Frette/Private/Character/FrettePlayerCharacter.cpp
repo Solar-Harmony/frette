@@ -112,7 +112,24 @@ void AFrettePlayerCharacter::CalcCamera(float DeltaTime, FMinimalViewInfo& OutRe
 	FTransform HeadTransform = GetMesh()->GetSocketTransform(FName("head"), RTS_World);
 
 	OutResult.Location = HeadTransform.GetLocation();
-	OutResult.Rotation = SmoothedControlRotation;
+	
+	if (bIsDead)
+	{
+		FQuat TargetQuat = HeadTransform.GetRotation();
+		FQuat CurrentQuat = SmoothedControlRotation.Quaternion();
+		
+		// Use a much slower interpolation speed for the ragdoll transition (e.g. 5.0f instead of LookSmoothingSpeed which is 20.0f)
+		// This creates a smooth blending effect where the camera gradually "falls" into alignment with the tumbling head
+		CurrentQuat = FMath::QInterpTo(CurrentQuat, TargetQuat, DeltaTime, 5.0f);
+		SmoothedControlRotation = CurrentQuat.Rotator();
+		
+		OutResult.Rotation = SmoothedControlRotation;
+	}
+	else
+	{
+		OutResult.Rotation = SmoothedControlRotation;
+	}
+	
 	OutResult.FOV = Camera->FieldOfView;
 }
 
@@ -120,16 +137,19 @@ void AFrettePlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	FRotator TargetRotation = GetControlRotation();
-	TargetRotation.Pitch = FRotator::NormalizeAxis(TargetRotation.Pitch);
-	SmoothedControlRotation.Pitch = FRotator::NormalizeAxis(SmoothedControlRotation.Pitch);
+	if (!bIsDead)
+	{
+		FRotator TargetRotation = GetControlRotation();
+		TargetRotation.Pitch = FRotator::NormalizeAxis(TargetRotation.Pitch);
+		SmoothedControlRotation.Pitch = FRotator::NormalizeAxis(SmoothedControlRotation.Pitch);
 
-	SmoothedControlRotation = FMath::RInterpTo(
-		SmoothedControlRotation,
-		TargetRotation,
-		DeltaSeconds,
-		LookSmoothingSpeed
-		);
+		SmoothedControlRotation = FMath::RInterpTo(
+			SmoothedControlRotation,
+			TargetRotation,
+			DeltaSeconds,
+			LookSmoothingSpeed
+			);
+	}
 }
 
 //Je suis pas trop sur de ce qui devrait être appeler juste du coté serveur ou juste du coté client mais pour l'instant
@@ -177,7 +197,9 @@ void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathV
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
+	{
 		PlayerController->DisableInput(PlayerController);
+	}
 	
 	
 	if (HasAuthority())
@@ -239,5 +261,7 @@ void AFrettePlayerCharacter::UnRagdoll()
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
+	{
 		PlayerController->EnableInput(PlayerController);
+	}
 }
