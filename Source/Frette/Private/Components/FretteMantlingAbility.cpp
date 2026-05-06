@@ -60,6 +60,13 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 		return false;
 	}
 	
+	// prevent mantling onto an orthogonal surface
+	const float PlayerToWallAlignment = FVector::DotProduct(Player->GetActorForwardVector(), -Wall->ImpactNormal);
+	if (PlayerToWallAlignment < 0.5f)
+	{
+		return false;
+	}
+	
 	// Prevent mantling onto surfaces we can simply walk up
 	if (Wall->ImpactNormal.Z >= Player->GetCharacterMovement()->GetWalkableFloorZ())
 	{
