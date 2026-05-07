@@ -14,6 +14,8 @@ static TAutoConsoleVariable CVarMantlingDebug(
 static constexpr float DebugDrawDuration = 5.0f;
 static constexpr float DebugDrawThickness = 2.0f;
 static constexpr float MinObstacleHeight = 50.0f;
+static constexpr float CapsuleRadiusShrinkScale = 0.8f;
+static constexpr float CapsuleHeightShrinkScale = 0.9f;
 
 UFretteMantlingAbility::UFretteMantlingAbility()
 {
@@ -37,14 +39,12 @@ void UFretteMantlingAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		return;
 	}
 
-	// try to mantle over obstacle, otherwise perform a regular jump
-	if (!TryMantling(Player))
+	const bool bMantlingSuccessful = TryMantling(Player);
+	if (!bMantlingSuccessful)
 	{
 		Player->Jump();
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 	} 
-	
-	// will EndAbility after mantling
 }
 
 void UFretteMantlingAbility::OnMoveCompleted()
@@ -64,14 +64,12 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 		return false;
 	}
 	
-	// prevent mantling onto an orthogonal surface
 	const float PlayerToWallAlignment = FVector::DotProduct(Player->GetActorForwardVector(), -Wall->ImpactNormal);
 	if (PlayerToWallAlignment < 0.5f)
 	{
 		return false;
 	}
-	
-	// Prevent mantling onto surfaces we can simply walk up
+
 	if (Wall->ImpactNormal.Z >= Player->GetCharacterMovement()->GetWalkableFloorZ())
 	{
 		return false;
@@ -83,9 +81,9 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 		return false;
 	}
 	
-	// Ensure the ledge is actually higher than the player's current location by a minimum threshold
 	const float CharacterBottom = Player->GetActorLocation().Z - Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-	if (Ledge->ImpactPoint.Z <= CharacterBottom + MinObstacleHeight)
+	const bool bIsLedgeHighEnough = Ledge->ImpactPoint.Z > CharacterBottom + MinObstacleHeight;
+	if (!bIsLedgeHighEnough)
 	{
 		return false;
 	}
@@ -124,16 +122,13 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 	UFretteMantlingObjectMoveTask* MoveTask = UFretteMantlingObjectMoveTask::MantlingMoveToComponent(
 		this, FName("MantlingMoveTask"), LedgeComp, TargetRelativeLocation, MantlingDuration);
 	
-	if (MoveTask)
+	if (!MoveTask)
 	{
-		MoveTask->OnCompleted.AddDynamic(this, &UFretteMantlingAbility::OnMoveCompleted);
-		MoveTask->ReadyForActivation();
+		return false;
 	}
-	else
-	{
-		// TODO: should probably not happen
-		Player->SetActorLocation(TargetLocation);
-	}
+
+	MoveTask->OnCompleted.AddDynamic(this, &UFretteMantlingAbility::OnMoveCompleted);
+	MoveTask->ReadyForActivation();
 	
 	return true;
 }
@@ -190,7 +185,7 @@ TOptional<FHitResult> UFretteMantlingAbility::DetectLedge(AFretteBaseCharacter* 
 bool UFretteMantlingAbility::FitsInSpace(const AFretteBaseCharacter* Player, const FVector& Location) const
 {
 	FCollisionShape Shape = Player->GetCapsuleComponent()->GetCollisionShape();
-	Shape.SetCapsule(Shape.GetCapsuleRadius() * 0.8f, Shape.GetCapsuleHalfHeight() * 0.9f);
+	Shape.SetCapsule(Shape.GetCapsuleRadius() * CapsuleRadiusShrinkScale, Shape.GetCapsuleHalfHeight() * CapsuleHeightShrinkScale);
 	const bool bHit = GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, ECC_Visibility, Shape);
 	
 	if (CVarMantlingDebug.GetValueOnAnyThread())
@@ -204,7 +199,7 @@ bool UFretteMantlingAbility::FitsInSpace(const AFretteBaseCharacter* Player, con
 bool UFretteMantlingAbility::HasEnoughSpaceAbove(const AFretteBaseCharacter* Player) const
 {
 	FCollisionShape PlayerShape = Player->GetCapsuleComponent()->GetCollisionShape();
-	PlayerShape.SetCapsule(PlayerShape.GetCapsuleRadius() * 0.8f, PlayerShape.GetCapsuleHalfHeight() * 0.9f);
+	PlayerShape.SetCapsule(PlayerShape.GetCapsuleRadius() * CapsuleRadiusShrinkScale, PlayerShape.GetCapsuleHalfHeight() * CapsuleHeightShrinkScale);
 	const FVector Start = Player->GetActorLocation();
 	const FVector End = Start + Player->GetActorUpVector() * PlayerShape.GetCapsuleHalfHeight() * 2.0f;
 
