@@ -25,6 +25,15 @@ public:
 	UPROPERTY(BlueprintReadWrite, Replicated)
 	bool bIsAiming = false;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Mantling")
+	FVector LeftHandMantlingIK = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Mantling")
+	FVector RightHandMantlingIK = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Mantling")
+	float MantlingIKSnapAlpha = 0.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
 

@@ -49,6 +49,10 @@ void UFretteMantlingAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 void UFretteMantlingAbility::OnMoveCompleted()
 {
+	if (AFretteBaseCharacter* Player = Cast<AFretteBaseCharacter>(GetAvatarActorFromActorInfo()))
+	{
+		Player->MantlingIKSnapAlpha = 0.0f;
+	}
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
@@ -106,6 +110,17 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 
 	const FVector TargetRelativeLocation = LedgeComp->GetComponentTransform().InverseTransformPosition(TargetLocation);
 	
+	const FVector RightDir = Player->GetActorRightVector();
+	const float HandOffset = 25.0f;
+	Player->LeftHandMantlingIK = Ledge->ImpactPoint - RightDir * HandOffset;
+	Player->RightHandMantlingIK = Ledge->ImpactPoint + RightDir * HandOffset;
+
+	if (CVarMantlingDebug.GetValueOnAnyThread())
+	{
+		DrawDebugPoint(GetWorld(), Player->LeftHandMantlingIK, 25.0f, FColor::Yellow, false, DebugDrawDuration);
+		DrawDebugPoint(GetWorld(), Player->RightHandMantlingIK, 25.0f, FColor::Yellow, false, DebugDrawDuration);
+	}
+
 	UFretteMantlingObjectMoveTask* MoveTask = UFretteMantlingObjectMoveTask::MantlingMoveToComponent(
 		this, FName("MantlingMoveTask"), LedgeComp, TargetRelativeLocation, MantlingDuration);
 	

@@ -1,5 +1,6 @@
 ﻿#include "Tasks/FretteMantlingObjectMoveTask.h"
 #include "GameFramework/Character.h"
+#include "Character/FretteBaseCharacter.h"
 #include "Components/PrimitiveComponent.h"
 
 UFretteMantlingObjectMoveTask* UFretteMantlingObjectMoveTask::MantlingMoveToComponent(UGameplayAbility* OwningAbility, FName TaskInstanceName, UPrimitiveComponent* TargetComponent, FVector TargetRelativeLocation, float Duration)
@@ -40,6 +41,14 @@ void UFretteMantlingObjectMoveTask::TickTask(float DeltaTime)
 	const FVector NewLocation = FMath::Lerp(StartLocation, EndLocation, Alpha);
 	
 	Character->SetActorLocation(NewLocation, false, nullptr, ETeleportType::TeleportPhysics);
+
+	if (AFretteBaseCharacter* FretteCharacter = Cast<AFretteBaseCharacter>(Character))
+	{
+		const float DistanceToLedge = FVector::Dist(NewLocation, EndLocation);
+		const float BlendDist = 100.0f;
+		
+		FretteCharacter->MantlingIKSnapAlpha = FMath::Clamp(1.0f - (DistanceToLedge - BlendDist) / BlendDist, 0.0f, 1.0f);
+	}
 
 	if (Alpha >= 1.0f)
 	{
