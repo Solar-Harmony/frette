@@ -38,7 +38,17 @@ void UFretteMantlingObjectMoveTask::TickTask(float DeltaTime)
 	const float Alpha = FMath::Clamp(TimePassed / TotalDuration, 0.0f, 1.0f);
 	
 	const FVector EndLocation = TargetComp->GetComponentTransform().TransformPosition(RelativeEndLocation);
-	const FVector NewLocation = FMath::Lerp(StartLocation, EndLocation, Alpha);
+	
+	// Create an L-shaped path: Move exclusively UP first, then strictly FORWARD.
+	// This ensures the capsule bottom fully clears the ledge corner before moving into the wall horizontally,
+	// entirely eliminating the climbing body intersection.
+	float UpAlpha = FMath::Clamp(Alpha * 2.0f, 0.0f, 1.0f);
+	float ForwardAlpha = FMath::Clamp((Alpha - 0.5f) * 2.0f, 0.0f, 1.0f);
+	
+	FVector NewLocation;
+	NewLocation.Z = FMath::Lerp(StartLocation.Z, EndLocation.Z, UpAlpha);
+	NewLocation.X = FMath::Lerp(StartLocation.X, EndLocation.X, ForwardAlpha);
+	NewLocation.Y = FMath::Lerp(StartLocation.Y, EndLocation.Y, ForwardAlpha);
 	
 	Character->SetActorLocation(NewLocation, false, nullptr, ETeleportType::TeleportPhysics);
 
