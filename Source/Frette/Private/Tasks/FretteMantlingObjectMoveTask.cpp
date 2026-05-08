@@ -17,7 +17,7 @@ void UFretteMantlingObjectMoveTask::Activate()
 {
 	Super::Activate();
 	TimePassed = 0.0f;
-	if (ACharacter* Character = Cast<ACharacter>(GetAvatarActor()))
+	if (const ACharacter* Character = CastChecked<ACharacter>(GetAvatarActor()))
 	{
 		StartLocation = Character->GetActorLocation();
 	}
@@ -35,14 +35,15 @@ void UFretteMantlingObjectMoveTask::TickTask(float DeltaTime)
 	}
 
 	TimePassed += DeltaTime;
-	const float Alpha = FMath::Clamp(TimePassed / TotalDuration, 0.0f, 1.0f);
 	
+	const float Alpha = FMath::Clamp(TimePassed / TotalDuration, 0.0f, 1.0f);
 	const FVector EndLocation = TargetComp->GetComponentTransform().TransformPosition(RelativeEndLocation);
 	
 	// Create a continuous, dynamic climbing cure:
 	// Pull up quickly to clear the edge, then shift body weight forward smoothly for momentum
-	float UpAlpha = FMath::InterpEaseOut(0.0f, 1.0f, Alpha, 2.0f);
-	float ForwardAlpha = FMath::InterpEaseIn(0.0f, 1.0f, Alpha, 2.0f);
+	// TODO: is this needed?
+	const float UpAlpha = FMath::InterpEaseOut(0.0f, 1.0f, Alpha, 2.0f);
+	const float ForwardAlpha = FMath::InterpEaseIn(0.0f, 1.0f, Alpha, 2.0f);
 	
 	FVector NewLocation;
 	NewLocation.Z = FMath::Lerp(StartLocation.Z, EndLocation.Z, UpAlpha);
@@ -53,6 +54,7 @@ void UFretteMantlingObjectMoveTask::TickTask(float DeltaTime)
 
 	if (AFretteBaseCharacter* FretteCharacter = Cast<AFretteBaseCharacter>(Character))
 	{
+		// todo: should gradually apply IK, but our mantle animation is garbage atm so it doesn't matter much
 		FretteCharacter->MantlingIKSnapAlpha = 1.0f;
 	}
 

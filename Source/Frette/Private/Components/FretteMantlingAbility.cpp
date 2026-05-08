@@ -13,7 +13,6 @@ static TAutoConsoleVariable CVarMantlingDebug(
 
 static constexpr float DebugDrawDuration = 5.0f;
 static constexpr float DebugDrawThickness = 2.0f;
-static constexpr float MinObstacleHeight = 50.0f;
 static constexpr float CapsuleRadiusShrinkScale = 0.8f;
 static constexpr float CapsuleHeightShrinkScale = 0.9f;
 
@@ -71,6 +70,11 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 		return false;
 	}
 	
+	if (!HasEnoughSpaceAbove(Player))
+	{
+		return false;
+	}
+	
 	TOptional<FHitResult> Ledge = DetectLedge(Player, *Wall);
 	if (!Ledge)
 	{
@@ -83,10 +87,10 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 	{
 		return false;
 	}
-	
-	FVector TargetLocation = Ledge->ImpactPoint + FVector(0.0f, 0.0f, Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 2.0f);
 
+	const FVector TargetLocation = Ledge->ImpactPoint + FVector(0.0f, 0.0f, Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 2.0f);
 	UPrimitiveComponent* LedgeComp = Ledge->GetComponent();
+	
 	if (!LedgeComp)
 	{
 		return false;
@@ -96,46 +100,14 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 	{
 		return false;
 	}
-	
-	if (!HasEnoughSpaceAbove(Player))
-	{
-		return false;
-	}
 
-	const FVector TargetRelativeLocation = LedgeComp->GetComponentTransform().InverseTransformPosition(TargetLocation);
-	
-	const FVector RightDir = Player->GetActorRightVector();
-	const float HandOffset = 25.0f;
-	Player->LeftHandMantlingIK = Ledge->ImpactPoint - RightDir * HandOffset;
-	Player->RightHandMantlingIK = Ledge->ImpactPoint + RightDir * HandOffset;
-
-	if (CVarMantlingDebug.GetValueOnAnyThread())
-	{
-		DrawDebugPoint(GetWorld(), Player->LeftHandMantlingIK, 25.0f, FColor::Yellow, false, DebugDrawDuration);
-		DrawDebugPoint(GetWorld(), Player->RightHandMantlingIK, 25.0f, FColor::Yellow, false, DebugDrawDuration);
-	}
-
-	const float HeightDiff = FMath::Max(FMath::Abs(TargetLocation.Z - Player->GetActorLocation().Z), 10.0f);
-	const float CalculatedDuration = FMath::Clamp(HeightDiff / BaseSpeed, MinDuration, MaxDuration);
-
-	UFretteMantlingObjectMoveTask* MoveTask = UFretteMantlingObjectMoveTask::MantlingMoveToComponent(
-		this, FName("MantlingMoveTask"), LedgeComp, TargetRelativeLocation, CalculatedDuration);
-	
-	if (!MoveTask)
-	{
-		return false;
-	}
-
-	MoveTask->OnCompleted.AddDynamic(this, &UFretteMantlingAbility::OnMoveCompleted);
-	MoveTask->ReadyForActivation();
-	
-	return true;
+	return PerformMantling(Player, Ledge, TargetLocation, LedgeComp);
 }
 
-TOptional<FHitResult> UFretteMantlingAbility::DetectWall(AFretteBaseCharacter* Player) const
+TOptional<FHitResult> UFretteMantlingAbility::DetectWall(const AFretteBaseCharacter* Player) const
 {
 	const FVector Start = Player->GetActorLocation();
-	const FVector End = Start + Player->GetActorForwardVector() * MaxDistanceToWall;
+	const FVector End = Start + Player->GetActorForwardVector() * MaxPlayerToWallDistance;
 	const FCollisionShape Shape = Player->GetCapsuleComponent()->GetCollisionShape();
 	
 	FHitResult Hit;
@@ -153,12 +125,13 @@ TOptional<FHitResult> UFretteMantlingAbility::DetectWall(AFretteBaseCharacter* P
 	return {};
 }
 
-TOptional<FHitResult> UFretteMantlingAbility::DetectLedge(AFretteBaseCharacter* Player, const FHitResult& Wall) const
+TOptional<FHitResult> UFretteMantlingAbility::DetectLedge(const AFretteBaseCharacter* Player, const FHitResult& Wall) const
 {
 	const float CapsuleRadius = Player->GetCapsuleComponent()->GetScaledCapsuleRadius();
 	const FVector WallForward = FVector(-Wall.Normal.X, -Wall.Normal.Y, 0.0f).GetSafeNormal();
 	
 	// Dynamically calculate the horizontal depth needed to clear the slanted wall geometry
+	// todo: no idea how this really works
 	const float SlopePush = FMath::Max(0.0f, MaxObstacleHeight * (Wall.Normal.Z / FMath::Max(0.001f, Wall.Normal.Size2D())));
 	const FVector Offset = WallForward * (CapsuleRadius + SlopePush + 5.0f);
 	
@@ -210,4 +183,37 @@ bool UFretteMantlingAbility::HasEnoughSpaceAbove(const AFretteBaseCharacter* Pla
 	}
 
 	return !bHit;
+}
+
+
+bool UFretteMantlingAbility::PerformMantling(AFretteBaseCharacter* Player, TOptional<FHitResult> Ledge, FVector TargetLocation, UPrimitiveComponent* LedgeComp)
+{
+	const FVector TargetRelativeLocation = LedgeComp->GetComponentTransform().InverseTransformPosition(TargetLocation);
+	
+	const FVector RightDir = Player->GetActorRightVector();
+	constexpr float HandOffset = 25.0f;
+	Player->LeftHandMantlingIK = Ledge->ImpactPoint - RightDir * HandOffset;
+	Player->RightHandMantlingIK = Ledge->ImpactPoint + RightDir * HandOffset;
+
+	if (CVarMantlingDebug.GetValueOnAnyThread())
+	{
+		DrawDebugPoint(GetWorld(), Player->LeftHandMantlingIK, 25.0f, FColor::Yellow, false, DebugDrawDuration);
+		DrawDebugPoint(GetWorld(), Player->RightHandMantlingIK, 25.0f, FColor::Yellow, false, DebugDrawDuration);
+	}
+
+	const float HeightDiff = FMath::Max(FMath::Abs(TargetLocation.Z - Player->GetActorLocation().Z), 10.0f);
+	const float CalculatedDuration = FMath::Clamp(HeightDiff / BaseClimbSpeed, MinDuration, MaxDuration);
+
+	UFretteMantlingObjectMoveTask* MoveTask = UFretteMantlingObjectMoveTask::MantlingMoveToComponent(
+		this, FName("MantlingMoveTask"), LedgeComp, TargetRelativeLocation, CalculatedDuration);
+	
+	if (!MoveTask)
+	{
+		return false;
+	}
+
+	MoveTask->OnCompleted.AddDynamic(this, &UFretteMantlingAbility::OnMoveCompleted);
+	MoveTask->ReadyForActivation();
+	
+	return true;
 }
