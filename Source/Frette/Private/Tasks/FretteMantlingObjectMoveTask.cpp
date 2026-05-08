@@ -39,11 +39,10 @@ void UFretteMantlingObjectMoveTask::TickTask(float DeltaTime)
 	
 	const FVector EndLocation = TargetComp->GetComponentTransform().TransformPosition(RelativeEndLocation);
 	
-	// Create an L-shaped path: Move exclusively UP first, then strictly FORWARD.
-	// This ensures the capsule bottom fully clears the ledge corner before moving into the wall horizontally,
-	// entirely eliminating the climbing body intersection.
-	float UpAlpha = FMath::Clamp(Alpha * 2.0f, 0.0f, 1.0f);
-	float ForwardAlpha = FMath::Clamp((Alpha - 0.5f) * 2.0f, 0.0f, 1.0f);
+	// Create a continuous, dynamic climbing cure:
+	// Pull up quickly to clear the edge, then shift body weight forward smoothly for momentum
+	float UpAlpha = FMath::InterpEaseOut(0.0f, 1.0f, Alpha, 2.0f);
+	float ForwardAlpha = FMath::InterpEaseIn(0.0f, 1.0f, Alpha, 2.0f);
 	
 	FVector NewLocation;
 	NewLocation.Z = FMath::Lerp(StartLocation.Z, EndLocation.Z, UpAlpha);
@@ -54,10 +53,7 @@ void UFretteMantlingObjectMoveTask::TickTask(float DeltaTime)
 
 	if (AFretteBaseCharacter* FretteCharacter = Cast<AFretteBaseCharacter>(Character))
 	{
-		const float DistanceToLedge = FVector::Dist(NewLocation, EndLocation);
-		const float BlendDist = 100.0f;
-		
-		FretteCharacter->MantlingIKSnapAlpha = FMath::Clamp(1.0f - (DistanceToLedge - BlendDist) / BlendDist, 0.0f, 1.0f);
+		FretteCharacter->MantlingIKSnapAlpha = 1.0f;
 	}
 
 	if (Alpha >= 1.0f)

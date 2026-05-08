@@ -49,11 +49,7 @@ void UFretteMantlingAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 void UFretteMantlingAbility::OnMoveCompleted()
 {
-	if (AFretteBaseCharacter* Player = Cast<AFretteBaseCharacter>(GetAvatarActorFromActorInfo()))
-	{
-		Player->MantlingIKSnapAlpha = 0.0f;
-	}
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+ 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
 
 bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
@@ -119,8 +115,11 @@ bool UFretteMantlingAbility::TryMantling(AFretteBaseCharacter* Player)
 		DrawDebugPoint(GetWorld(), Player->RightHandMantlingIK, 25.0f, FColor::Yellow, false, DebugDrawDuration);
 	}
 
+	const float HeightDiff = FMath::Max(FMath::Abs(TargetLocation.Z - Player->GetActorLocation().Z), 10.0f);
+	const float CalculatedDuration = FMath::Clamp(HeightDiff / BaseSpeed, MinDuration, MaxDuration);
+
 	UFretteMantlingObjectMoveTask* MoveTask = UFretteMantlingObjectMoveTask::MantlingMoveToComponent(
-		this, FName("MantlingMoveTask"), LedgeComp, TargetRelativeLocation, MantlingDuration);
+		this, FName("MantlingMoveTask"), LedgeComp, TargetRelativeLocation, CalculatedDuration);
 	
 	if (!MoveTask)
 	{

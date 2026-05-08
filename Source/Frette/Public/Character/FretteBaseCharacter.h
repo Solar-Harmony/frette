@@ -49,6 +49,7 @@ public:
 protected:
 	AFretteBaseCharacter();
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY()
@@ -92,3 +93,4 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_HandleRevive();
 };
+

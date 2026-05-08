@@ -25,8 +25,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Mantling")
 	float MaxObstacleHeight = 150.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Mantling", meta=(Units="cm/s"))
+	float BaseSpeed = 160.0f;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Mantling")
-	float MantlingDuration = 0.25f;
+	float MinDuration = 0.2f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Mantling")
+	float MaxDuration = 1.0f;
 
 	UFUNCTION()
 	void OnMoveCompleted();
