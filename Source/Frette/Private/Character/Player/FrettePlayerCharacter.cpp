@@ -21,7 +21,6 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 	SetReplicatingMovement(true);
 
 	FPMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("First Person Mesh"));
-
 	FPMesh->SetupAttachment(GetMesh());
 	FPMesh->SetOnlyOwnerSee(true);
 	FPMesh->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
@@ -38,14 +37,14 @@ AFrettePlayerCharacter::AFrettePlayerCharacter()
 
 	EquipmentComponent = CreateDefaultSubobject<UFretteEquipmentComponent>(TEXT("Equipment Component"));
 	EquipmentComponent->SetIsReplicated(true);
+	
 	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("Notifications Component"));
-	NotificationsComponent = CreateDefaultSubobject<UFretteNotificationsComponent>(TEXT("NotificationsComponent_Internal"));
 	NotificationsComponent->SetIsReplicated(true);
 	
 	CompassComponent = CreateDefaultSubobject<UFretteCompassComponent>(TEXT("Compass Component"));
 }
 
-void AFrettePlayerCharacter::SetupPlayerCollisions()
+void AFrettePlayerCharacter::SetupPlayerCollisions() const
 {
 	GetMesh()->SetCollisionObjectType(ECC_CharacterMesh);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -111,9 +110,27 @@ void AFrettePlayerCharacter::DoPlayerLook(FVector2D LookAxis)
 void AFrettePlayerCharacter::CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult)
 {
 	FTransform HeadTransform = GetMesh()->GetSocketTransform(FName("head"), RTS_World);
+	FVector CameraLocation = HeadTransform.GetLocation();
 
-	OutResult.Location = HeadTransform.GetLocation();
-	OutResult.Rotation = SmoothedControlRotation;
+	OutResult.Location = CameraLocation;
+	
+	if (bIsDead)
+	{
+		FQuat TargetQuat = HeadTransform.GetRotation();
+		FQuat CurrentQuat = SmoothedControlRotation.Quaternion();
+		
+		// Use a much slower interpolation speed for the ragdoll transition (e.g. 5.0f instead of LookSmoothingSpeed which is 20.0f)
+		// This creates a smooth blending effect where the camera gradually "falls" into alignment with the tumbling head
+		CurrentQuat = FMath::QInterpTo(CurrentQuat, TargetQuat, DeltaTime, 5.0f);
+		SmoothedControlRotation = CurrentQuat.Rotator();
+		
+		OutResult.Rotation = SmoothedControlRotation;
+	}
+	else
+	{
+		OutResult.Rotation = SmoothedControlRotation;
+	}
+	
 	OutResult.FOV = Camera->FieldOfView;
 }
 
@@ -121,16 +138,84 @@ void AFrettePlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	FRotator TargetRotation = GetControlRotation();
-	TargetRotation.Pitch = FRotator::NormalizeAxis(TargetRotation.Pitch);
-	SmoothedControlRotation.Pitch = FRotator::NormalizeAxis(SmoothedControlRotation.Pitch);
+	if (!bIsDead)
+	{
+		// Prevent head clipping visually by receding the mesh locally
+		FVector DefaultRelativeLocation(0, 0, -GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+		FVector CurrentRelLoc = GetMesh()->GetRelativeLocation();
+		
+		// Reconstruct the "clean" un-pushed head position
+		FVector CurrentWorldOffset = GetActorTransform().TransformVectorNoScale(CurrentRelLoc - DefaultRelativeLocation);
+		FVector CleanHeadLoc = GetMesh()->GetSocketLocation(FName("head")) - CurrentWorldOffset;
+		
+		FVector TraceStart = GetActorLocation();
+		TraceStart.Z = CleanHeadLoc.Z;
 
-	SmoothedControlRotation = FMath::RInterpTo(
-		SmoothedControlRotation,
-		TargetRotation,
-		DeltaSeconds,
-		LookSmoothingSpeed
-		);
+		FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(HeadClip), false, this);
+		FHitResult Hit;
+		
+		float ProbeSize = 20.0f;
+		FVector TargetRelativeLoc = DefaultRelativeLocation;
+		
+		if (GetWorld()->SweepSingleByChannel(
+			Hit, 
+			TraceStart, 
+			CleanHeadLoc + (CleanHeadLoc - TraceStart).GetSafeNormal() * ProbeSize, 
+			FQuat::Identity, 
+			ECC_Camera, 
+			FCollisionShape::MakeSphere(ProbeSize), 
+			QueryParams))
+		{
+			// Only push back against mostly vertical walls to avoid mantling floor ledge snags
+			if (FMath::Abs(Hit.Normal.Z) < 0.7f)
+			{
+				FVector PushBack = FVector::ZeroVector;
+				if (Hit.bStartPenetrating)
+				{
+					PushBack = Hit.Normal * (Hit.PenetrationDepth + 1.0f);
+				}
+				else
+				{
+					PushBack = Hit.Location - CleanHeadLoc;
+				}
+				
+				// Convert to local space to offset the mesh 
+				FVector LocalPushBack = GetActorTransform().InverseTransformVectorNoScale(PushBack);
+				
+				// Only drag the mesh backward along its forward axis to avoid sideways sliding
+				LocalPushBack.X = FMath::Min(0.0f, LocalPushBack.X);
+				LocalPushBack.Y = 0.0f;
+				LocalPushBack.Z = 0.0f; 
+				TargetRelativeLoc += LocalPushBack;
+			}
+		}
+
+		// Apply target instantly if we need to push back more, otherwise recover smoothly
+		FVector CurrentRelLocClean = GetMesh()->GetRelativeLocation();
+		FVector SmoothedLoc;
+		if (TargetRelativeLoc.X < CurrentRelLocClean.X - 1.0f)
+		{
+			SmoothedLoc = TargetRelativeLoc; // Snap immediately to prevent clipping
+		}
+		else
+		{
+			SmoothedLoc = FMath::VInterpTo(CurrentRelLocClean, TargetRelativeLoc, DeltaSeconds, 15.0f);
+		}
+		
+		SmoothedLoc.Z = DefaultRelativeLocation.Z; // Ensure Z remains properly locked
+		GetMesh()->SetRelativeLocation(SmoothedLoc);
+
+		FRotator TargetRotation = GetControlRotation();
+		TargetRotation.Pitch = FRotator::NormalizeAxis(TargetRotation.Pitch);
+		SmoothedControlRotation.Pitch = FRotator::NormalizeAxis(SmoothedControlRotation.Pitch);
+
+		SmoothedControlRotation = FMath::RInterpTo(
+			SmoothedControlRotation,
+			TargetRotation,
+			DeltaSeconds,
+			LookSmoothingSpeed
+			);
+	}
 }
 
 //Je suis pas trop sur de ce qui devrait être appeler juste du coté serveur ou juste du coté client mais pour l'instant
@@ -139,6 +224,7 @@ void AFrettePlayerCharacter::Tick(float DeltaSeconds)
 void AFrettePlayerCharacter::InitAbilityActorInfo()
 {
 	AFrettePlayerState* State = GetPlayerState<AFrettePlayerState>();
+	check(State);
 	check(State);
 	AttributeSet = State->GetAttributeSet();
 	AbilitySystemComponent = Cast<UFretteAbilitySystemComponent>(State->GetAbilitySystemComponent());
@@ -177,7 +263,9 @@ void AFrettePlayerCharacter::Multicast_HandleDeath_Implementation(FVector DeathV
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
+	{
 		PlayerController->DisableInput(PlayerController);
+	}
 	
 	
 	if (HasAuthority())
@@ -239,5 +327,7 @@ void AFrettePlayerCharacter::UnRagdoll()
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
+	{
 		PlayerController->EnableInput(PlayerController);
+	}
 }

@@ -29,6 +29,11 @@ AFretteBaseCharacter::AFretteBaseCharacter()
 	BodyTemperatureComponent->SetIsReplicated(true);
 }
 
+UAbilitySystemComponent* AFretteBaseCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
 void AFretteBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -36,6 +41,23 @@ void AFretteBaseCharacter::BeginPlay()
 	//Force l'update de la position des bones sur le serveur
 	//Fix un problem avec le aim et la position du gun selon le serveur vs client
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+}
+
+void AFretteBaseCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (AbilitySystemComponent && !AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Frette.Abiilty.Mantling"))))
+	{
+		if (MantlingIKSnapAlpha > 0.0f)
+		{
+			MantlingIKSnapAlpha = FMath::FInterpTo(MantlingIKSnapAlpha, 0.0f, DeltaSeconds, 8.0f);
+			if (MantlingIKSnapAlpha < 0.01f)
+			{
+				MantlingIKSnapAlpha = 0.0f;
+			}
+		}
+	}
 }
 
 void AFretteBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

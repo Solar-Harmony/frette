@@ -25,6 +25,15 @@ public:
 	UPROPERTY(BlueprintReadWrite, Replicated)
 	bool bIsAiming = false;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Mantling")
+	FVector LeftHandMantlingIK = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Mantling")
+	FVector RightHandMantlingIK = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Mantling")
+	float MantlingIKSnapAlpha = 0.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFretteBodyPartComponent> BodyPartComponent;
 
@@ -40,6 +49,7 @@ public:
 protected:
 	AFretteBaseCharacter();
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY()
@@ -66,7 +76,7 @@ protected:
 	UPROPERTY(Replicated)
 	bool bIsDead = false;
 
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
@@ -83,3 +93,4 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_HandleRevive();
 };
+

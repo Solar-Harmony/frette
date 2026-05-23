@@ -91,6 +91,12 @@ public:
 		return nullptr;
 	}
 	
+	template<typename T>
+	T* GetFirstItemFromAsset(TSubclassOf<UFretteInventoryItemDataAsset> AssetClass) const
+	{
+		return Cast<T>(GetFirstItemFromAsset(AssetClass));
+	}
+	
 	template <typename T>
 	const T* GetItem(int32 Id) const { return Cast<T>(GetItem(Id)); }
 

@@ -25,7 +25,7 @@ public:
 	UFretteEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
 
 	AFrettePlayerCharacter();
-	void SetupPlayerCollisions();
+	void SetupPlayerCollisions() const;
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
@@ -65,6 +65,13 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly)
 	float ReviveTimer = 5.0f;
+	
+	UFUNCTION(BlueprintPure)
+	UFretteAbilitySystemComponent* GetASC() const
+	{
+		AFrettePlayerState* State = GetPlayerState<AFrettePlayerState>();
+		return Cast<UFretteAbilitySystemComponent>(State->GetAbilitySystemComponent());
+	}
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;
@@ -85,6 +92,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteInventoryComponent> PlayerInventory;
+	
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UFretteNotificationsComponent> NotificationsComponent;
