@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayAbilitySystem/FretteGameplayAbility.h"
 #include "Character/FretteBaseCharacter.h"
+#include "Character/Components/AbilitySystem/FretteGameplayAbility.h"
 #include "FretteMantlingAbility.generated.h"
 
 UCLASS()

@@ -19,7 +19,7 @@ AFretteGameMode::AFretteGameMode()
 
 FText AFretteGameMode::SpawnPointOfInterestReward(const AFretteLandmark* Landmark) const
 {
-	if (fail(!Cfg->SecondaryClueRewards.IsEmpty(), "No secondary clue rewards are configured. Clues will not spawn any rewards."))
+	unless(!Cfg->SecondaryClueRewards.IsEmpty(), "No secondary clue rewards are configured. Clues will not spawn any rewards.")
 		return INVTEXT("");
 	
 	UNavigationSystemV1* Navmesh = UNavigationSystemV1::GetCurrent(GetWorld());

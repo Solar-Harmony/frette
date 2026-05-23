@@ -1,8 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/FretteBaseCharacter.h"
+#include "FrettePlayerState.h"
 #include "Camera/CameraComponent.h"
+#include "Character/FretteBaseCharacter.h"
 
 #include "Character/Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
@@ -69,7 +70,7 @@ public:
 	UFUNCTION(BlueprintPure)
 	UFretteAbilitySystemComponent* GetASC() const
 	{
-		AFrettePlayerState* State = GetPlayerState<AFrettePlayerState>();
+		const AFrettePlayerState* State = GetPlayerState<AFrettePlayerState>();
 		return Cast<UFretteAbilitySystemComponent>(State->GetAbilitySystemComponent());
 	}
 

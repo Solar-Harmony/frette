@@ -1,8 +1,7 @@
-#include "Components/FretteMantlingAbility.h"
+#include "FretteMantlingAbility.h"
 
 #include "DrawDebugHelpers.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Tasks/FretteMantlingObjectMoveTask.h"
 
 static TAutoConsoleVariable CVarMantlingDebug(

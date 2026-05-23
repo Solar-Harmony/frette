@@ -2,8 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "FretteViewModel.h"
-#include "MVVMViewModelBase.h"
-#include "Inventory/Items/Impl/FretteClueItem.h"
 #include "FretteCraftingMenuVM.generated.h"
 
 UCLASS()
