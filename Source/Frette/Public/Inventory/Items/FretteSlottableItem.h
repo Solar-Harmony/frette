@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "FretteInventoryItem.h"
+#include "Inventory/Items/FretteInventoryItem.h"
 #include "GameplayTagContainer.h"
-#include "GameplayAbilitySystem/FretteAbilitySetDataAsset.h"
-#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
+#include "Character/Components/AbilitySystem/FretteAbilitySetDataAsset.h"
+#include "Character/Components/AbilitySystem/FretteAbilitySystemComponent.h"
 #include "FretteSlottableItem.generated.h"
 
 class UFretteSlottableItemDataAsset;

@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "NiagaraSystem.h"
 #include "Components/SphereComponent.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
+#include "Character/Components/BodyParts/FretteBodyPartComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "FretteProjectile.generated.h"

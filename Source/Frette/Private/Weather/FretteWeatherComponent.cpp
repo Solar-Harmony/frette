@@ -1,9 +1,9 @@
 ﻿#include "Weather/FretteWeatherComponent.h"
 #include "Core/FretteWorldSettings.h"
-#include "CoreGameplay/FretteGameState.h"
+#include "Game/FretteGameState.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
-#include "Frette/Frette.h"
+#include "Frette.h"
 #include "Weather/FretteWeatherConfig.h"
 #include "Weather/FretteWeatherSubsystem.h"
 

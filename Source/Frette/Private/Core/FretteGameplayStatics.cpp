@@ -1,6 +1,6 @@
-﻿#include "Components/FretteGameplayStatics.h"
+﻿#include "Core/FretteGameplayStatics.h"
 
-#include "Util/FretteCollisionChannels.h"
+#include "Core/FretteCollisionChannels.h"
 
 ECardinalDirection UFretteGameplayStatics::DirVectorToCardinal(const FVector2D& Dir)
 {

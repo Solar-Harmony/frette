@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
-#include "FretteBodyPartData.h"
+#include "Character/Components/BodyParts/FretteBodyPartData.h"
 #include "GameplayTagContainer.h"
 #include "FretteBodyPartContext.generated.h"
 

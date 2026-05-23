@@ -1,13 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FrettePlayerState.h"
+#include "Character/Player/FrettePlayerState.h"
 #include "GameplayTagContainer.h"
 #include "InputAction.h"
 #include "GameFramework/PlayerController.h"
-#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
-#include "Input/FretteInputConfig.h"
-#include "Interactable/FretteInteractorComponent.h"
+#include "Character/Components/AbilitySystem/FretteAbilitySystemComponent.h"
+#include "Character/Player/Input/FretteInputConfig.h"
+#include "GPI/Interactable/FretteInteractorComponent.h"
 #include "FrettePlayerController.generated.h"
 
 class UCameraComponent;

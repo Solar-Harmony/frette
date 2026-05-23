@@ -1,7 +1,7 @@
-#include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Character/Components/AbilitySystem/FretteAttributeSet.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
-#include "Frette/Frette.h"
+#include "Frette.h"
 #include "GameFramework/Character.h"
 
 #include "Net/UnrealNetwork.h"

@@ -1,12 +1,12 @@
-#include "Components/BodyPart/FretteBodyPartComponent.h"
+#include "Character/Components/BodyParts/FretteBodyPartComponent.h"
 
 #include "Character/FretteBaseCharacter.h"
 #include "GameplayTagContainer.h"
-#include "Character/FrettePlayerCharacter.h"
-#include "Components/BodyPart/FretteBodyPartTags.h"
-#include "Frette/Frette.h"
+#include "Character/Player/FrettePlayerCharacter.h"
+#include "Character/Components/BodyParts/FretteBodyPartTags.h"
+#include "Frette.h"
 #include "Net/UnrealNetwork.h"
-#include "Player/FrettePlayerController.h"
+#include "Character/Player/FrettePlayerController.h"
 
 namespace
 {

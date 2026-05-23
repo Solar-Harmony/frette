@@ -1,6 +1,6 @@
 ﻿#include "Inventory/FretteInventoryList.h"
 
-#include "Frette/Frette.h"
+#include "Frette.h"
 #include "Inventory/FretteInventoryComponent.h"
 
 bool FFretteInventoryList::HasEntry(int32 ItemId) const

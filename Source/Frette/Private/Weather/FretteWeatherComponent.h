@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "CoreGameplay/FretteGameState.h"
+#include "Game/FretteGameState.h"
 #include "GameFramework/GameStateBase.h"
 #include "Weather/FretteWeatherState.h"
 #include "FretteWeatherComponent.generated.h"

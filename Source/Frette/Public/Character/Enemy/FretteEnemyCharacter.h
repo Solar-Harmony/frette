@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "FrettePlayerCharacter.h"
+#include "Character/Player/FrettePlayerCharacter.h"
 #include "Character/FretteBaseCharacter.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"

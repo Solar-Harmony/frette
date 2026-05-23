@@ -1,4 +1,4 @@
-#include "Components/BodyPart/FretteBodyPartEffectRule.h"
+#include "Character/Components/BodyParts/FretteBodyPartEffectRule.h"
 
 bool UFretteBodyPartEffectRule::CheckIfTriggers(const FFretteBodyPartContext& Context)
 {

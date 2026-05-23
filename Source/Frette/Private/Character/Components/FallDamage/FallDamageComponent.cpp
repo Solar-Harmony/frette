@@ -1,10 +1,10 @@
-#include "Components/FallDamageComponent.h"
+#include "Character/Components/FallDamage/FallDamageComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Frette.h"
 #include "Character/FretteBaseCharacter.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
-#include "Components/BodyPart/FretteBodyPartTags.h"
-#include "Frette/Frette.h"
+#include "Character/Components/BodyParts/FretteBodyPartComponent.h"
+#include "Character/Components/BodyParts/FretteBodyPartTags.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Effect_Movement_FallDamage, "Effect.Movement.FallDamage");
 

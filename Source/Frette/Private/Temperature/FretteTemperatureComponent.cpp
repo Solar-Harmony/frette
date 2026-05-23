@@ -1,8 +1,8 @@
-#include "Components/FretteTemperatureComponent.h"
+#include "Temperature/FretteTemperatureComponent.h"
 
-#include "Character/FrettePlayerCharacter.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
-#include "Frette/Frette.h"
+#include "Character/Player/FrettePlayerCharacter.h"
+#include "Character/Components/BodyParts/FretteBodyPartComponent.h"
+#include "Frette.h"
 #include "GameFramework/GameStateBase.h"
 #include "Weather/FretteWeatherComponent.h"
 

@@ -1,11 +1,11 @@
-#include "GameplayAbilitySystem/FretteGA_RangedWeapon.h"
+#include "Character/Components/Weapons/FretteGA_RangedWeapon.h"
 
 #include "Character/FretteBaseCharacter.h"
-#include "Character/FretteNotificationsComponent.h"
-#include "Character/FrettePlayerCharacter.h"
-#include "Frette/Frette.h"
+#include "Character/Player/Components/FretteNotificationsComponent.h"
+#include "Character/Player/FrettePlayerCharacter.h"
+#include "Frette.h"
 #include "Inventory/FretteInventoryComponent.h"
-#include "Weapons/FretteProjectile.h"
+#include "Character/Components/Weapons/FretteProjectile.h"
 
 void UFretteGA_RangedWeapon::SpawnProjectile(const UFretteRangedWeaponItem* WeaponInstance)
 {

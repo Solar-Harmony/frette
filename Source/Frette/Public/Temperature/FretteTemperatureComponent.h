@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FretteTemperatureBufferComponent.h"
+#include "Temperature/FretteTemperatureBufferComponent.h"
 #include "GameplayTagContainer.h"
-#include "BodyPart/FretteBodyPartTags.h"
+#include "Character/Components/BodyParts/FretteBodyPartTags.h"
 #include "Components/ActorComponent.h"
 #include "Core/FretteWorldSettings.h"
 #include "FretteTemperatureComponent.generated.h"

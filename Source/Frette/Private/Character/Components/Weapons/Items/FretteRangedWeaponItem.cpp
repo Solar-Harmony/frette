@@ -1,6 +1,6 @@
-#include "Inventory/Items/Impl/Weapons/FretteRangedWeaponItem.h"
+#include "Character/Components/Weapons/Items/FretteRangedWeaponItem.h"
 
-#include "Frette/Frette.h"
+#include "Frette.h"
 #include "Inventory/FretteInventoryComponent.h"
 
 bool UFretteRangedWeaponItem::TryUseAmmo()

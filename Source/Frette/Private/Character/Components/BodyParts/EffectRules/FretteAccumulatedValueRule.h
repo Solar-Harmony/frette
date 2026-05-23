@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "Components/BodyPart/FretteBodyPartEffectRule.h"
+#include "Character/Components/BodyParts/FretteBodyPartEffectRule.h"
 #include "FretteAccumulatedValueRule.generated.h"
 
 UENUM(BlueprintType)

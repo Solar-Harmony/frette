@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Components/FretteGameplayStatics.h"
+#include "Core/FretteGameplayStatics.h"
 #include "FretteCompassComponent.generated.h"
 
 class UCameraComponent;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FretteInventoryList.h"
+#include "Inventory/FretteInventoryList.h"
 #include "Components/ActorComponent.h"
 
 #include "FretteInventoryComponent.generated.h"

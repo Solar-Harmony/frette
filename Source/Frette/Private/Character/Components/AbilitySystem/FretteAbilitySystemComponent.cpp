@@ -1,9 +1,9 @@
-#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
+#include "Character/Components/AbilitySystem/FretteAbilitySystemComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Character/FretteBaseCharacter.h"
-#include "Frette/Frette.h"
-#include "GameplayAbilitySystem/FretteGameplayAbility.h"
+#include "Frette.h"
+#include "Character/Components/AbilitySystem/FretteGameplayAbility.h"
 
 void UFretteAbilitySystemComponent::AbilityInputPressed(const FGameplayTag& InputTag)
 {

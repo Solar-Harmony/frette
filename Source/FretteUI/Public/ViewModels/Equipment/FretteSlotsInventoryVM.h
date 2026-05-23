@@ -4,6 +4,7 @@
 #include "FretteSlotsInventoryItemVM.h"
 #include "FretteSlotsInventorySlotVM.h"
 #include "FretteViewModel.h"
+#include "Character/Equipment/FretteEquipmentComponent.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Inventory/Items/FretteSlottableItem.h"
 #include "FretteSlotsInventoryVM.generated.h"

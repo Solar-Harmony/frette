@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Interactable/FretteInteractableInterface.h"
+#include "GPI/Interactable/FretteInteractableInterface.h"
 #include "Inventory/Items/FretteInventoryItem.h"
 #include "FrettePickupBase.generated.h"
 

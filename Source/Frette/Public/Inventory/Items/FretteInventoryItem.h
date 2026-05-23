@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
+#include "Character/Components/AbilitySystem/FretteAbilitySystemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "FretteInventoryItem.generated.h"
 

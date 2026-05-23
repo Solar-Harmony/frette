@@ -2,8 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
-#include "Character/FrettePlayerCharacter.h"
-#include "Frette/Frette.h"
+#include "Character/Player/FrettePlayerCharacter.h"
 #include "FretteViewModel.generated.h"
 
 UCLASS(Abstract)

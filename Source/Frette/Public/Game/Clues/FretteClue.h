@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interactable/FrettePickupBase.h"
-#include "Inventory/Items/Impl/FretteClueItem.h"
+#include "GPI/Interactable/FrettePickupBase.h"
+#include "Game/Clues/FretteClueItem.h"
 #include "FretteClue.generated.h"
 
 class UFretteClueTemplateSet;

@@ -1,11 +1,11 @@
-﻿#include "Components/FretteTemperatureSourceComponent.h"
+﻿#include "Temperature/FretteTemperatureSourceComponent.h"
 
 #include "Components/ArrowComponent.h"
 #include "Components/DrawSphereComponent.h"
-#include "Components/FretteTemperatureComponent.h"
+#include "Temperature/FretteTemperatureComponent.h"
 #include "Components/TextRenderComponent.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
-#include "Components/BodyPart/FretteBodyPartData.h"
+#include "Character/Components/BodyParts/FretteBodyPartComponent.h"
+#include "Character/Components/BodyParts/FretteBodyPartData.h"
 #include "GameFramework/Character.h"
 #include "Weather/FretteWeatherComponent.h"
 

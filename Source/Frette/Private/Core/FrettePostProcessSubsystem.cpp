@@ -1,6 +1,6 @@
-﻿#include "FrettePostProcessSubsystem.h"
+﻿#include "Core/FrettePostProcessSubsystem.h"
 
-#include "Frette/Frette.h"
+#include "Frette.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FretteBaseCharacter.h"
+#include "Character/FretteBaseCharacter.h"
 #include "Camera/CameraComponent.h"
 
-#include "Equipment/FretteEquipmentComponent.h"
+#include "Character/Equipment/FretteEquipmentComponent.h"
 #include "FrettePlayerCharacter.generated.h"
 
 class UFretteCompassComponent;

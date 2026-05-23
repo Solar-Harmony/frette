@@ -2,9 +2,9 @@
 
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
-#include "Components/FallDamageComponent.h"
+#include "Character/Components/FallDamage/FallDamageComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Character/Components/AbilitySystem/FretteAttributeSet.h"
 
 void AFretteBaseCharacter::Die()
 {

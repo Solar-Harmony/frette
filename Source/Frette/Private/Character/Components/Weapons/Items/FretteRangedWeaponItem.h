@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Inventory/Items/FretteStackableItem.h"
-#include "Inventory/Items/Impl/FretteWeaponItem.h"
+#include "Character/Components/Weapons/Items/FretteWeaponItem.h"
 #include "FretteRangedWeaponItem.generated.h"
 
 class AFretteProjectile;

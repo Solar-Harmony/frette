@@ -2,7 +2,7 @@
 
 #include "FretteClueTemplateCustomization.h"
 #include "MessageLogModule.h"
-#include "CoreGameplay/FretteClueTemplateSet.h"
+#include "Game/Clues/FretteClueTemplateSet.h"
 
 #define LOCTEXT_NAMESPACE "FFretteEditorModule"
 

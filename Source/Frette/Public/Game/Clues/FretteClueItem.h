@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Character/FrettePlayerCharacter.h"
+#include "Character/Player/FrettePlayerCharacter.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Inventory/Items/FretteInventoryItem.h"
-#include "Player/FrettePlayerController.h"
+#include "Character/Player/FrettePlayerController.h"
 #include "FretteClueItem.generated.h"
 
 class UFretteClueItemDataAsset;

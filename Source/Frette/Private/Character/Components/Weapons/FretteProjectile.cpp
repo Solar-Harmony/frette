@@ -1,13 +1,13 @@
-#include "Weapons/FretteProjectile.h"
+#include "Character/Components/Weapons/FretteProjectile.h"
 
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
-#include "Components/BodyPart/FretteBodyPartTags.h"
+#include "Character/Components/BodyParts/FretteBodyPartComponent.h"
+#include "Character/Components/BodyParts/FretteBodyPartTags.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "PhysicsEngine/SkeletalBodySetup.h"
-#include "Util/FretteCollisionChannels.h"
+#include "Core/FretteCollisionChannels.h"
 
 AFretteProjectile::AFretteProjectile()
 {

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "FretteInventoryItem.h"
+#include "Inventory/Items/FretteInventoryItem.h"
 #include "FretteStackableItem.generated.h"
 
 // An item with a stack size but no other runtime properties.

@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Interactable/FretteInteractableInterface.h"
+#include "GPI/Interactable/FretteInteractableInterface.h"
 #include "FretteInteractorComponent.generated.h"
 
 class UFretteInteractableComponent;

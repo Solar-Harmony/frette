@@ -1,10 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FretteBonesToTagData.h"
+#include "Character/Components/BodyParts/FretteBonesToTagData.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
-#include "Components/BodyPart/FretteBodyPartInstance.h"
+#include "Character/Components/BodyParts/FretteBodyPartInstance.h"
 #include "FretteBodyPartComponent.generated.h"
 
 class UFretteBodyPartData;

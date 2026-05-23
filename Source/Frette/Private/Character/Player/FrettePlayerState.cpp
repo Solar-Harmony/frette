@@ -1,7 +1,7 @@
-#include "Player/FrettePlayerState.h"
+#include "Character/Player/FrettePlayerState.h"
 
-#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
-#include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Character/Components/AbilitySystem/FretteAbilitySystemComponent.h"
+#include "Character/Components/AbilitySystem/FretteAttributeSet.h"
 #include "Net/UnrealNetwork.h"
 
 AFrettePlayerState::AFrettePlayerState()

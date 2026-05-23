@@ -1,4 +1,4 @@
-#include "Inventory/Items/Impl/FretteWeaponItem.h"
+#include "Character/Components/Weapons/Items/FretteWeaponItem.h"
 #include "Character/FretteBaseCharacter.h"
 #include "GameFramework/Character.h"
 #include "Inventory/FretteInventoryComponent.h"

@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/DrawSphereComponent.h"
-#include "Inventory/Items/Impl/FretteObjectiveItem.h"
+#include "Game/Treasure/FretteObjectiveItem.h"
 #include "FretteMainObjective.generated.h"
 
 /**

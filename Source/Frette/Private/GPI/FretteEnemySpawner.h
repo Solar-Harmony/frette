@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/FretteEnemyCharacter.h"
+#include "Character/Enemy/FretteEnemyCharacter.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "FretteEnemySpawner.generated.h"

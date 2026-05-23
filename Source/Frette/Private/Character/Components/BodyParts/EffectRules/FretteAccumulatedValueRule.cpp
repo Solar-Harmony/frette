@@ -1,4 +1,4 @@
-#include "Components/BodyPart/EffectRules/FretteAccumulatedValueRule.h"
+#include "Character/Components/BodyParts/EffectRules/FretteAccumulatedValueRule.h"
 
 bool UFretteAccumulatedValueRule::CheckCondition(FFretteBodyPartContext Context)
 {

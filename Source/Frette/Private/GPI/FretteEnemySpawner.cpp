@@ -1,7 +1,7 @@
-#include "AI/FretteEnemySpawner.h"
+#include "GPI/FretteEnemySpawner.h"
 #include "NavigationSystem.h"
 #include "Components/BillboardComponent.h"
-#include "Frette/Frette.h"
+#include "Frette.h"
 
 AFretteEnemySpawner::AFretteEnemySpawner()
 {

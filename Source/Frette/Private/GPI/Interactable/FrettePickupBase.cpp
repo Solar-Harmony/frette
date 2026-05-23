@@ -1,8 +1,8 @@
-#include "Interactable/FrettePickupBase.h"
+#include "GPI/Interactable/FrettePickupBase.h"
 
-#include "Character/FrettePlayerCharacter.h"
-#include "Frette/Frette.h"
-#include "Interactable/FretteInteractableComponent.h"
+#include "Character/Player/FrettePlayerCharacter.h"
+#include "Frette.h"
+#include "GPI/Interactable/FretteInteractableComponent.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Inventory/Items/FretteStackableItem.h"
 #include "Net/UnrealNetwork.h"

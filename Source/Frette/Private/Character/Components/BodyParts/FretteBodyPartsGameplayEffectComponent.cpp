@@ -1,6 +1,6 @@
-#include "Inventory/Items/Impl/Consumables/FretteBodyPartsGameplayEffectComponent.h"
+#include "Character/Components/BodyParts/FretteBodyPartsGameplayEffectComponent.h"
 
-#include "Character/FrettePlayerCharacter.h"
+#include "Character/Player/FrettePlayerCharacter.h"
 
 bool UFretteBodyPartsGameplayEffectComponent::CanGameplayEffectApply(const FActiveGameplayEffectsContainer& ActiveGEContainer, const FGameplayEffectSpec& GESpec) const
 {

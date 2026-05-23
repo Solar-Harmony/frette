@@ -1,12 +1,12 @@
-#include "Player/FrettePlayerController.h"
+#include "Character/Player/FrettePlayerController.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/HUD.h"
-#include "Input/FretteInputComponent.h"
+#include "Character/Player/Input/FretteInputComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Player/FrettePlayerState.h"
+#include "Character/Player/FrettePlayerState.h"
 
 class AFrettePlayerState;
 

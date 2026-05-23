@@ -1,7 +1,7 @@
-#include "CoreGameplay/FretteExtractionPoint.h"
+#include "Game/Treasure/FretteExtractionPoint.h"
 
-#include "Character/FrettePlayerCharacter.h"
-#include "CoreGameplay/FretteGameMode.h"
+#include "Character/Player/FrettePlayerCharacter.h"
+#include "Game/FretteGameMode.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Kismet/GameplayStatics.h"
 

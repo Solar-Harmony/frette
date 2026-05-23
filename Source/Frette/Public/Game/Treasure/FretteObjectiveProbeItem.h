@@ -1,13 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/FrettePlayerCharacter.h"
-#include "CoreGameplay/FretteGameMode.h"
+#include "Character/Player/FrettePlayerCharacter.h"
+#include "Game/FretteGameMode.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Inventory/Items/FretteInventoryItem.h"
 #include "Inventory/Items/FretteSlottableItem.h"
 #include "Kismet/GameplayStatics.h"
-#include "Player/FrettePlayerController.h"
+#include "Character/Player/FrettePlayerController.h"
 #include "FretteObjectiveProbeItem.generated.h"
 
 class UFretteObjectiveProbeItemDataAsset;

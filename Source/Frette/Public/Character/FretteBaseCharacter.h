@@ -2,12 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
-#include "Components/FallDamageComponent.h"
-#include "Components/FretteTemperatureComponent.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
-#include "Equipment/FretteEquipmentComponent.h"
+#include "Character/Components/AbilitySystem/FretteAbilitySystemComponent.h"
+#include "Character/Components/BodyParts/FretteBodyPartComponent.h"
+#include "Character/Equipment/FretteEquipmentComponent.h"
+#include "Components/FallDamage/FallDamageComponent.h"
 #include "GameFramework/Character.h"
-#include "GameplayAbilitySystem/FretteAbilitySystemComponent.h"
+#include "Temperature/FretteTemperatureComponent.h"
 #include "FretteBaseCharacter.generated.h"
 
 class UAttributeSet;

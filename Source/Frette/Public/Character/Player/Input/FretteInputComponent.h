@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "EnhancedInputComponent.h"
-#include "FretteInputConfig.h"
+#include "Character/Player/Input/FretteInputConfig.h"
 #include "FretteInputComponent.generated.h"
 
 struct FFretteInputAction;

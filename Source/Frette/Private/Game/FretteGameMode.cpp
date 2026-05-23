@@ -1,16 +1,16 @@
-#include "CoreGameplay/FretteGameMode.h"
+#include "Game/FretteGameMode.h"
 #include "Weather/FretteWeatherComponent.h"
 
 #include "EngineUtils.h"
 #include "NavigationSystem.h"
-#include "Character/FretteNotificationsComponent.h"
-#include "Components/FretteGameplayStatics.h"
-#include "CoreGameplay/FretteClue.h"
-#include "CoreGameplay/FretteClueTemplateSet.h"
-#include "CoreGameplay/FretteGameState.h"
-#include "CoreGameplay/FretteLandmark.h"
-#include "CoreGameplay/FretteMainObjective.h"
-#include "Frette/Frette.h"
+#include "Character/Player/Components/FretteNotificationsComponent.h"
+#include "Core/FretteGameplayStatics.h"
+#include "Game/Clues/FretteClue.h"
+#include "Game/Clues/FretteClueTemplateSet.h"
+#include "Game/FretteGameState.h"
+#include "Game/FretteLandmark.h"
+#include "Game/Treasure/FretteMainObjective.h"
+#include "Frette.h"
 
 AFretteGameMode::AFretteGameMode()
 {

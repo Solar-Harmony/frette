@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayAbilitySystem/FretteGameplayAbility.h"
-#include "Inventory/Items/Impl/Weapons/FretteRangedWeaponItem.h"
+#include "Character/Components/AbilitySystem/FretteGameplayAbility.h"
+#include "Character/Components/Weapons/Items/FretteRangedWeaponItem.h"
 #include "FretteGA_RangedWeapon.generated.h"
 
 UCLASS()

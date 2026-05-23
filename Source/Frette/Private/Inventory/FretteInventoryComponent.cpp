@@ -1,7 +1,7 @@
 ﻿#include "Inventory/FretteInventoryComponent.h"
 
 #include "Engine/World.h"
-#include "Frette/Frette.h"
+#include "Frette.h"
 #include "GameFramework/PlayerController.h"
 
 UFretteInventoryComponent::UFretteInventoryComponent()

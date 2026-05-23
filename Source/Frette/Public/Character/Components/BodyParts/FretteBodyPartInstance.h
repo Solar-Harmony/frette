@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FretteBodyPartData.h"
-#include "FretteBodyPartEffectRule.h"
 #include "Abilities/GameplayAbilityTypes.h"
+#include "Character/Components/BodyParts/FretteBodyPartData.h"
+#include "Character/Components/BodyParts/FretteBodyPartEffectRule.h"
 #include "UObject/Object.h"
 #include "FretteBodyPartInstance.generated.h"
 

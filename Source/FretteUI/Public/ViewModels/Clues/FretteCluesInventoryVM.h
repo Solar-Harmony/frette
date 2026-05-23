@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 #include "FretteClueInventoryVM.h"
 #include "FretteViewModel.h"
+#include "Game/Clues/FretteClueItem.h"
 #include "Inventory/FretteInventoryComponent.h"
-#include "Inventory/Items/Impl/FretteClueItem.h"
 #include "FretteCluesInventoryVM.generated.h"
 
 UCLASS()

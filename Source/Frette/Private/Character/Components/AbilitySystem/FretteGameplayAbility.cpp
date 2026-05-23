@@ -1,4 +1,4 @@
-#include "GameplayAbilitySystem/FretteGameplayAbility.h"
+#include "Character/Components/AbilitySystem/FretteGameplayAbility.h"
 
 UFretteGameplayAbility::UFretteGameplayAbility()
 {

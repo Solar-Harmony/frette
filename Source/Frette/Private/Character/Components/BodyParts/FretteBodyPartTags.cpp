@@ -1,4 +1,4 @@
-#include "Components/BodyPart/FretteBodyPartTags.h"
+#include "Character/Components/BodyParts/FretteBodyPartTags.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Head, "Frette.BodyPart.Head");
 UE_DEFINE_GAMEPLAY_TAG(TAG_BodyPart_Torso, "Frette.BodyPart.Torso");

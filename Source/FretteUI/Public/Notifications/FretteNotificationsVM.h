@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "FretteNotificationEntryVM.h"
 #include "FretteViewModel.h"
-#include "Character/FretteNotificationsComponent.h"
+#include "Character/Player/Components/FretteNotificationsComponent.h"
 #include "FretteNotificationsVM.generated.h"
 
 UCLASS()

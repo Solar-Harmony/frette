@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "NativeGameplayTags.h"
-#include "Character/FallDamageDataAsset.h"
+#include "Character/Components/FallDamage/FallDamageDataAsset.h"
 #include "Components/ActorComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"

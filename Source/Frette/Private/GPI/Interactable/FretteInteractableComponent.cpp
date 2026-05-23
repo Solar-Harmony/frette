@@ -1,4 +1,4 @@
-#include "Interactable/FretteInteractableComponent.h"
+#include "GPI/Interactable/FretteInteractableComponent.h"
 
 #include "Net/UnrealNetwork.h"
 

@@ -1,4 +1,4 @@
-#include "Components/BodyPart/EffectRules/FretteLimitReachedRule.h"
+#include "Character/Components/BodyParts/EffectRules/FretteLimitReachedRule.h"
 
 bool UFretteLimitReachedRule::CheckCondition(const FFretteBodyPartContext Context)
 {

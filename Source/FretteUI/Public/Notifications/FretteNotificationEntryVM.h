@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "FretteViewModel.h"
-#include "Character/FretteNotificationsComponent.h"
 #include "FretteNotificationEntryVM.generated.h"
 
 UCLASS()

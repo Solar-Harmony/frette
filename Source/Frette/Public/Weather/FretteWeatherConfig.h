@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FretteWeatherDataAsset.h"
+#include "Weather/FretteWeatherDataAsset.h"
 #include "FretteWeatherConfig.generated.h"
 
 UCLASS()

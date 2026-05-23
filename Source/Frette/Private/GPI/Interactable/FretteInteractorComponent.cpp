@@ -1,12 +1,12 @@
-#include "Interactable/FretteInteractorComponent.h"
+#include "GPI/Interactable/FretteInteractorComponent.h"
 
-#include "FrettePostProcessSubsystem.h"
+#include "Core/FrettePostProcessSubsystem.h"
 #include "Blueprint/UserWidget.h"
-#include "Character/FrettePlayerCharacter.h"
+#include "Character/Player/FrettePlayerCharacter.h"
 #include "Components/TextBlock.h"
-#include "Frette/Frette.h"
-#include "Interactable/FretteInteractableComponent.h"
-#include "Player/FrettePlayerController.h"
+#include "Frette.h"
+#include "GPI/Interactable/FretteInteractableComponent.h"
+#include "Character/Player/FrettePlayerController.h"
 
 UFretteInteractorComponent::UFretteInteractorComponent()
 {

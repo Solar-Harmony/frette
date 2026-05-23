@@ -1,7 +1,7 @@
-﻿#include "Inventory/Items/Impl/FretteClothingItem.h"
+﻿#include "Temperature/Items/FretteClothingItem.h"
 
-#include "Components/FretteTemperatureComponent.h"
-#include "Components/BodyPart/FretteBodyPartComponent.h"
+#include "Temperature/FretteTemperatureComponent.h"
+#include "Character/Components/BodyParts/FretteBodyPartComponent.h"
 #include "Inventory/FretteInventoryComponent.h"
 
 void UFretteClothingItem::OnEquipped()

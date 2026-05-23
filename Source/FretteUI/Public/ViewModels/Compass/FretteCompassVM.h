@@ -3,9 +3,8 @@
 #include "CoreMinimal.h"
 #include "FretteViewModel.h"
 #include "MVVMViewModelBase.h"
-#include "Components/FretteCompassComponent.h"
-#include "Components/FretteGameplayStatics.h"
-#include "Inventory/Items/Impl/FretteClueItem.h"
+#include "Character/Player/Components/FretteCompassComponent.h"
+#include "Core/FretteGameplayStatics.h"
 #include "FretteCompassVM.generated.h"
 
 #define LOCTEXT_NAMESPACE "Frette"

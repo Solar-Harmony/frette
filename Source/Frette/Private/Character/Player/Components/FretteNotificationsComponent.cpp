@@ -1,6 +1,6 @@
-#include "Character/FretteNotificationsComponent.h"
+#include "Character/Player/Components/FretteNotificationsComponent.h"
 
-#include "Frette/Frette.h"
+#include "Frette.h"
 #include "GameFramework/PlayerController.h"
 
 void UFretteNotificationsComponent::Notify(const AFrettePlayerCharacter* PlayerCharacter, const FText& Message)

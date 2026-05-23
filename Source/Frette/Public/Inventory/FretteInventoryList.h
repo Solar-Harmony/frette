@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Items/FretteInventoryItem.h"
+#include "Inventory/Items/FretteInventoryItem.h"
 #include "Net/Serialization/FastArraySerializer.h"
 
 #include "FretteInventoryList.generated.h"

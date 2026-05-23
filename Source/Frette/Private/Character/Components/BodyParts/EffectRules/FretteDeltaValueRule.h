@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/BodyPart/FretteBodyPartEffectRule.h"
+#include "Character/Components/BodyParts/FretteBodyPartEffectRule.h"
 #include "FretteDeltaValueRule.generated.h"
 
 /**

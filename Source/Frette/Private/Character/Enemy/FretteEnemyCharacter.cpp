@@ -1,10 +1,10 @@
-#include "Character/FretteEnemyCharacter.h"
+#include "Character/Enemy/FretteEnemyCharacter.h"
 
 #include "AIController.h"
 #include "NavigationSystem.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Components/CapsuleComponent.h"
-#include "GameplayAbilitySystem/FretteAttributeSet.h"
+#include "Character/Components/AbilitySystem/FretteAttributeSet.h"
 #include "Perception/AISenseConfig_Sight.h"
 
 class UNavigationSystemV1;

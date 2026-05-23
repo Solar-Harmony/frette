@@ -1,9 +1,9 @@
-#include "CoreGameplay/FretteClue.h"
+#include "Game/Clues/FretteClue.h"
 
-#include "CoreGameplay/FretteClueTemplateSet.h"
-#include "CoreGameplay/FretteGameMode.h"
-#include "Frette/Frette.h"
-#include "Inventory/Items/Impl/FretteClueItem.h"
+#include "Game/Clues/FretteClueTemplateSet.h"
+#include "Game/FretteGameMode.h"
+#include "Frette.h"
+#include "Game/Clues/FretteClueItem.h"
 #include "Kismet/GameplayStatics.h"
 
 void AFretteClue::OnPickUp_Implementation(AFrettePlayerCharacter* Interactor, UFretteInventoryItem* AddedItem)

@@ -1,4 +1,4 @@
-#include "Actor/FretteEffectActor.h"
+#include "GPI/FretteEffectActor.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 

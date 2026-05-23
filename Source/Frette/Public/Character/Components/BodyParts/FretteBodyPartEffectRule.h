@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FretteBodyPartContext.h"
+#include "Character/Components/BodyParts/FretteBodyPartContext.h"
 #include "UObject/Object.h"
 #include "FretteBodyPartEffectRule.generated.h"
 

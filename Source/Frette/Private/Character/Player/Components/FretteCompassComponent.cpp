@@ -1,4 +1,4 @@
-﻿#include "Components/FretteCompassComponent.h"
+﻿#include "Character/Player/Components/FretteCompassComponent.h"
 #include "Camera/CameraComponent.h"
 
 UFretteCompassComponent::UFretteCompassComponent()

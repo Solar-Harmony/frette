@@ -1,5 +1,5 @@
-#include "Components/FretteTemperatureBufferComponent.h"
-#include "Components/FretteTemperatureComponent.h"
+#include "Temperature/FretteTemperatureBufferComponent.h"
+#include "Temperature/FretteTemperatureComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "GameFramework/Character.h"
 

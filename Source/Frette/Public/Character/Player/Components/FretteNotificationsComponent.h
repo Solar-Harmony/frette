@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FrettePlayerCharacter.h"
+#include "Character/Player/FrettePlayerCharacter.h"
 #include "FretteNotificationsComponent.generated.h"
 
 

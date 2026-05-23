@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FretteClueGenerationDataAsset.h"
-#include "FretteClueTemplateSet.h"
-#include "CoreGameplay/FretteClue.h"
+#include "Game/Clues/FretteClueGenerationDataAsset.h"
+#include "Game/Clues/FretteClueTemplateSet.h"
+#include "Game/Clues/FretteClue.h"
 #include "GameFramework/GameModeBase.h"
 #include "Weather/FretteWeatherComponent.h"
 #include "FretteGameMode.generated.h"

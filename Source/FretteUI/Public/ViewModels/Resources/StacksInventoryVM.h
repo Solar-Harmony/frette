@@ -5,7 +5,6 @@
 #include "StacksInventoryItemVM.h"
 #include "Inventory/FretteInventoryComponent.h"
 #include "Inventory/Items/FretteStackableItem.h"
-#include "Player/FrettePlayerState.h"
 #include "StacksInventoryVM.generated.h"
 
 UCLASS()

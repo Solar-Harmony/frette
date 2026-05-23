@@ -1,4 +1,4 @@
-#include "CoreGameplay/FretteMainObjective.h"
+#include "Game/Treasure/FretteMainObjective.h"
 
 #include "Net/UnrealNetwork.h"
 

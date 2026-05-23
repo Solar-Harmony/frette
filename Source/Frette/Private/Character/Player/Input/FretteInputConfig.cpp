@@ -1,4 +1,4 @@
-#include "Input/FretteInputConfig.h"
+#include "Character/Player/Input/FretteInputConfig.h"
 
 const UInputAction* UFretteInputConfig::FindAbilityInputActionForTag(const FGameplayTag& InputTag, bool bLogNotFound) const
 {
