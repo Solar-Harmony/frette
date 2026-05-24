@@ -319,3 +319,6 @@ RELEASE_MSG
 # Linux project files
 /Makefile
 /.ignore
+
+# local engine config
+/Config/UserEngine.ini
